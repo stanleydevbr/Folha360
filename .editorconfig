@@ -1,0 +1,62 @@
+# EditorConfig for Folha360 project
+root = true
+
+# All files
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# XML files
+[*.xml]
+indent_size = 2
+
+# JSON files
+[*.{json,jsonc}]
+indent_size = 2
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# C# files
+[*.cs]
+indent_size = 4
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_between_query_expression_clauses = true
+
+# Naming rules
+dotnet_naming_rule.interface_prefix.severity = suggestion
+dotnet_naming_rule.interface_prefix.symbols = interface
+dotnet_naming_rule.interface_prefix.style = prefix_I
+dotnet_naming_symbols.interface.applicable_kinds = interface
+dotnet_naming_style.prefix_I.required_prefix = I
+dotnet_naming_style.prefix_I.capitalization = pascal_case
+
+dotnet_naming_rule.types_and_namespaces.severity = suggestion
+dotnet_naming_rule.types_and_namespaces.symbols = types_and_namespaces
+dotnet_naming_rule.types_and_namespaces.style = pascal_case
+dotnet_naming_symbols.types_and_namespaces.applicable_kinds = class, struct, enum, record, namespace
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_rule.private_fields.severity = suggestion
+dotnet_naming_rule.private_fields.symbols = private_fields
+dotnet_naming_rule.private_fields.style = underscore_prefix
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.required_modifiers = private
+dotnet_naming_style.underscore_prefix.required_prefix = _
+dotnet_naming_style.underscore_prefix.capitalization = camel_case

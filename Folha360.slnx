@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Folha360.Application/Folha360.Application.csproj" />
+    <Project Path="src/Folha360.Domain/Folha360.Domain.csproj" />
+    <Project Path="src/Folha360.Infrastructure/Folha360.Infrastructure.csproj" />
+    <Project Path="src/Folha360.IoC/Folha360.IoC.csproj" />
+    <Project Path="src/Folha360.WebApi/Folha360.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Folha360.Tests/Folha360.Tests.csproj" />
+  </Folder>
+</Solution>

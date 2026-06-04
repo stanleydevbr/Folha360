@@ -1,0 +1,96 @@
+site_name: Folha360 — Documentação de Arquitetura
+site_description: Documentação de Arquitetura de Software do Sistema Folha360 — Folha de Pagamento compatível com e-Social v. S-1.3
+repo_url: https://github.com/seu-usuario/Folha360
+edit_uri: edit/main/docs/outputs/arquitetura/
+docs_dir: docs
+
+theme:
+  name: material
+  language: pt-BR
+  palette:
+    primary: indigo
+    accent: deep orange
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - toc.integrate
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+
+plugins:
+  - search:
+      lang: pt
+  - mermaid2:
+      arguments:
+        theme: default
+
+nav:
+  - "🏠 Home": index.md
+  - "🚀 Features & Roadmap":
+      - "Features": outputs/features/Features.md
+  - "🏛️ Visões Arquiteturais":
+      - "Visão em Camadas": outputs/arquitetura/layered-architecture.md
+      - "Fronteiras de Componentes": outputs/arquitetura/component-boundaries.md
+      - "Fronteiras de Integração": outputs/arquitetura/integration-boundaries.md
+      - "Visão de Deployment": outputs/arquitetura/deployment-view.md
+      - "Visão de Runtime": outputs/arquitetura/runtime-view.md
+      - "Modelo de Banco de Dados": outputs/arquitetura/database-model.md
+      - "Protótipo de Frontend": outputs/arquitetura/frontend-prototype.md
+
+  - "✅ Decisões de Arquitetura (ADRs)":
+      - "ADR-001: Monólito Modular": outputs/arquitetura/adr-001-monolito-modular.md
+      - "ADR-002: RabbitMQ Message Broker": outputs/arquitetura/adr-002-rabbitmq-message-broker.md
+      - "ADR-003: Schema por Tenant": outputs/arquitetura/adr-003-schema-por-tenant.md
+      - "ADR-004: Processamento Assíncrono": outputs/arquitetura/adr-004-processamento-assincrono-folha.md
+      - "ADR-005: Redis Cache": outputs/arquitetura/adr-005-redis-cache-tabelas.md
+
+  - "🔍 Análises e Avaliações":
+      - "Cenários de Qualidade": outputs/arquitetura/quality-attribute-scenarios.md
+      - "Registro de Riscos": outputs/arquitetura/architecture-risk-register.md
+      - "Matriz de Tradeoffs": outputs/arquitetura/tradeoff-matrix.md
+      - "Opções Arquiteturais": outputs/arquitetura/architecture-options.md
+  - "📖 Boas Práticas de Desenvolvimento":
+      - "📋 Índice Geral": outputs/instrucoes/instrucoes-indice.md
+      - "Backend .NET 10": outputs/instrucoes/instrucoes-backend.md
+      - "Frontend React": outputs/instrucoes/instrucoes-frontend.md
+      - "Design Patterns": outputs/instrucoes/instrucoes-design-patterns.md
+      - "Princípios SOLID": outputs/instrucoes/instrucoes-solid.md
+      - "DevOps e FinOps": outputs/instrucoes/instrucoes-devops-finops.md
+      - "Banco de Dados": outputs/instrucoes/instrucoes-database.md
+      - "Segurança (LGPD/OWASP)": outputs/instrucoes/instrucoes-seguranca.md
+
+  - "📖 Guia de Publicação": ../wiki/README.md
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/seu-usuario/Folha360
+
+copyright: "Folha360 &copy; 2026 — Documentação de Arquitetura v1.0-draft"
