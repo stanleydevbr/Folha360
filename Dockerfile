@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /source
 
 # Copy solution and project files
-COPY Folha360.sln .
+COPY Folha360.slnx .
 COPY Directory.Build.props .
 COPY stylecop.ruleset .
 COPY .stylecop.json .
