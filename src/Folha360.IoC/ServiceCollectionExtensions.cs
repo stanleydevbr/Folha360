@@ -30,10 +30,7 @@ public static class ServiceCollectionExtensions
             .AddInterceptors(new AuditInterceptor()));
 
         services.AddScoped<Folha360DbContext>(sp =>
-        {
-            var factory = sp.GetRequiredService<IDbContextFactory<Folha360DbContext>>();
-            return factory.CreateDbContext();
-        });
+            sp.GetRequiredService<IDbContextFactory<Folha360DbContext>>().CreateDbContext());
 
         // Multi-tenancy
         services.AddHttpContextAccessor();

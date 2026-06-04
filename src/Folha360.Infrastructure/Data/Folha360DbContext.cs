@@ -1,4 +1,3 @@
-using Folha360.Domain.Abstractions;
 using Folha360.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,12 +5,9 @@ namespace Folha360.Infrastructure.Data;
 
 public class Folha360DbContext : DbContext
 {
-    private readonly ITenantContext? _tenantContext;
-
-    public Folha360DbContext(DbContextOptions<Folha360DbContext> options, ITenantContext? tenantContext = null)
+    public Folha360DbContext(DbContextOptions<Folha360DbContext> options)
         : base(options)
     {
-        _tenantContext = tenantContext;
     }
 
     public DbSet<Tenant> Tenants => Set<Tenant>();
@@ -72,10 +68,5 @@ public class Folha360DbContext : DbContext
 
         // Aplicar filtro global de schema do tenant para tabelas de negócio
         // (aplicado via interceptor em tempo de execução)
-    }
-
-    public ITenantContext? GetTenantContext()
-    {
-        return _tenantContext;
     }
 }
