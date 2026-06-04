@@ -26,7 +26,7 @@ public class AuthService : IAuthService
     {
         var usuario = await _usuarioRepository.GetByEmailAsync(command.Email, ct);
 
-        if (usuario == null || !VerifyPassword(command.Password, usuario.SenhaHash))
+        if (usuario == null || !PasswordHelper.VerifyPassword(command.Password, usuario.SenhaHash))
         {
             throw new UnauthorizedAccessException("Credenciais inválidas");
         }
@@ -68,13 +68,5 @@ public class AuthService : IAuthService
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    private static bool VerifyPassword(string password, string hash)
-    {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-        var computedHash = Convert.ToBase64String(hashBytes);
-        return computedHash == hash;
     }
 }

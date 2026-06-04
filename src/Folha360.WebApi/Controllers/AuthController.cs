@@ -32,17 +32,17 @@ public class AuthController : ControllerBase
 
         if (!validationResult.IsValid)
         {
-            return UnprocessableEntity(new
-            {
-                Type = "https://tools.ietf.org/html/rfc7807",
-                Title = "Validation Error",
-                Status = 422,
-                Detail = "One or more validation errors occurred.",
-                Instance = Request.Path,
-                Errors = validationResult.Errors
+            var problem = new ProblemDetailsResponse(
+                Type: "https://tools.ietf.org/html/rfc7807",
+                Title: "Validation Error",
+                Status: 422,
+                Detail: "One or more validation errors occurred.",
+                Instance: Request.Path,
+                Errors: validationResult.Errors
                     .GroupBy(e => e.PropertyName)
-                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())
-            });
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()));
+
+            return UnprocessableEntity(problem);
         }
 
         try
@@ -52,14 +52,15 @@ public class AuthController : ControllerBase
         }
         catch (UnauthorizedAccessException)
         {
-            return Unauthorized(new
-            {
-                Type = "https://tools.ietf.org/html/rfc7807",
-                Title = "Unauthorized",
-                Status = 401,
-                Detail = "Credenciais inválidas",
-                Instance = Request.Path
-            });
+            var problem = new ProblemDetailsResponse(
+                Type: "https://tools.ietf.org/html/rfc7807",
+                Title: "Unauthorized",
+                Status: 401,
+                Detail: "Credenciais inválidas",
+                Instance: Request.Path,
+                Errors: null);
+
+            return Unauthorized(problem);
         }
     }
 
@@ -69,7 +70,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult Refresh()
     {
-        // TODO: Implementar refresh token na F10 (segurança)
-        return Ok(new { message = "Refresh token endpoint - not implemented yet" });
+        // Stub: Refresh token com rotação será implementado na F10 — Segurança & Conformidade LGPD
+        return Ok(new { message = "Refresh token endpoint - will be implemented in F10 (Security)" });
     }
 }

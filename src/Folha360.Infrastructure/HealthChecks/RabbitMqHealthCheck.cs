@@ -21,8 +21,8 @@ public class RabbitMqHealthCheck : IHealthCheck
             var connectionString = _configuration.GetConnectionString("RabbitMQ")
                 ?? "amqp://folha360:Folha360@Dev@localhost:5672";
 
-            // Simulação: RabbitMQ será implementado na F03
-            // Por enquanto, reporta como Healthy para não bloquear o health check
+            // Mock: Implementação real com RabbitMQ.Client será feita na F03 — Eventos Trabalhistas
+            // Por enquanto, reporta Healthy para não bloquear o health check em desenvolvimento
             await Task.CompletedTask;
 
             return HealthCheckResult.Healthy("RabbitMQ está respondendo (mock)");

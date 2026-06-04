@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using Folha360.Domain;
 using Folha360.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -38,25 +36,25 @@ public static class SeedData
         {
             new(
                 email: "admin@folha360.com.br",
-                senhaHash: HashPassword("Admin@123"),
+                senhaHash: PasswordHelper.HashPassword("Admin@123"),
                 nome: "Administrador",
                 perfil: PerfilAcesso.Admin,
                 status: UsuarioStatus.Ativo),
             new(
                 email: "operador@folha360.com.br",
-                senhaHash: HashPassword("Oper@123"),
+                senhaHash: PasswordHelper.HashPassword("Oper@123"),
                 nome: "Operador",
                 perfil: PerfilAcesso.Operador,
                 status: UsuarioStatus.Ativo),
             new(
                 email: "contador@folha360.com.br",
-                senhaHash: HashPassword("Cont@123"),
+                senhaHash: PasswordHelper.HashPassword("Cont@123"),
                 nome: "Contador",
                 perfil: PerfilAcesso.Contador,
                 status: UsuarioStatus.Ativo),
             new(
                 email: "consulta@folha360.com.br",
-                senhaHash: HashPassword("Cons@123"),
+                senhaHash: PasswordHelper.HashPassword("Cons@123"),
                 nome: "Consulta",
                 perfil: PerfilAcesso.Consulta,
                 status: UsuarioStatus.Ativo),
@@ -66,11 +64,5 @@ public static class SeedData
         await context.SaveChangesAsync();
 
         logger.LogInformation("Database seeded successfully with {UserCount} users and 1 tenant", usuarios.Count);
-    }
-
-    public static string HashPassword(string password)
-    {
-        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
-        return Convert.ToBase64String(hashBytes);
     }
 }

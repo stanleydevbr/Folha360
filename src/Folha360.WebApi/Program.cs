@@ -23,14 +23,14 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline
 
-// 1. Exception Handler (must be first)
-app.UseMiddleware<ExceptionHandlerMiddleware>();
-
-// 2. Correlation ID
+// 1. Correlation ID (must be first so all subsequent middleware have access to it)
 app.UseMiddleware<CorrelationIdMiddleware>();
 
-// 3. Serilog request logging
+// 2. Serilog request logging (logs with CorrelationId)
 app.UseSerilogRequestLogging();
+
+// 3. Exception Handler (captures exceptions with CorrelationId in logs)
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 // 4. Routing
 app.UseRouting();

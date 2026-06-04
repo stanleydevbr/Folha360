@@ -1,4 +1,5 @@
 using System.Net;
+using Folha360.Application.DTOs;
 
 namespace Folha360.WebApi.Middleware;
 
@@ -27,14 +28,15 @@ public class ExceptionHandlerMiddleware
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             context.Response.ContentType = "application/problem+json";
 
-            await context.Response.WriteAsJsonAsync(new
-            {
-                Type = "https://tools.ietf.org/html/rfc7807",
-                Title = "Unauthorized",
-                Status = 401,
-                Detail = ex.Message,
-                Instance = context.Request.Path
-            });
+            var problem = new ProblemDetailsResponse(
+                Type: "https://tools.ietf.org/html/rfc7807",
+                Title: "Unauthorized",
+                Status: 401,
+                Detail: ex.Message,
+                Instance: context.Request.Path,
+                Errors: null);
+
+            await context.Response.WriteAsJsonAsync(problem);
         }
         catch (Exception ex)
         {
@@ -44,14 +46,15 @@ public class ExceptionHandlerMiddleware
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "application/problem+json";
 
-            await context.Response.WriteAsJsonAsync(new
-            {
-                Type = "https://tools.ietf.org/html/rfc7807",
-                Title = "Internal Server Error",
-                Status = 500,
-                Detail = "An unexpected error occurred.",
-                Instance = context.Request.Path
-            });
+            var problem = new ProblemDetailsResponse(
+                Type: "https://tools.ietf.org/html/rfc7807",
+                Title: "Internal Server Error",
+                Status: 500,
+                Detail: "An unexpected error occurred.",
+                Instance: context.Request.Path,
+                Errors: null);
+
+            await context.Response.WriteAsJsonAsync(problem);
         }
     }
 }
