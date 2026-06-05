@@ -1,7 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Folha360.Application\Folha360.Application.csproj" />
+    <ProjectReference Include="..\Folha360.Cadastros.Application\Folha360.Cadastros.Application.csproj" />
+    <ProjectReference Include="..\Folha360.Cadastros.Infrastructure\Folha360.Cadastros.Infrastructure.csproj" />
+    <ProjectReference Include="..\Folha360.Cadastros.Presentation\Folha360.Cadastros.Presentation.csproj" />
     <ProjectReference Include="..\Folha360.Infrastructure\Folha360.Infrastructure.csproj" />
   </ItemGroup>
 

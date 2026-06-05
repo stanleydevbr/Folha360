@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Folha360.Cadastros.Domain\Folha360.Cadastros.Domain.csproj" />
     <ProjectReference Include="..\..\src\Folha360.WebApi\Folha360.WebApi.csproj" />
   </ItemGroup>
 
