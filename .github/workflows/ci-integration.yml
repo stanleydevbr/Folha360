@@ -1,31 +1,31 @@
 name: CI - Integration Tests
 
 on:
-    workflow_dispatch:
-    push:
-        branches: [master]
+  workflow_dispatch:
+  push:
+    branches: [master]
 
 jobs:
-    integration:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Setup .NET ${{ env.DOTNET_VERSION }}
-              uses: actions/setup-dotnet@v4
-              with:
-                  dotnet-version: "10.0.x"
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
 
-            - name: Start Docker services
-              run: docker compose up -d postgres redis rabbitmq
+      - name: Start Docker services
+        run: docker compose up -d postgres redis rabbitmq
 
-            - name: Wait for services
-              run: |
-                  sleep 10
-                  docker compose ps
+      - name: Wait for services
+        run: |
+          sleep 10
+          docker compose ps
 
-            - name: Run integration tests
-              run: dotnet test --filter "Category=Integration" --logger trx
+      - name: Run integration tests
+        run: dotnet test --filter "Category=Integration" --logger trx
 
-            - name: Cleanup
-              run: docker compose down
+      - name: Cleanup
+        run: docker compose down

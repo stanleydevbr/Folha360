@@ -1,82 +1,82 @@
 name: Deploy — Master
 
 on:
-  push:
-    branches: [master]
-  workflow_dispatch:
+    push:
+        branches: [master]
+    workflow_dispatch:
 
 permissions:
-  contents: read
-  packages: write
+    contents: read
+    packages: write
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - uses: actions/checkout@v4
+    build-and-push:
+        runs-on: ubuntu-latest
+        environment: production
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "10.0.x"
 
-      - name: Cache NuGet
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
+            - name: Cache NuGet
+              uses: actions/cache@v4
+              with:
+                  path: ~/.nuget/packages
+                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+                  restore-keys: ${{ runner.os }}-nuget-
 
-      - name: Restore
-        run: dotnet restore
+            - name: Restore
+              run: dotnet restore
 
-      - name: Build
-        run: dotnet build --no-restore --configuration Release --warningsAsErrors
+            - name: Build
+              run: dotnet build --no-restore --configuration Release --warningsAsErrors
 
-      - name: Test
-        run: dotnet test --no-build --configuration Release --logger trx
+            - name: Test
+              run: dotnet test --no-build --configuration Release --logger trx
 
-      - name: Publish
-        run: dotnet publish src/Folha360.WebApi/Folha360.WebApi.csproj --configuration Release --output ./publish
+            - name: Publish
+              run: dotnet publish src/Folha360.WebApi/Folha360.WebApi.csproj --configuration Release --output ./publish
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapi-publish
-          path: ./publish/
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: webapi-publish
+                  path: ./publish/
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Login to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  push: true
+                  tags: |
+                      ghcr.io/${{ github.repository }}:latest
+                      ghcr.io/${{ github.repository }}:${{ github.sha }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
 
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: ${{ steps.deploy.outputs.url }}
-    steps:
-      - name: Deploy
-        id: deploy
-        run: |
-          echo "Deploying ${{ github.sha }} to production..."
-          echo "Environment: production"
-          echo "Image: ghcr.io/${{ github.repository }}:${{ github.sha }}"
-          # Add your deploy command here (e.g., kubectl, ssh, webhook)
-          # Example: kubectl set image deployment/folha360 folha360=ghcr.io/${{ github.repository }}:${{ github.sha }}
-          echo "url=https://folha360.example.com" >> $GITHUB_OUTPUT
+    deploy:
+        needs: build-and-push
+        runs-on: ubuntu-latest
+        environment:
+            name: production
+            url: ${{ steps.deploy.outputs.url }}
+        steps:
+            - name: Deploy
+              id: deploy
+              run: |
+                  echo "Deploying ${{ github.sha }} to production..."
+                  echo "Environment: production"
+                  echo "Image: ghcr.io/${{ github.repository }}:${{ github.sha }}"
+                  # Add your deploy command here (e.g., kubectl, ssh, webhook)
+                  # Example: kubectl set image deployment/folha360 folha360=ghcr.io/${{ github.repository }}:${{ github.sha }}
+                  echo "url=https://folha360.example.com" >> $GITHUB_OUTPUT
