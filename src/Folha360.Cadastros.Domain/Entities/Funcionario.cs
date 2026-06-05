@@ -40,11 +40,9 @@ public class Funcionario : BaseEntity
     public string? TipoContrato { get; private set; }
     public int? JornadaHorasSemanais { get; private set; }
 
-#pragma warning disable CS8618
     private Funcionario()
     {
     }
-#pragma warning restore CS8618
 
     public Funcionario(
         Guid empresaId,

@@ -16,11 +16,9 @@ public class Convenio : BaseEntity
     public decimal PercentualEmpresa { get; private set; }
     public decimal PercentualFuncionario { get; private set; }
 
-#pragma warning disable CS8618
     private Convenio()
     {
     }
-#pragma warning restore CS8618
 
     public Convenio(
         Guid empresaId,

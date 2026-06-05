@@ -20,11 +20,9 @@ public class HorarioTrabalho : BaseEntity
     public TimeOnly? FimIntervalo { get; private set; }
     public int ToleranciaAtrasoMinutos { get; private set; }
 
-#pragma warning disable CS8618
     private HorarioTrabalho()
     {
     }
-#pragma warning restore CS8618
 
     public HorarioTrabalho(
         Guid empresaId,

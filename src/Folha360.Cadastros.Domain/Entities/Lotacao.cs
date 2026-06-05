@@ -13,11 +13,9 @@ public class Lotacao : BaseEntity
     public string Descricao { get; private set; } = null!;
     public string? TipoEsocial { get; private set; }
 
-#pragma warning disable CS8618
     private Lotacao()
     {
     }
-#pragma warning restore CS8618
 
     public Lotacao(Guid empresaId, string codigo, string descricao, string? tipoEsocial = null)
     {

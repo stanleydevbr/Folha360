@@ -16,11 +16,9 @@ public class Sindicato : BaseEntity
     public decimal ContribuicaoSindicalPercentual { get; private set; }
     public decimal ContribuicaoAssistencialPercentual { get; private set; }
 
-#pragma warning disable CS8618
     private Sindicato()
     {
     }
-#pragma warning restore CS8618
 
     public Sindicato(
         Guid empresaId,

@@ -29,11 +29,9 @@ public class Empresa : BaseEntity
     public string? Telefone { get; set; }
     public string? Email { get; set; }
 
-#pragma warning disable CS8618
     private Empresa()
     {
     }
-#pragma warning restore CS8618
 
     public Empresa(
         Guid tenantId,

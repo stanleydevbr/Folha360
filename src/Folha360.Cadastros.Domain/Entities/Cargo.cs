@@ -15,11 +15,9 @@ public class Cargo : BaseEntity
     public decimal? SalarioBaseMinimo { get; private set; }
     public decimal? SalarioBaseMaximo { get; private set; }
 
-#pragma warning disable CS8618
     private Cargo()
     {
     }
-#pragma warning restore CS8618
 
     public Cargo(
         Guid empresaId,

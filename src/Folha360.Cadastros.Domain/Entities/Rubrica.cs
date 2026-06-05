@@ -23,11 +23,9 @@ public class Rubrica : BaseEntity
     public string? FormulaCalculo { get; private set; }
     public int OrdemExibicao { get; private set; }
 
-#pragma warning disable CS8618
     private Rubrica()
     {
     }
-#pragma warning restore CS8618
 
     public Rubrica(
         Guid empresaId,

@@ -23,11 +23,9 @@ public class Dependente : BaseEntity
     public decimal? PensaoAlimenticiaValor { get; private set; }
     public decimal? PensaoAlimenticiaPercentual { get; private set; }
 
-#pragma warning disable CS8618
     private Dependente()
     {
     }
-#pragma warning restore CS8618
 
     public Dependente(
         Guid funcionarioId,
@@ -43,8 +41,9 @@ public class Dependente : BaseEntity
     {
         if (dependenteSalarioFamilia)
         {
-            var idade = DateTime.Today.Year - dataNascimento.Year;
-            if (dataNascimento > DateOnly.FromDateTime(DateTime.Today.AddYears(-idade)))
+            var hoje = DateOnly.FromDateTime(DateTime.UtcNow);
+            var idade = hoje.Year - dataNascimento.Year;
+            if (dataNascimento > hoje.AddYears(-idade))
                 idade--;
 
             if (idade > 14)
@@ -78,8 +77,9 @@ public class Dependente : BaseEntity
     {
         if (dependenteSalarioFamilia ?? DependenteSalarioFamilia)
         {
-            var idade = DateTime.Today.Year - dataNascimento.Year;
-            if (dataNascimento > DateOnly.FromDateTime(DateTime.Today.AddYears(-idade)))
+            var hoje = DateOnly.FromDateTime(DateTime.UtcNow);
+            var idade = hoje.Year - dataNascimento.Year;
+            if (dataNascimento > hoje.AddYears(-idade))
                 idade--;
 
             if (idade > 14)

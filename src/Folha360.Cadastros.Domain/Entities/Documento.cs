@@ -21,11 +21,9 @@ public class Documento : BaseEntity
     public string? UfEmissor { get; private set; }
     public string? ArquivoPath { get; private set; }
 
-#pragma warning disable CS8618
     private Documento()
     {
     }
-#pragma warning restore CS8618
 
     public Documento(
         Guid funcionarioId,
