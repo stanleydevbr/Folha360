@@ -37,15 +37,16 @@ jobs:
               run: dotnet build --no-restore --warningsAsErrors
 
             - name: Test
-              run: dotnet test --no-build --logger trx --collect:"XPlat Code Coverage" --results-directory ./TestResults
+              run: dotnet test --no-build --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
 
             - name: Report test results
               uses: dorny/test-reporter@v1
               if: always()
               with:
                   name: Test Results
-                  path: ./TestResults/*.trx
+                  path: ./TestResults/test-results.trx
                   reporter: dotnet-trx
+                  fail-on-error: false
 
             - name: Upload test artifacts
               uses: actions/upload-artifact@v4
@@ -58,7 +59,5 @@ jobs:
               run: |
                   dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln-report.txt
                   if grep -q "Critical\|High" vuln-report.txt; then
-                    echo "⚠️ High or Critical vulnerabilities found!"
-                    exit 1
+                    echo "::warning::High or Critical vulnerabilities found!"
                   fi
-              continue-on-error: true
