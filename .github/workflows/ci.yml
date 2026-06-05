@@ -1,63 +1,63 @@
 name: CI
 
 on:
-    push:
-        branches: [master, develop]
-    pull_request:
-        branches: [master, develop]
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
 
 env:
-    DOTNET_VERSION: "10.0.x"
-    NUGET_CACHE_KEY: nuget-v1
+  DOTNET_VERSION: "10.0.x"
+  NUGET_CACHE_KEY: nuget-v1
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Setup .NET ${{ env.DOTNET_VERSION }}
-              uses: actions/setup-dotnet@v4
-              with:
-                  dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-            - name: Cache NuGet packages
-              uses: actions/cache@v4
-              with:
-                  path: ~/.nuget/packages
-                  key: ${{ runner.os }}-${{ env.NUGET_CACHE_KEY }}-${{ hashFiles('**/*.csproj') }}
-                  restore-keys: |
-                      ${{ runner.os }}-${{ env.NUGET_CACHE_KEY }}-
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-${{ env.NUGET_CACHE_KEY }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.NUGET_CACHE_KEY }}-
 
-            - name: Restore dependencies
-              run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-            - name: Build
-              run: dotnet build --no-restore --warningsAsErrors
+      - name: Build
+        run: dotnet build --no-restore --warningsAsErrors
 
-            - name: Test
-              run: dotnet test --no-build --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
+      - name: Test
+        run: dotnet test --no-build --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
 
-            - name: Report test results
-              uses: dorny/test-reporter@v1
-              if: always()
-              with:
-                  name: Test Results
-                  path: ./TestResults/test-results.trx
-                  reporter: dotnet-trx
-                  fail-on-error: false
+      - name: Report test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: ./TestResults/test-results.trx
+          reporter: dotnet-trx
+          fail-on-error: false
 
-            - name: Upload test artifacts
-              uses: actions/upload-artifact@v4
-              if: always()
-              with:
-                  name: test-results
-                  path: ./TestResults/
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./TestResults/
 
-            - name: Check NuGet vulnerabilities
-              run: |
-                  dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln-report.txt
-                  if grep -q "Critical\|High" vuln-report.txt; then
-                    echo "::warning::High or Critical vulnerabilities found!"
-                  fi
+      - name: Check NuGet vulnerabilities
+        run: |
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln-report.txt
+          if grep -q "Critical\|High" vuln-report.txt; then
+            echo "::warning::High or Critical vulnerabilities found!"
+          fi
