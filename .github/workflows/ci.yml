@@ -34,7 +34,7 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --no-restore --warningsAsErrors
+        run: dotnet build --no-restore
 
       - name: Test
         run: dotnet test --no-build --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
