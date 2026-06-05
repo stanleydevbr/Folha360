@@ -26,16 +26,34 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.source_branch || github.ref_name }}
 
-      - name: Determine source and target branches
+      - name: Fetch all branches and ensure target exists
         id: branches
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            SOURCE="${{ github.event.inputs.source_branch }}"
-          else
-            SOURCE="${{ github.ref_name }}"
-          fi
+          git fetch --all --prune
+
           TARGET="develop"
+          SOURCE="${{ github.event.inputs.source_branch || github.ref_name }}"
+
+          # Check if target branch exists on remote
+          if git ls-remote --heads origin "${TARGET}" | grep -q "${TARGET}"; then
+            echo "Target branch '${TARGET}' exists on remote."
+            git branch "${TARGET}" "origin/${TARGET}" 2>/dev/null || true
+          else
+            echo "Target branch '${TARGET}' does not exist. Creating from main..."
+            git fetch origin main 2>/dev/null || true
+            if git rev-parse --verify origin/main >/dev/null 2>&1; then
+              git branch "${TARGET}" origin/main
+            else
+              # First run: create develop from current branch
+              git branch "${TARGET}" HEAD
+            fi
+            git push origin "${TARGET}"
+          fi
+
+          git checkout "${SOURCE}"
+
           echo "source=${SOURCE}" >> $GITHUB_OUTPUT
           echo "target=${TARGET}" >> $GITHUB_OUTPUT
           echo "Source: ${SOURCE} -> Target: ${TARGET}"
@@ -70,13 +88,13 @@ jobs:
           SOURCE="${{ steps.branches.outputs.source }}"
           TARGET="${{ steps.branches.outputs.target }}"
 
-          FIRST_COMMIT=$(git log origin/${TARGET}..HEAD --pretty=format:"%s" --reverse 2>/dev/null | head -1)
+          FIRST_COMMIT=$(git log ${TARGET}..HEAD --pretty=format:"%s" --reverse 2>/dev/null | head -1)
           if [ -z "$FIRST_COMMIT" ]; then
             FIRST_COMMIT="Merge ${SOURCE} into ${TARGET}"
           fi
           echo "title=${FIRST_COMMIT}" >> $GITHUB_OUTPUT
 
-          COMMITS=$(git log origin/${TARGET}..HEAD --pretty=format:"- %s" 2>/dev/null || git log HEAD~5..HEAD --pretty=format:"- %s")
+          COMMITS=$(git log ${TARGET}..HEAD --pretty=format:"- %s" 2>/dev/null || git log HEAD~5..HEAD --pretty=format:"- %s")
 
           cat > pr-body.md << BODYEOF
           ## Resumo
