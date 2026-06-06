@@ -5,6 +5,10 @@
     <Project Path="src/Folha360.Cadastros.Domain/Folha360.Cadastros.Domain.csproj" />
     <Project Path="src/Folha360.Cadastros.Infrastructure/Folha360.Cadastros.Infrastructure.csproj" />
     <Project Path="src/Folha360.Cadastros.Presentation/Folha360.Cadastros.Presentation.csproj" />
+    <Project Path="src/Folha360.Eventos.Domain/Folha360.Eventos.Domain.csproj" />
+    <Project Path="src/Folha360.Eventos.Application/Folha360.Eventos.Application.csproj" />
+    <Project Path="src/Folha360.Eventos.Infrastructure/Folha360.Eventos.Infrastructure.csproj" />
+    <Project Path="src/Folha360.Eventos.Presentation/Folha360.Eventos.Presentation.csproj" />
     <Project Path="src/Folha360.Domain/Folha360.Domain.csproj" />
     <Project Path="src/Folha360.Infrastructure/Folha360.Infrastructure.csproj" />
     <Project Path="src/Folha360.IoC/Folha360.IoC.csproj" />

@@ -15,6 +15,10 @@ COPY src/Folha360.Cadastros.Domain/*.csproj src/Folha360.Cadastros.Domain/
 COPY src/Folha360.Cadastros.Application/*.csproj src/Folha360.Cadastros.Application/
 COPY src/Folha360.Cadastros.Infrastructure/*.csproj src/Folha360.Cadastros.Infrastructure/
 COPY src/Folha360.Cadastros.Presentation/*.csproj src/Folha360.Cadastros.Presentation/
+COPY src/Folha360.Eventos.Domain/*.csproj src/Folha360.Eventos.Domain/
+COPY src/Folha360.Eventos.Application/*.csproj src/Folha360.Eventos.Application/
+COPY src/Folha360.Eventos.Infrastructure/*.csproj src/Folha360.Eventos.Infrastructure/
+COPY src/Folha360.Eventos.Presentation/*.csproj src/Folha360.Eventos.Presentation/
 COPY tests/Folha360.Tests/*.csproj tests/Folha360.Tests/
 
 # Restore
