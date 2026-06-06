@@ -12,7 +12,9 @@ public class Folha360DbContextFactory : IDesignTimeDbContextFactory<Folha360DbCo
             ? args[0]
             : "Host=localhost;Port=5432;Database=folha360;Username=folha360_user;Password=Folha360@Dev";
 
-        optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder
+            .UseSnakeCaseNamingConvention()
+            .UseNpgsql(connectionString);
 
         return new Folha360DbContext(optionsBuilder.Options);
     }

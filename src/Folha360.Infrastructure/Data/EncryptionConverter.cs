@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
 
-namespace Folha360.Cadastros.Infrastructure.Data;
+namespace Folha360.Infrastructure.Data;
 
 /// <summary>
 /// ValueConverter that encrypts sensitive data using ASP.NET Core Data Protection (AES-256-GCM).

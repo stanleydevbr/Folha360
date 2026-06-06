@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Folha360.Domain\Folha360.Domain.csproj" />
+    <ProjectReference Include="..\Folha360.Cadastros.Domain\Folha360.Cadastros.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,6 +16,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.8" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
   </ItemGroup>
 
   <PropertyGroup>
