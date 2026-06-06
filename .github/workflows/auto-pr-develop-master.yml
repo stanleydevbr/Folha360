@@ -1,0 +1,148 @@
+name: Auto PR — Develop → Master
+
+on:
+    push:
+        branches:
+            - develop
+    workflow_dispatch:
+
+permissions:
+    contents: write
+    pull-requests: write
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    auto-pr:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: develop
+
+            - name: Fetch all branches and ensure master exists
+              id: branches
+              run: |
+                  git fetch --all --prune
+
+                  TARGET="master"
+                  SOURCE="develop"
+
+                  if git ls-remote --heads origin "${TARGET}" | grep -q "${TARGET}"; then
+                    echo "Target branch '${TARGET}' exists on remote."
+                    git branch "${TARGET}" "origin/${TARGET}" 2>/dev/null || true
+                  else
+                    echo "Target branch '${TARGET}' does not exist. Creating from root commit..."
+                    ROOT=$(git rev-list --max-parents=0 HEAD)
+                    git push origin "${ROOT}:refs/heads/${TARGET}"
+                    git branch "${TARGET}" "origin/${TARGET}"
+                  fi
+
+                  git checkout "${SOURCE}"
+
+                  echo "source=${SOURCE}" >> $GITHUB_OUTPUT
+                  echo "target=${TARGET}" >> $GITHUB_OUTPUT
+                  echo "Source: ${SOURCE} -> Target: ${TARGET}"
+
+            - name: Check if PR already exists
+              id: check-pr
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  EXISTING=$(gh pr list \
+                    --head "${{ steps.branches.outputs.source }}" \
+                    --base "${{ steps.branches.outputs.target }}" \
+                    --state open \
+                    --json number,url \
+                    --jq '.[0]')
+                  if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+                    PR_NUMBER=$(echo "$EXISTING" | jq -r '.number')
+                    PR_URL=$(echo "$EXISTING" | jq -r '.url')
+                    echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+                    echo "pr_url=${PR_URL}" >> $GITHUB_OUTPUT
+                    echo "exists=true" >> $GITHUB_OUTPUT
+                    echo "PR #${PR_NUMBER} already exists: ${PR_URL}"
+                  else
+                    echo "exists=false" >> $GITHUB_OUTPUT
+                    echo "No existing PR found."
+                  fi
+
+            - name: Generate PR body and title
+              id: pr-body
+              if: steps.check-pr.outputs.exists == 'false'
+              run: |
+                  SOURCE="${{ steps.branches.outputs.source }}"
+                  TARGET="${{ steps.branches.outputs.target }}"
+
+                  FIRST_COMMIT=$(git log ${TARGET}..HEAD --pretty=format:"%s" --reverse 2>/dev/null | head -1)
+                  if [ -z "$FIRST_COMMIT" ]; then
+                    FIRST_COMMIT="Merge ${SOURCE} into ${TARGET}"
+                  fi
+                  echo "title=${FIRST_COMMIT}" >> $GITHUB_OUTPUT
+
+                  COMMITS=$(git log ${TARGET}..HEAD --pretty=format:"- %s" 2>/dev/null || git log HEAD~5..HEAD --pretty=format:"- %s")
+
+                  cat > pr-body.md << BODYEOF
+                  ## Resumo
+
+                  Merge automatico de \`${SOURCE}\` -> \`${TARGET}\`.
+
+                  ## Commits incluidos
+
+                  ${COMMITS}
+
+                  ## Checklist
+
+                  - [ ] Codigo compila sem erros (\`dotnet build\`)
+                  - [ ] Testes passam (\`dotnet test\`)
+                  - [ ] Code review realizado
+                  - [ ] Sem breaking changes nao documentados
+
+                  > Este PR foi gerado automaticamente pela action \`auto-pr-develop-master.yml\`.
+                  BODYEOF
+
+            - name: Create Pull Request
+              id: create-pr
+              if: steps.check-pr.outputs.exists == 'false'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh pr create \
+                    --title "${{ steps.pr-body.outputs.title }}" \
+                    --head "${{ steps.branches.outputs.source }}" \
+                    --base "${{ steps.branches.outputs.target }}" \
+                    --body-file pr-body.md
+
+            - name: Ensure labels exist
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  for label in auto-pr release; do
+                    gh label create "${label}" --color "0366d6" --force 2>/dev/null || true
+                  done
+                  echo "Labels ready."
+
+            - name: Add labels to PR
+              if: steps.check-pr.outputs.exists == 'false' || steps.check-pr.outputs.pr_number != ''
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  if [ "${{ steps.check-pr.outputs.exists }}" = "true" ]; then
+                    PR_NUMBER="${{ steps.check-pr.outputs.pr_number }}"
+                  else
+                    PR_NUMBER=$(gh pr view "${{ steps.branches.outputs.source }}" --json number --jq '.number')
+                  fi
+                  gh pr edit "${PR_NUMBER}" --add-label "auto-pr,release"
+                  echo "Labels added: auto-pr,release"
+
+            - name: Summary
+              run: |
+                  if [ "${{ steps.check-pr.outputs.exists }}" = "true" ]; then
+                    echo "PR already exists: ${{ steps.check-pr.outputs.pr_url }}"
+                  else
+                    echo "PR created successfully!"
+                  fi

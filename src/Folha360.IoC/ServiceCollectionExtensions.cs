@@ -25,7 +25,8 @@ public static class ServiceCollectionExtensions
     {
         // DbContext
         services.AddDbContextFactory<Folha360DbContext>(options =>
-            options.UseNpgsql(
+            options.UseSnakeCaseNamingConvention()
+            .UseNpgsql(
                 configuration.GetConnectionString("Postgres"),
                 npgsql => npgsql.EnableRetryOnFailure(3))
             .AddInterceptors(new AuditInterceptor()));
@@ -106,7 +107,8 @@ public static class ServiceCollectionExtensions
     {
         // DbContext
         services.AddDbContextFactory<Folha360.Cadastros.Infrastructure.Data.CadastrosDbContext>(options =>
-            options.UseNpgsql(
+            options.UseSnakeCaseNamingConvention()
+            .UseNpgsql(
                 configuration.GetConnectionString("Postgres"),
                 npgsql => npgsql.EnableRetryOnFailure(3)));
 
