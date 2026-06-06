@@ -1073,6 +1073,317 @@ namespace Folha360.Infrastructure.Migrations
 
                     b.ToTable("usuario", "public");
                 });
+
+            modelBuilder.Entity("Folha360.Eventos.Domain.Entities.Admissao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CargoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cargo_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly>("DataAdmissao")
+                        .HasColumnType("date")
+                        .HasColumnName("data_admissao");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("funcionario_id");
+
+                    b.Property<int?>("PeriodoExperienciaMeses")
+                        .HasColumnType("integer")
+                        .HasColumnName("periodo_experiencia_meses");
+
+                    b.Property<decimal>("SalarioInicial")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("salario_inicial");
+
+                    b.Property<int>("TipoContrato")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipo_contrato");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("XmlContent")
+                        .HasColumnType("text")
+                        .HasColumnName("xml_content");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admissao");
+
+                    b.HasIndex("DataAdmissao")
+                        .HasDatabaseName("ix_admissao_data_admissao");
+
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("ix_admissao_empresa_id");
+
+                    b.HasIndex("FuncionarioId")
+                        .HasDatabaseName("ix_admissao_funcionario_id")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("admissao", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Eventos.Domain.Entities.Afastamento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Cid")
+                        .HasColumnType("text")
+                        .HasColumnName("cid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly?>("DataFimEfetiva")
+                        .HasColumnType("date")
+                        .HasColumnName("data_fim_efetiva");
+
+                    b.Property<DateOnly>("DataFimPrevista")
+                        .HasColumnType("date")
+                        .HasColumnName("data_fim_prevista");
+
+                    b.Property<DateOnly>("DataInicio")
+                        .HasColumnType("date")
+                        .HasColumnName("data_inicio");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("funcionario_id");
+
+                    b.Property<int>("TipoAfastamento")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipo_afastamento");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("XmlContent")
+                        .HasColumnType("text")
+                        .HasColumnName("xml_content");
+
+                    b.HasKey("Id")
+                        .HasName("pk_afastamento");
+
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("ix_afastamento_empresa_id");
+
+                    b.HasIndex("FuncionarioId")
+                        .HasDatabaseName("ix_afastamento_funcionario_id")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("afastamento", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Eventos.Domain.Entities.AlteracaoContratual", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CamposAlterados")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("campos_alterados");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly>("DataAlteracao")
+                        .HasColumnType("date")
+                        .HasColumnName("data_alteracao");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("funcionario_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("ValorAnterior")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("valor_anterior");
+
+                    b.Property<string>("ValorNovo")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("valor_novo");
+
+                    b.Property<string>("XmlContent")
+                        .HasColumnType("text")
+                        .HasColumnName("xml_content");
+
+                    b.HasKey("Id")
+                        .HasName("pk_alteracao_contratual");
+
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("ix_alteracao_contratual_empresa_id");
+
+                    b.HasIndex("FuncionarioId")
+                        .HasDatabaseName("ix_alteracao_contratual_funcionario_id")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("alteracao_contratual", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Eventos.Domain.Entities.Desligamento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly>("DataDesligamento")
+                        .HasColumnType("date")
+                        .HasColumnName("data_desligamento");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("funcionario_id");
+
+                    b.Property<int>("MotivoDesligamento")
+                        .HasColumnType("integer")
+                        .HasColumnName("motivo_desligamento");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("VerbasRescisorias")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("verbas_rescisorias");
+
+                    b.Property<string>("XmlContent")
+                        .HasColumnType("text")
+                        .HasColumnName("xml_content");
+
+                    b.HasKey("Id")
+                        .HasName("pk_desligamento");
+
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("ix_desligamento_empresa_id");
+
+                    b.HasIndex("FuncionarioId")
+                        .HasDatabaseName("ix_desligamento_funcionario_id")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("desligamento", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Eventos.Domain.Entities.Ferias", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly>("DataInicio")
+                        .HasColumnType("date")
+                        .HasColumnName("data_inicio");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<int>("DiasGozo")
+                        .HasColumnType("integer")
+                        .HasColumnName("dias_gozo");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("funcionario_id");
+
+                    b.Property<DateOnly>("PeriodoAquisitivoFim")
+                        .HasColumnType("date")
+                        .HasColumnName("periodo_aquisitivo_fim");
+
+                    b.Property<DateOnly>("PeriodoAquisitivoInicio")
+                        .HasColumnType("date")
+                        .HasColumnName("periodo_aquisitivo_inicio");
+
+                    b.Property<int>("TipoFerias")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipo_ferias");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("XmlContent")
+                        .HasColumnType("text")
+                        .HasColumnName("xml_content");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ferias");
+
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("ix_ferias_empresa_id");
+
+                    b.HasIndex("FuncionarioId")
+                        .HasDatabaseName("ix_ferias_funcionario_id")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("ferias", "public");
+                });
 #pragma warning restore 612, 618
         }
     }
