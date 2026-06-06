@@ -29,6 +29,13 @@ services:
       ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=folha360;Username=folha360_user;Password=${POSTGRES_PASSWORD:-Folha360@Dev}
       ConnectionStrings__Redis: redis:6379,password=${REDIS_PASSWORD:-Folha360@Dev}
       ConnectionStrings__RabbitMQ: amqp://${RABBITMQ_USER:-folha360}:${RABBITMQ_PASSWORD:-Folha360@Dev}@rabbitmq:5672
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER:-folha360}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD:-Folha360@Dev}
+      MinIO__Endpoint: minio:9000
+      MinIO__AccessKey: ${MINIO_ROOT_USER:-minioadmin}
+      MinIO__SecretKey: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MinIO__BucketName: folha360-documentos
       Jwt__Secret: ${JWT_SECRET:-Folha360@DevSecretKey@2026!TempKey}
       Seq__Url: http://seq:5341
     networks:
