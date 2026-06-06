@@ -101,6 +101,9 @@ public static class ServiceCollectionExtensions
         // Eventos Trabalhistas Module (F03)
         services.AddFolha360Eventos(configuration);
 
+        // MassTransit + RabbitMQ (centralizado — único AddMassTransit por container)
+        services.AddFolha360MassTransit(configuration);
+
         return services;
     }
 
@@ -138,19 +141,6 @@ public static class ServiceCollectionExtensions
 
         // FluentValidation — registra validators do módulo de Cadastros
         services.AddValidatorsFromAssemblyContaining<Folha360.Cadastros.Application.Validators.CriarEmpresaCommandValidator>();
-
-        // MassTransit + RabbitMQ
-        services.AddMassTransit(x =>
-        {
-            x.UsingRabbitMq((ctx, cfg) =>
-            {
-                cfg.Host(configuration["RabbitMQ:Host"] ?? "rabbitmq", "/", h =>
-                {
-                    h.Username(configuration["RabbitMQ:Username"] ?? "folha360");
-                    h.Password(configuration["RabbitMQ:Password"] ?? "folha360");
-                });
-            });
-        });
 
         return services;
     }
@@ -194,9 +184,16 @@ public static class ServiceCollectionExtensions
         // FluentValidation
         services.AddValidatorsFromAssemblyContaining<Folha360.Eventos.Application.Validators.CriarAdmissaoCommandValidator>();
 
-        // MassTransit Consumers
+        return services;
+    }
+
+    public static IServiceCollection AddFolha360MassTransit(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
         services.AddMassTransit(x =>
         {
+            // Consumers — Módulo F03
             x.AddConsumer<Folha360.Eventos.Application.Consumers.FuncionarioCadastradoConsumer>();
             x.AddConsumer<Folha360.Eventos.Application.Consumers.GerarXmlAdmissaoConsumer>();
             x.AddConsumer<Folha360.Eventos.Application.Consumers.GerarXmlFeriasConsumer>();
