@@ -37,6 +37,7 @@ public class GerarXmlAfastamentoConsumer : IConsumer<GerarXmlAfastamentoCommand>
         var afastamento = await _repo.GetByIdAsync(msg.AfastamentoId, context.CancellationToken);
         if (afastamento is null)
         {
+            _logger.LogWarning("Afastamento {AfastamentoId} não encontrado para geração de XML", msg.AfastamentoId);
             return;
         }
 
@@ -44,6 +45,7 @@ public class GerarXmlAfastamentoConsumer : IConsumer<GerarXmlAfastamentoCommand>
         var empresa = await _empresaRepo.GetByIdAsync(afastamento.EmpresaId, context.CancellationToken);
         if (funcionario is null || empresa is null)
         {
+            _logger.LogWarning("Dados complementares não encontrados para AfastamentoId={AfastamentoId}", msg.AfastamentoId);
             return;
         }
 

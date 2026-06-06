@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Folha360.Cadastros.Domain\Folha360.Cadastros.Domain.csproj" />
+    <ProjectReference Include="..\Folha360.Application\Folha360.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

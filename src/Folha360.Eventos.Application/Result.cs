@@ -1,5 +1,5 @@
-// Reusa Result<T>, Error e PaginatedResult<T> do módulo F02
-using Folha360.Cadastros.Application;
+// Reusa Result<T>, Error e PaginatedResult<T> do projeto compartilhado Folha360.Application
+using Folha360.Application;
 
 namespace Folha360.Eventos.Application;
 

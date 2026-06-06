@@ -37,6 +37,7 @@ public class GerarXmlDesligamentoConsumer : IConsumer<GerarXmlDesligamentoComman
         var desligamento = await _repo.GetByIdAsync(msg.DesligamentoId, context.CancellationToken);
         if (desligamento is null)
         {
+            _logger.LogWarning("Desligamento {DesligamentoId} não encontrado para geração de XML", msg.DesligamentoId);
             return;
         }
 
@@ -44,6 +45,7 @@ public class GerarXmlDesligamentoConsumer : IConsumer<GerarXmlDesligamentoComman
         var empresa = await _empresaRepo.GetByIdAsync(desligamento.EmpresaId, context.CancellationToken);
         if (funcionario is null || empresa is null)
         {
+            _logger.LogWarning("Dados complementares não encontrados para DesligamentoId={DesligamentoId}", msg.DesligamentoId);
             return;
         }
 
