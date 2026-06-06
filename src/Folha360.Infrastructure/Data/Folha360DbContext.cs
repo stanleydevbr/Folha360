@@ -1,81 +1,89 @@
-using Folha360.Domain.Abstractions;
 using Folha360.Domain.Entities;
+using Folha360.Infrastructure.Data.Configurations.Base;
+using Folha360.Infrastructure.Data.Configurations.Cadastros;
 using Microsoft.EntityFrameworkCore;
 
 namespace Folha360.Infrastructure.Data;
 
+/// <summary>
+/// Modelo canônico do Folha360 — contém TODAS as entidades de TODOS os módulos.
+/// Este é o assembly DONO das migrations (Migrations Assembly Centralizado).
+/// </summary>
 public class Folha360DbContext : DbContext
 {
-    private readonly ITenantContext? _tenantContext;
-
-    public Folha360DbContext(DbContextOptions<Folha360DbContext> options, ITenantContext? tenantContext = null)
+    public Folha360DbContext(DbContextOptions<Folha360DbContext> options)
         : base(options)
     {
-        _tenantContext = tenantContext;
     }
 
+    // ============================
+    // Tabelas base (schema public)
+    // ============================
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<AuditLogEntry> AuditLogs => Set<AuditLogEntry>();
+
+    // ============================
+    // Módulo F02 — Cadastros (schema public)
+    // ============================
+    public DbSet<Folha360.Cadastros.Domain.Entities.Empresa> Empresas => Set<Folha360.Cadastros.Domain.Entities.Empresa>();
+
+    // ============================
+    // Módulo F02 — Cadastros (schema tenant)
+    // ============================
+    public DbSet<Folha360.Cadastros.Domain.Entities.Funcionario> Funcionarios => Set<Folha360.Cadastros.Domain.Entities.Funcionario>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.Cargo> Cargos => Set<Folha360.Cadastros.Domain.Entities.Cargo>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.Rubrica> Rubricas => Set<Folha360.Cadastros.Domain.Entities.Rubrica>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.Lotacao> Lotacoes => Set<Folha360.Cadastros.Domain.Entities.Lotacao>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.Dependente> Dependentes => Set<Folha360.Cadastros.Domain.Entities.Dependente>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.Documento> Documentos => Set<Folha360.Cadastros.Domain.Entities.Documento>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.Sindicato> Sindicatos => Set<Folha360.Cadastros.Domain.Entities.Sindicato>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.Convenio> Convenios => Set<Folha360.Cadastros.Domain.Entities.Convenio>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.HorarioTrabalho> HorariosTrabalho => Set<Folha360.Cadastros.Domain.Entities.HorarioTrabalho>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("public");
 
-        // Tenant mapping
-        modelBuilder.Entity<Tenant>(entity =>
+        // ============================
+        // Configurações base
+        // ============================
+        modelBuilder.ApplyConfiguration(new TenantConfiguration());
+        modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
+        modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
+
+        // ============================
+        // Módulo F02 — Cadastros
+        // ============================
+        modelBuilder.ApplyConfiguration(new EmpresaConfiguration());
+        modelBuilder.ApplyConfiguration(new FuncionarioConfiguration());
+        modelBuilder.ApplyConfiguration(new CargoConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaConfiguration());
+        modelBuilder.ApplyConfiguration(new LotacaoConfiguration());
+        modelBuilder.ApplyConfiguration(new DependenteConfiguration());
+        modelBuilder.ApplyConfiguration(new DocumentoConfiguration());
+        modelBuilder.ApplyConfiguration(new SindicatoConfiguration());
+        modelBuilder.ApplyConfiguration(new ConvenioConfiguration());
+        modelBuilder.ApplyConfiguration(new HorarioTrabalhoConfiguration());
+
+        // ============================
+        // Módulo F03 — (futuro)
+        // ============================
+        // modelBuilder.ApplyConfiguration(new ...);
+
+        // ============================
+        // Query Filter Global: Soft Delete
+        // ============================
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            entity.ToTable("tenant");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.TenantId).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.SchemaName).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.Nome).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.Status).IsRequired();
-            entity.Property(e => e.CreatedAt).IsRequired();
-            entity.HasIndex(e => e.TenantId).IsUnique();
-            entity.HasIndex(e => e.SchemaName).IsUnique();
-        });
-
-        // Usuario mapping
-        modelBuilder.Entity<Usuario>(entity =>
-        {
-            entity.ToTable("usuario");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.SenhaHash).IsRequired().HasMaxLength(500);
-            entity.Property(e => e.Nome).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.Perfil).IsRequired();
-            entity.Property(e => e.Status).IsRequired();
-            entity.Property(e => e.UltimoLogin);
-            entity.Property(e => e.CreatedAt).IsRequired();
-            entity.Property(e => e.UpdatedAt).IsRequired();
-            entity.HasIndex(e => e.Email).IsUnique();
-        });
-
-        // AuditLog mapping
-        modelBuilder.Entity<AuditLogEntry>(entity =>
-        {
-            entity.ToTable("audit_log");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.SchemaName).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.TableName).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.RecordId).IsRequired();
-            entity.Property(e => e.Action).IsRequired().HasMaxLength(10);
-            entity.Property(e => e.OldData).HasColumnType("jsonb");
-            entity.Property(e => e.NewData).HasColumnType("jsonb");
-            entity.Property(e => e.ChangedBy).IsRequired();
-            entity.Property(e => e.ChangedAt).IsRequired();
-            entity.HasIndex(e => new { e.TableName, e.RecordId });
-            entity.HasIndex(e => e.ChangedAt);
-        });
-
-        // Aplicar filtro global de schema do tenant para tabelas de negócio
-        // (aplicado via interceptor em tempo de execução)
-    }
-
-    public ITenantContext? GetTenantContext()
-    {
-        return _tenantContext;
+            if (typeof(Folha360.Domain.Abstractions.ISoftDeletable).IsAssignableFrom(entityType.ClrType))
+            {
+                var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
+                var property = System.Linq.Expressions.Expression.Property(parameter, nameof(Folha360.Domain.Abstractions.ISoftDeletable.DeletedAt));
+                var nullCheck = System.Linq.Expressions.Expression.Equal(property, System.Linq.Expressions.Expression.Constant(null, typeof(DateTime?)));
+                var lambda = System.Linq.Expressions.Expression.Lambda(nullCheck, parameter);
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+            }
+        }
     }
 }

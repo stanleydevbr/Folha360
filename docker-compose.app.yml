@@ -1,0 +1,109 @@
+version: "3.8"
+name: folha360
+
+# =============================================================================
+# APLICAÇÃO + MONITORAMENTO
+# Uso: docker compose -f docker-compose.yml -f docker-compose.app.yml up -d
+# Só monitoramento: docker compose -f docker-compose.app.yml --profile monitoring up -d
+# =============================================================================
+
+# Volumes usados apenas pela aplicação/monitoramento
+volumes:
+  prometheus-data:
+  grafana-data:
+
+services:
+  # ===========================================================================
+  # APLICAÇÃO
+  # ===========================================================================
+  folha360-webapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: folha360-webapi
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=folha360;Username=folha360_user;Password=${POSTGRES_PASSWORD:-Folha360@Dev}
+      ConnectionStrings__Redis: redis:6379,password=${REDIS_PASSWORD:-Folha360@Dev}
+      ConnectionStrings__RabbitMQ: amqp://${RABBITMQ_USER:-folha360}:${RABBITMQ_PASSWORD:-Folha360@Dev}@rabbitmq:5672
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER:-folha360}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD:-Folha360@Dev}
+      MinIO__Endpoint: minio:9000
+      MinIO__AccessKey: ${MINIO_ROOT_USER:-minioadmin}
+      MinIO__SecretKey: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MinIO__BucketName: folha360-documentos
+      Jwt__Secret: ${JWT_SECRET:-Folha360@DevSecretKey@2026!TempKey}
+      Seq__Url: http://seq:5341
+    networks:
+      - folha360-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: folha360-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - folha360-net
+    depends_on:
+      - folha360-webapi
+    restart: unless-stopped
+
+  # ===========================================================================
+  # MONITORAMENTO (profile: monitoring)
+  # ===========================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: folha360-prometheus
+    profiles:
+      - monitoring
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - folha360-net
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: folha360-grafana
+    profiles:
+      - monitoring
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - folha360-net
+    depends_on:
+      - prometheus
+    restart: unless-stopped

@@ -1,0 +1,125 @@
+name: Release — Develop → Master
+
+on:
+    workflow_dispatch:
+        inputs:
+            version:
+                description: "Version (e.g., 1.0.0)"
+                required: true
+                type: string
+            release_notes:
+                description: "Release notes"
+                required: false
+                type: string
+    schedule:
+        # Every Monday at 9am UTC — automated release candidate
+        - cron: "0 9 * * 1"
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    prepare-release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: develop
+
+            - name: Ensure branches exist
+              run: |
+                  git fetch --all --prune
+
+                  if ! git ls-remote --heads origin master | grep -q master; then
+                    echo "ERROR: master branch does not exist on remote"
+                    exit 1
+                  fi
+
+                  git branch master origin/master
+
+            - name: Generate changelog
+              id: changelog
+              run: |
+                  COMMITS=$(git log master..develop --pretty=format:"- %s (%h)" --reverse 2>/dev/null)
+
+                  if [ -z "$COMMITS" ]; then
+                    echo "No commits between master and develop. Nothing to release."
+                    echo "skip=true" >> $GITHUB_OUTPUT
+                    exit 0
+                  fi
+
+                  echo "skip=false" >> $GITHUB_OUTPUT
+
+                  VERSION="${{ github.event.inputs.version || 'auto' }}"
+                  if [ "$VERSION" = "auto" ] || [ -z "$VERSION" ]; then
+                    VERSION=$(date +'%Y.%-m.%-d')
+                  fi
+
+                  echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+                  RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
+                  if [ -z "$RELEASE_NOTES" ]; then
+                    RELEASE_NOTES="Automated release candidate."
+                  fi
+
+                  cat > release-body.md << BODYEOF
+                  ## Release v${VERSION}
+
+                  ${RELEASE_NOTES}
+
+                  ## Changes since last release
+
+                  ${COMMITS}
+
+                  ## Checklist
+
+                  - [ ] All CI checks pass on develop
+                  - [ ] Integration tests pass
+                  - [ ] No critical or high vulnerabilities
+                  - [ ] Release notes reviewed
+
+                  > This PR was generated automatically by the release workflow.
+                  BODYEOF
+
+            - name: Check if release PR already exists
+              id: check-pr
+              if: steps.changelog.outputs.skip == 'false'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  EXISTING=$(gh pr list \
+                    --base master \
+                    --head develop \
+                    --state open \
+                    --json number,url \
+                    --jq '.[0]')
+                  if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+                    echo "exists=true" >> $GITHUB_OUTPUT
+                    echo "Release PR already exists."
+                  else
+                    echo "exists=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Create release PR
+              if: steps.changelog.outputs.skip == 'false' && steps.check-pr.outputs.exists == 'false'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh pr create \
+                    --title "Release v${{ steps.changelog.outputs.version }}" \
+                    --head develop \
+                    --base master \
+                    --body-file release-body.md \
+                    --label "release,auto-pr"
+
+                  echo "Release PR created: develop -> master"
+
+            - name: Summary
+              run: |
+                  if [ "${{ steps.changelog.outputs.skip }}" = "true" ]; then
+                    echo "Nothing to release."
+                  else
+                    echo "Release v${{ steps.changelog.outputs.version }} ready for review."
+                  fi

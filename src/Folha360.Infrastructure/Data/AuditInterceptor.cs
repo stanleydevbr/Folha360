@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Folha360.Domain.Abstractions;
 using Folha360.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -8,11 +7,8 @@ namespace Folha360.Infrastructure.Data;
 
 public class AuditInterceptor : SaveChangesInterceptor
 {
-    private readonly ITenantContext? _tenantContext;
-
-    public AuditInterceptor(ITenantContext? tenantContext = null)
+    public AuditInterceptor()
     {
-        _tenantContext = tenantContext;
     }
 
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -25,8 +21,8 @@ public class AuditInterceptor : SaveChangesInterceptor
             return base.SavingChangesAsync(eventData, result, cancellationToken);
 
         var auditEntries = new List<AuditLogEntry>();
-        var changedBy = _tenantContext?.TenantId ?? "system";
-        var schemaName = _tenantContext?.SchemaName ?? "public";
+        var changedBy = "system";
+        var schemaName = "public";
 
         foreach (var entry in context.ChangeTracker.Entries())
         {

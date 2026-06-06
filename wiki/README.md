@@ -29,7 +29,7 @@ Folha360/
 
 ## Opção 1: Publicar via GitHub Web
 
-1. Acesse: `https://github.com/<seu-usuario>/Folha360/wiki`
+1. Acesse: `https://github.com/stanleydevbr/Folha360/wiki`
 2. Clique em **"Create the first page"**
 3. Cole o conteúdo de `wiki/Home.md` como página **Home**
 4. Clique em **"Save"**
@@ -43,7 +43,7 @@ Folha360/
 
 ```bash
 # 1. Clonar a wiki como repositório Git separado
-git clone https://github.com/<seu-usuario>/Folha360.wiki.git
+git clone https://github.com/stanleydevbr/Folha360.wiki.git
 cd Folha360.wiki
 
 # 2. Copiar todos os artefatos como páginas
