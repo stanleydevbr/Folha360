@@ -3,6 +3,8 @@
 ## Summary
 Mapeamento dos elementos de software do Folha360 em nós de infraestrutura, containers e processos. A implantação segue o modelo de **monólito modular** containerizado com Docker Compose para ambientes de desenvolvimento/homologação e Kubernetes para produção. Cada módulo de domínio é um container independente, com banco de dados PostgreSQL compartilhado (schemas separados por módulo).
 
+> **Atualização (Junho 2026)**: O Redis agora também armazena cache de rubricas, composições e fórmulas com invalidação pub/sub. O `api-cadastros` foi expandido com endpoints de rubricas (composição, fórmulas, tabelas progressivas).
+
 ## Diagrama de Deployment
 
 ```mermaid

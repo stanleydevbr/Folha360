@@ -36,6 +36,10 @@ Registro de riscos arquiteturais do sistema Folha360, identificados a partir da 
 | **R12** | **Mudança de regime tributário da empresa** | Empresa muda de Lucro Real para Simples Nacional (ou vice-versa) | Regras de cálculo fiscal incorretas; apuração errada; risco fiscal para o cliente | 2 | 3 | **6** | Strategy pattern para regimes tributários; configuração por empresa; testes com diferentes regimes | Testes unitários com cenários de regimes diferentes |
 | **R13** | **Latência de replicação PostgreSQL impacta relatórios** | Lag de replicação > 30s por carga pesada no primary | Relatórios mostram dados desatualizados; decisões erradas | 2 | 2 | **4** | Monitor de lag; alerta se > 10s; fallback para primary em consultas críticas | Monitoramento contínuo de lag |
 | **R14** | **Equipe não familiarizada com a stack proposta** | Contratação difícil; curva de aprendizado alta | Atraso no desenvolvimento; bugs por falta de domínio | 3 | 2 | **6** | Documentação interna; pair programming; treinamento inicial; padrões documentados | Avaliação de senioridade da equipe |
+| **R15** | **Fórmula NCalc com loop infinito ou acesso indevido** | Usuário cadastra fórmula maliciosa ou com erro de sintaxe | Crash do motor de cálculo; funcionário não processado; lentidão generalizada | 3 | 3 | **9** | Sandbox com timeout 100ms e memory limit; whitelist de funções; validador de sintaxe pré-execução; fórmula marcada como `formula_erro` e isolada | Teste com fórmulas maliciosas conhecidas |
+| **R16** | **Ciclo em composição hierárquica de rubricas** | Usuário cria composição circular (A → B → A) | Loop infinito no cálculo; stack overflow; processo abortado | 2 | 3 | **6** | Detecção de ciclos via DFS no momento do cadastro; validação pré-cálculo; alerta visual no editor drag-and-drop | Testes com grafos cíclicos de rubricas |
+| **R17** | **Tabela progressiva desatualizada (IRRF/INSS)** | Mudança anual nas tabelas oficiais não aplicada a tempo | Cálculos fiscais incorretos; divergência com governo; multas | 3 | 3 | **9** | Versionamento anual de tabelas; script de seed com tabelas oficiais; alerta de vigência; endpoint `GET /api/rubricas/conformidade` | Verificação trimestral de tabelas oficiais |
+| **R18** | **Inconsistência entre rubricas locais e Tabela 03 e-Social** | Rubrica cadastrada sem `tipo_esocial` ou com código incorreto | Evento S-1010 rejeitado; retrabalho; atraso no envio | 3 | 3 | **9** | Validação de `tipo_esocial` contra catálogo oficial; endpoint de conformidade; dashboard de rubricas não mapeadas; CI/CD monitora portal e-Social | Testes de validação XSD para S-1010 |
 
 ---
 
@@ -44,8 +48,8 @@ Registro de riscos arquiteturais do sistema Folha360, identificados a partir da 
 |   | Impacto 1 | Impacto 2 | Impacto 3 | Impacto 4 |
 |---|---|---|---|---|
 | **Prob. 4** | — | — | — | — |
-| **Prob. 3** | — | R8, R9, R11 | R3, R5, R7 | R1 |
-| **Prob. 2** | — | R13 | R10, R12, R14 | R2, R4, R6 |
+| **Prob. 3** | — | R8, R9, R11 | R3, R5, R7, R15, R17, R18 | R1 |
+| **Prob. 2** | — | R13 | R10, R12, R14, R16 | R2, R4, R6 |
 | **Prob. 1** | — | — | — | — |
 
 ---
@@ -58,7 +62,9 @@ Registro de riscos arquiteturais do sistema Folha360, identificados a partir da 
 | **R3** | Processamento > 2h | 9 | Teste de carga com 150K; otimizar batch; HPA |
 | **R5** | Inconsistência entre módulos | 9 | Idempotência; reconciliação batch; saga pattern |
 | **R7** | Novo layout e-Social | 9 | CI/CD monitora portal; schemas versionados |
-| **R2** | Vazamento de dados | 8 | Criptografia; pentest; audit log; network policies |
+| **R15** | Fórmula NCalc maliciosa/loop | 9 | Sandbox com timeout 100ms; whitelist de funções |
+| **R17** | Tabela progressiva desatualizada | 9 | Versionamento anual; alerta de vigência; seed data |
+| **R18** | Inconsistência rubricas × Tabela 03 | 9 | Validação contínua; dashboard de conformidade |
 
 ## Evidence vs Assumptions
 
