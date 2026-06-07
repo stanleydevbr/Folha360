@@ -98,6 +98,12 @@ public static class ServiceCollectionExtensions
         // Cadastros Module (F02)
         services.AddFolha360Cadastros(configuration);
 
+        // Eventos Trabalhistas Module (F03)
+        services.AddFolha360Eventos(configuration);
+
+        // MassTransit + RabbitMQ (centralizado — único AddMassTransit por container)
+        services.AddFolha360MassTransit(configuration);
+
         return services;
     }
 
@@ -136,9 +142,65 @@ public static class ServiceCollectionExtensions
         // FluentValidation — registra validators do módulo de Cadastros
         services.AddValidatorsFromAssemblyContaining<Folha360.Cadastros.Application.Validators.CriarEmpresaCommandValidator>();
 
-        // MassTransit + RabbitMQ
+        return services;
+    }
+
+    public static IServiceCollection AddFolha360Eventos(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        // DbContext
+        services.AddDbContextFactory<Folha360.Eventos.Infrastructure.Data.EventosDbContext>(options =>
+            options.UseSnakeCaseNamingConvention()
+            .UseNpgsql(
+                configuration.GetConnectionString("Postgres"),
+                npgsql => npgsql.EnableRetryOnFailure(3)));
+
+        services.AddScoped<Folha360.Eventos.Infrastructure.Data.EventosDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<Folha360.Eventos.Infrastructure.Data.EventosDbContext>>().CreateDbContext());
+
+        // Repositories
+        services.AddScoped<Folha360.Eventos.Domain.Abstractions.IAdmissaoRepository,
+            Folha360.Eventos.Infrastructure.Repositories.AdmissaoRepository>();
+        services.AddScoped<Folha360.Eventos.Domain.Abstractions.IFeriasRepository,
+            Folha360.Eventos.Infrastructure.Repositories.FeriasRepository>();
+        services.AddScoped<Folha360.Eventos.Domain.Abstractions.IAfastamentoRepository,
+            Folha360.Eventos.Infrastructure.Repositories.AfastamentoRepository>();
+        services.AddScoped<Folha360.Eventos.Domain.Abstractions.IDesligamentoRepository,
+            Folha360.Eventos.Infrastructure.Repositories.DesligamentoRepository>();
+        services.AddScoped<Folha360.Eventos.Domain.Abstractions.IAlteracaoContratualRepository,
+            Folha360.Eventos.Infrastructure.Repositories.AlteracaoContratualRepository>();
+
+        // Services
+        services.AddScoped<Folha360.Eventos.Application.Services.IXmlGeradorService,
+            Folha360.Eventos.Infrastructure.Services.XmlGeradorService>();
+
+        // MediatR
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Folha360.Eventos.Application.Commands.CriarAdmissaoCommand).Assembly);
+        });
+
+        // FluentValidation
+        services.AddValidatorsFromAssemblyContaining<Folha360.Eventos.Application.Validators.CriarAdmissaoCommandValidator>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddFolha360MassTransit(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
         services.AddMassTransit(x =>
         {
+            // Consumers — Módulo F03
+            x.AddConsumer<Folha360.Eventos.Application.Consumers.FuncionarioCadastradoConsumer>();
+            x.AddConsumer<Folha360.Eventos.Application.Consumers.GerarXmlAdmissaoConsumer>();
+            x.AddConsumer<Folha360.Eventos.Application.Consumers.GerarXmlFeriasConsumer>();
+            x.AddConsumer<Folha360.Eventos.Application.Consumers.GerarXmlAfastamentoConsumer>();
+            x.AddConsumer<Folha360.Eventos.Application.Consumers.GerarXmlDesligamentoConsumer>();
+            x.AddConsumer<Folha360.Eventos.Application.Consumers.GerarXmlAlteracaoContratualConsumer>();
+
             x.UsingRabbitMq((ctx, cfg) =>
             {
                 cfg.Host(configuration["RabbitMQ:Host"] ?? "rabbitmq", "/", h =>
@@ -146,6 +208,9 @@ public static class ServiceCollectionExtensions
                     h.Username(configuration["RabbitMQ:Username"] ?? "folha360");
                     h.Password(configuration["RabbitMQ:Password"] ?? "folha360");
                 });
+
+                cfg.UseMessageRetry(r => r.Exponential(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(2)));
+                cfg.ConfigureEndpoints(ctx);
             });
         });
 

@@ -1,4 +1,4 @@
-using Folha360.Cadastros.Domain.Attributes;
+using Folha360.Domain.Attributes;
 using Folha360.Domain;
 
 namespace Folha360.Cadastros.Domain.Entities;

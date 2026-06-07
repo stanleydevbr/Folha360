@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Folha360.Domain\Folha360.Domain.csproj" />
     <ProjectReference Include="..\Folha360.Cadastros.Domain\Folha360.Cadastros.Domain.csproj" />
+    <ProjectReference Include="..\Folha360.Eventos.Domain\Folha360.Eventos.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,7 @@
 using Folha360.Domain.Entities;
 using Folha360.Infrastructure.Data.Configurations.Base;
 using Folha360.Infrastructure.Data.Configurations.Cadastros;
+using Folha360.Infrastructure.Data.Configurations.Eventos;
 using Microsoft.EntityFrameworkCore;
 
 namespace Folha360.Infrastructure.Data;
@@ -41,6 +42,15 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Cadastros.Domain.Entities.Convenio> Convenios => Set<Folha360.Cadastros.Domain.Entities.Convenio>();
     public DbSet<Folha360.Cadastros.Domain.Entities.HorarioTrabalho> HorariosTrabalho => Set<Folha360.Cadastros.Domain.Entities.HorarioTrabalho>();
 
+    // ============================
+    // Módulo F03 — Eventos Trabalhistas (schema tenant)
+    // ============================
+    public DbSet<Folha360.Eventos.Domain.Entities.Admissao> Admissoes => Set<Folha360.Eventos.Domain.Entities.Admissao>();
+    public DbSet<Folha360.Eventos.Domain.Entities.Ferias> Ferias => Set<Folha360.Eventos.Domain.Entities.Ferias>();
+    public DbSet<Folha360.Eventos.Domain.Entities.Afastamento> Afastamentos => Set<Folha360.Eventos.Domain.Entities.Afastamento>();
+    public DbSet<Folha360.Eventos.Domain.Entities.Desligamento> Desligamentos => Set<Folha360.Eventos.Domain.Entities.Desligamento>();
+    public DbSet<Folha360.Eventos.Domain.Entities.AlteracaoContratual> AlteracoesContratuais => Set<Folha360.Eventos.Domain.Entities.AlteracaoContratual>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("public");
@@ -67,9 +77,13 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new HorarioTrabalhoConfiguration());
 
         // ============================
-        // Módulo F03 — (futuro)
+        // Módulo F03 — Eventos Trabalhistas
         // ============================
-        // modelBuilder.ApplyConfiguration(new ...);
+        modelBuilder.ApplyConfiguration(new AdmissaoConfiguration());
+        modelBuilder.ApplyConfiguration(new FeriasConfiguration());
+        modelBuilder.ApplyConfiguration(new AfastamentoConfiguration());
+        modelBuilder.ApplyConfiguration(new DesligamentoConfiguration());
+        modelBuilder.ApplyConfiguration(new AlteracaoContratualConfiguration());
 
         // ============================
         // Query Filter Global: Soft Delete

@@ -1,4 +1,4 @@
-namespace Folha360.Cadastros.Domain.Attributes;
+namespace Folha360.Domain.Attributes;
 
 /// <summary>
 /// Marca uma propriedade como dado sensível.
