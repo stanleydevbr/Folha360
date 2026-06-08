@@ -29,7 +29,7 @@ public class MotorCalculoTests
         var contexto = new Dictionary<string, object> { ["salario_base"] = 3000m };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // Assert
         Assert.Equal(3000m, resultado.TotalVencimentos);
@@ -57,7 +57,7 @@ public class MotorCalculoTests
         };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // Assert
         Assert.Equal(3200m, resultado.TotalVencimentos); // 3000 + (10 * 20)
@@ -77,7 +77,7 @@ public class MotorCalculoTests
         var contexto = new Dictionary<string, object> { ["salario_base"] = 3000m };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // Assert
         Assert.Equal(3000m, resultado.TotalVencimentos);
@@ -103,7 +103,7 @@ public class MotorCalculoTests
         var contexto = new Dictionary<string, object> { ["salario_base"] = 3000m };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // IRRF sobre R$3000: cálculo progressivo
         // Faixa 1: 2259.20 * 0% = 0
@@ -127,7 +127,7 @@ public class MotorCalculoTests
         var contexto = new Dictionary<string, object> { ["salario_base"] = 5000m };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // Assert
         Assert.Equal(4000m, resultado.TotalVencimentos); // Limitado pelo teto
@@ -145,7 +145,7 @@ public class MotorCalculoTests
         var contexto = new Dictionary<string, object> { ["salario_base"] = 500m };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // Assert
         Assert.Equal(1412m, resultado.TotalVencimentos); // Garantido pelo piso
@@ -165,7 +165,7 @@ public class MotorCalculoTests
         var contexto = new Dictionary<string, object> { ["SALARIO_BASE"] = 3000m };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // Assert
         Assert.Equal(3300m, resultado.TotalVencimentos); // 3000 + 300
@@ -185,7 +185,7 @@ public class MotorCalculoTests
         var contexto = new Dictionary<string, object> { ["salario_base"] = 3000m };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // Assert
         Assert.Equal(3000m, resultado.TotalVencimentos); // Bonus inativo ignorado
@@ -217,7 +217,7 @@ public class MotorCalculoTests
         var contexto = new Dictionary<string, object> { ["salario_base"] = 3000m };
 
         // Act
-        var resultado = _motor.Calcular(rubricas, contexto);
+        var resultado = _motor.Calcular(rubricas, contexto, ct: CancellationToken.None);
 
         // Assert — sem erro de ordem
         Assert.Equal(3000m, resultado.TotalVencimentos);

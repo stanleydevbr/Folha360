@@ -6,17 +6,15 @@ namespace Folha360.Infrastructure.Data;
 
 public static class RubricaSeeder
 {
-    public static async Task SeedAsync(Folha360DbContext context, ILogger logger)
+    public static async Task SeedAsync(Folha360DbContext context, Guid empresaId, ILogger logger)
     {
-        if (await context.Set<Rubrica>().AnyAsync())
+        if (await context.Set<Rubrica>().AnyAsync(r => r.EmpresaId == empresaId))
         {
-            logger.LogInformation("Rubricas already seeded. Skipping...");
+            logger.LogInformation("Rubricas already seeded for empresa {EmpresaId}. Skipping...", empresaId);
             return;
         }
 
-        logger.LogInformation("Seeding rubricas padrao (Tabela 03 e-Social)...");
-
-        var empresaId = Guid.NewGuid(); // Será substituído pelo tenant real
+        logger.LogInformation("Seeding rubricas padrao (Tabela 03 e-Social) para empresa {EmpresaId}...", empresaId);
 
         // Grupos de Rubrica
         var grupos = new List<GrupoRubrica>

@@ -15,10 +15,13 @@ public class AvaliadorCondicional
         if (string.IsNullOrWhiteSpace(condicao))
             return true;
 
-        // Substituir placeholders por valores do contexto
+        // Substituir placeholders por valores do contexto (ordem decrescente para evitar substituição parcial)
         var expressao = condicao;
-        foreach (var kv in contexto)
-            expressao = expressao.Replace($"{{{kv.Key}}}", kv.Value?.ToString() ?? "null");
+        var chavesOrdenadas = contexto.Keys.OrderByDescending(k => k.Length);
+        foreach (var chave in chavesOrdenadas)
+        {
+            expressao = expressao.Replace($"{{{chave}}}", contexto[chave]?.ToString() ?? "null");
+        }
 
         // Suporte a operadores simples: valor1 > valor2, valor1 == valor2, etc.
         var partes = expressao.Split(" AND ", StringSplitOptions.TrimEntries);

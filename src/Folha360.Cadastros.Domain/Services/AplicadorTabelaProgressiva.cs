@@ -4,15 +4,46 @@ namespace Folha360.Cadastros.Domain.Services;
 
 /// <summary>
 /// Aplicador de tabelas progressivas (IRRF/INSS).
-/// Itera faixas em ordem e aplica alíquota com dedução.
+/// Suporta dois métodos: simplificado (RFB) e progressivo por faixa.
 /// </summary>
 public class AplicadorTabelaProgressiva
 {
     /// <summary>
-    /// Aplica a tabela progressiva sobre a base de cálculo.
-    /// Fórmula: (baseCalculo * aliquota) - deducao para a última faixa aplicável.
+    /// Aplica a tabela progressiva usando o método simplificado da Receita Federal:
+    /// (baseCalculo * aliquotaDaUltimaFaixa) - deducao.
     /// </summary>
     public decimal Aplicar(decimal baseCalculo, IReadOnlyList<RubricaTabelaProgressiva> faixas)
+    {
+        if (faixas.Count == 0)
+        {
+            return 0;
+        }
+
+        var faixasOrdenadas = faixas.OrderBy(f => f.Ordem).ToList();
+
+        // Encontrar a última faixa aplicável
+        RubricaTabelaProgressiva? faixaAplicavel = null;
+        foreach (var faixa in faixasOrdenadas)
+        {
+            if (baseCalculo > faixa.FaixaDe)
+            {
+                faixaAplicavel = faixa;
+            }
+        }
+
+        if (faixaAplicavel == null || faixaAplicavel.Aliquota == 0)
+        {
+            return 0;
+        }
+
+        return (baseCalculo * faixaAplicavel.Aliquota / 100) - faixaAplicavel.Deducao;
+    }
+
+    /// <summary>
+    /// Aplica a tabela progressiva usando cálculo progressivo por faixa
+    /// (soma dos valores de cada faixa). Usado para INSS.
+    /// </summary>
+    public decimal AplicarProgressivo(decimal baseCalculo, IReadOnlyList<RubricaTabelaProgressiva> faixas)
     {
         if (faixas.Count == 0)
         {

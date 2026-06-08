@@ -31,7 +31,8 @@ public class MotorCalculo
     public ResultadoCalculo Calcular(
         IReadOnlyList<Rubrica> rubricas,
         IReadOnlyDictionary<string, object> contextoFuncionario,
-        IReadOnlyDictionary<Guid, decimal>? historicoMedias = null)
+        IReadOnlyDictionary<Guid, decimal>? historicoMedias = null,
+        CancellationToken ct = default)
     {
         var resultado = new ResultadoCalculo();
         var valoresCalculados = new Dictionary<Guid, decimal>();
@@ -42,6 +43,7 @@ public class MotorCalculo
         // Fase 1: Vencimentos (ordem_calculo 1-99)
         foreach (var rubrica in ordenadas.Where(r => r.OrdemCalculo < 100 && r.Ativo))
         {
+            ct.ThrowIfCancellationRequested();
             try
             {
                 var valor = CalcularRubrica(rubrica, contextoFuncionario, valoresCalculados, historicoMedias);
@@ -55,10 +57,15 @@ public class MotorCalculo
         }
 
         resultado.TotalVencimentos = valoresCalculados
-            .Where(kv => ordenadas.First(r => r.Id == kv.Key).Natureza != "Desconto")
+            .Where(kv =>
+            {
+                var rubrica = ordenadas.FirstOrDefault(r => r.Id == kv.Key);
+                return rubrica != null && rubrica.Natureza != "Desconto";
+            })
             .Sum(kv => kv.Value);
 
         // Fase 2: Bases (ordem_calculo 100-199)
+        ct.ThrowIfCancellationRequested();
         foreach (var rubrica in ordenadas.Where(r => r.OrdemCalculo >= 100 && r.OrdemCalculo < 200 && r.Ativo))
         {
             try
@@ -89,6 +96,8 @@ public class MotorCalculo
         }
 
         // Fase 3: Descontos (ordem_calculo 200-299)
+        ct.ThrowIfCancellationRequested();
+
         // Ordenar por prioridade_desconto dentro da fase
         var descontos = ordenadas
             .Where(r => r.OrdemCalculo >= 200 && r.OrdemCalculo < 300 && r.Ativo)
@@ -113,6 +122,7 @@ public class MotorCalculo
             valoresCalculados.TryGetValue(r.Id, out var v) ? v : 0);
 
         // Fase 4: Totais (ordem_calculo 300-399)
+        ct.ThrowIfCancellationRequested();
         foreach (var rubrica in ordenadas.Where(r => r.OrdemCalculo >= 300 && r.Ativo))
         {
             try

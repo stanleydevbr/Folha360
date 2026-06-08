@@ -20,14 +20,10 @@ public class AplicadorTabelaProgressivaTests
             new(Guid.NewGuid(), 2026, 4664.69m, null, 27.5m, 896.00m, 5),
         };
 
-        // Act — Salário R$ 3.000 (faixa 3: 15%)
+        // Act — Salário R$ 3.000 (faixa 3: 15%, dedução 381.44)
         var resultado = _aplicador.Aplicar(3000m, faixas);
 
-        // IRRF esperado: cálculo progressivo
-        // Faixa 1: 2259.20 * 0% = 0
-        // Faixa 2: (2826.65 - 2259.20) * 7.5% = 567.45 * 0.075 = 42.56
-        // Faixa 3: (3000 - 2826.65) * 15% = 173.35 * 0.15 = 26.00
-        // Total: 0 + 42.56 + 26.00 = 68.56
+        // Método RFB: (3000 * 15%) - 381.44 = 450 - 381.44 = 68.56
         var esperado = 68.56m;
         Assert.Equal(esperado, Math.Round(resultado, 2));
     }
@@ -46,7 +42,7 @@ public class AplicadorTabelaProgressivaTests
     }
 
     [Fact]
-    public void Aplicar_TetoINSS_DeveCalcularCorretamente()
+    public void AplicarProgressivo_TetoINSS_DeveCalcularCorretamente()
     {
         var faixas = new List<RubricaTabelaProgressiva>
         {
@@ -56,7 +52,7 @@ public class AplicadorTabelaProgressivaTests
             new(Guid.NewGuid(), 2026, 4000.04m, 7786.02m, 14m, 0m, 4),
         };
 
-        var resultado = _aplicador.Aplicar(5000m, faixas);
+        var resultado = _aplicador.AplicarProgressivo(5000m, faixas);
 
         // Faixa 1: 1412 * 7.5% = 105.90
         // Faixa 2: (2666.68 - 1412) * 9% = 1254.68 * 0.09 = 112.92
