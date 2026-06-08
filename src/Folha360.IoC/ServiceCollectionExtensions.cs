@@ -142,6 +142,15 @@ public static class ServiceCollectionExtensions
         // FluentValidation — registra validators do módulo de Cadastros
         services.AddValidatorsFromAssemblyContaining<Folha360.Cadastros.Application.Validators.CriarEmpresaCommandValidator>();
 
+        // Domain Services — Motor de Cálculo (ADR-006)
+        services.AddScoped<Folha360.Cadastros.Domain.Services.ResolvedorComposicao>();
+        services.AddScoped<Folha360.Cadastros.Domain.Services.AplicadorTabelaProgressiva>();
+        services.AddScoped<Folha360.Cadastros.Domain.Services.CalculadorMedia>();
+        services.AddScoped<Folha360.Cadastros.Domain.Services.AvaliadorCondicional>();
+        services.AddScoped<Folha360.Cadastros.Domain.Services.IExpressionEvaluator,
+            Folha360.Cadastros.Infrastructure.Services.NCalcExpressionEvaluator>();
+        services.AddScoped<Folha360.Cadastros.Domain.Services.MotorCalculo>();
+
         return services;
     }
 
