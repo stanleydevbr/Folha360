@@ -203,6 +203,9 @@ public class RubricaRepository : IRubricaRepository
     public async Task<IEnumerable<Rubrica>> GetAllAsync(CancellationToken ct = default)
         => await _db.Rubricas.ToListAsync(ct);
 
+    public async Task<IEnumerable<Rubrica>> GetAllByEmpresaAsync(Guid empresaId, CancellationToken ct = default)
+        => await _db.Rubricas.Where(r => r.EmpresaId == empresaId).ToListAsync(ct);
+
     public async Task<(IEnumerable<Rubrica> Items, int TotalCount)> GetPagedAsync(
         int page, int pageSize, string? orderBy = null,
         Guid? empresaId = null, string? natureza = null, string? tipoEsocial = null,

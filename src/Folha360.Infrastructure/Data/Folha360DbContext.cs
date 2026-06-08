@@ -43,6 +43,18 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Cadastros.Domain.Entities.HorarioTrabalho> HorariosTrabalho => Set<Folha360.Cadastros.Domain.Entities.HorarioTrabalho>();
 
     // ============================
+    // Módulo F02 — Cadastros (schema tenant) — Subsistema de Rubricas (ADR-006)
+    // ============================
+    public DbSet<Folha360.Cadastros.Domain.Entities.GrupoRubrica> GruposRubrica => Set<Folha360.Cadastros.Domain.Entities.GrupoRubrica>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaComposicao> RubricasComposicao => Set<Folha360.Cadastros.Domain.Entities.RubricaComposicao>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaFormula> RubricasFormula => Set<Folha360.Cadastros.Domain.Entities.RubricaFormula>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaIncidencia> RubricasIncidencia => Set<Folha360.Cadastros.Domain.Entities.RubricaIncidencia>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaTabelaProgressiva> RubricasTabelaProgressiva => Set<Folha360.Cadastros.Domain.Entities.RubricaTabelaProgressiva>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaHistorico> RubricasHistorico => Set<Folha360.Cadastros.Domain.Entities.RubricaHistorico>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.ProcessoAdministrativo> ProcessosAdministrativos => Set<Folha360.Cadastros.Domain.Entities.ProcessoAdministrativo>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaProcesso> RubricasProcesso => Set<Folha360.Cadastros.Domain.Entities.RubricaProcesso>();
+
+    // ============================
     // Módulo F03 — Eventos Trabalhistas (schema tenant)
     // ============================
     public DbSet<Folha360.Eventos.Domain.Entities.Admissao> Admissoes => Set<Folha360.Eventos.Domain.Entities.Admissao>();
@@ -75,6 +87,18 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new SindicatoConfiguration());
         modelBuilder.ApplyConfiguration(new ConvenioConfiguration());
         modelBuilder.ApplyConfiguration(new HorarioTrabalhoConfiguration());
+
+        // ============================
+        // Módulo F02 — Cadastros — Subsistema de Rubricas (ADR-006)
+        // ============================
+        modelBuilder.ApplyConfiguration(new GrupoRubricaConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaComposicaoConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaFormulaConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaIncidenciaConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaTabelaProgressivaConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaHistoricoConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcessoAdministrativoConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaProcessoConfiguration());
 
         // ============================
         // Módulo F03 — Eventos Trabalhistas
