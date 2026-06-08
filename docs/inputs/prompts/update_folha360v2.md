@@ -20,6 +20,7 @@
 - Rubricas são parametrizáveis com fórmulas (NCalc), composição hierárquica e tabelas progressivas versionadas por ano
 - Eventos trabalhistas (S-2200, S-2230, S-2299) disparam automaticamente impactos na folha
 - Conformidade com LGPD (art. 18), legislação fiscal (RFB) e normas do e-Social (S-1200, S-1210, S-5001, S-5002)
+- Os cálculos devem considerar bases de cálculo atualizadas definidas pelo governo, como por exemplo: IRRF, Salário-Familia
 
 ### Technical
 
