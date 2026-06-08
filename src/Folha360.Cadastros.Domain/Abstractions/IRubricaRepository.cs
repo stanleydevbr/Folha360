@@ -7,6 +7,7 @@ public interface IRubricaRepository
     Task<Rubrica?> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<Rubrica?> GetByCodigoAsync(Guid empresaId, string codigo, CancellationToken ct = default);
     Task<IEnumerable<Rubrica>> GetAllAsync(CancellationToken ct = default);
+    Task<IEnumerable<Rubrica>> GetAllByEmpresaAsync(Guid empresaId, CancellationToken ct = default);
     Task<(IEnumerable<Rubrica> Items, int TotalCount)> GetPagedAsync(
         int page, int pageSize, string? orderBy = null,
         Guid? empresaId = null, string? natureza = null, string? tipoEsocial = null,
