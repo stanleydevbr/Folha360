@@ -222,6 +222,24 @@ public class RubricasController : ControllerBase
         var result = await _mediator.Send(new ExcluirRubricaCommand(id), ct);
         return result.IsSuccess ? NoContent() : NotFound(new { result.Errors });
     }
+
+    [HttpGet("conformidade")]
+    [Authorize(Policy = "Contador")]
+    public async Task<ActionResult<List<ConformidadeRubricaDto>>> VerificarConformidade(
+        [FromQuery] Guid empresaId, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new VerificarConformidadeQuery { EmpresaId = empresaId }, ct);
+        return result.IsSuccess ? Ok(result.Value) : UnprocessableEntity(new { result.Errors });
+    }
+
+    [HttpPost("simular")]
+    [Authorize(Policy = "Contador")]
+    public async Task<ActionResult<SimulacaoResultadoDto>> Simular(
+        [FromBody] SimularRubricaCommand command, CancellationToken ct)
+    {
+        var result = await _mediator.Send(command, ct);
+        return result.IsSuccess ? Ok(result.Value) : UnprocessableEntity(new { result.Errors });
+    }
 }
 
 [ApiController]
