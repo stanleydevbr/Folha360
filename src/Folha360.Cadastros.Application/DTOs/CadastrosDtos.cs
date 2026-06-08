@@ -68,10 +68,13 @@ public sealed record RubricaDto
 {
     public Guid Id { get; init; }
     public Guid EmpresaId { get; init; }
+    public Guid? GrupoRubricaId { get; init; }
     public string Codigo { get; init; } = string.Empty;
     public string Descricao { get; init; } = string.Empty;
+    public string? DescricaoAbreviada { get; init; }
     public string Natureza { get; init; } = string.Empty;
     public string? TipoEsocial { get; init; }
+    public bool EnviarEsocial { get; init; } = true;
     public bool IncideInss { get; init; }
     public bool IncideIrrf { get; init; }
     public bool IncideFgts { get; init; }
@@ -79,8 +82,25 @@ public sealed record RubricaDto
     public bool IncideDecimoTerceiro { get; init; }
     public bool IncideFerias { get; init; }
     public bool IncideAvisoPrevio { get; init; }
+    public bool IncideRescisao { get; init; }
+    public bool IncideDissidio { get; init; }
+    public bool IncideSalarioMaternidade { get; init; }
+    public bool IncideAuxilioDoenca { get; init; }
+    public bool IncideAdiantamento { get; init; }
+    public string TipoCalculo { get; init; } = "VALOR_FIXO";
     public string? FormulaCalculo { get; init; }
+    public decimal? ValorFixo { get; init; }
+    public decimal? Percentual { get; init; }
+    public Guid? RubricaBaseId { get; init; }
+    public int OrdemCalculo { get; init; }
     public int OrdemExibicao { get; init; }
+    public int? PrioridadeDesconto { get; init; }
+    public decimal? TetoMaximo { get; init; }
+    public decimal? PisoMinimo { get; init; }
+    public bool Ativo { get; init; } = true;
+    public DateTime? DataInicioVigencia { get; init; }
+    public DateTime? DataFimVigencia { get; init; }
+    public string? Observacao { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
 }
@@ -92,6 +112,44 @@ public sealed record LotacaoDto
     public string Codigo { get; init; } = string.Empty;
     public string Descricao { get; init; } = string.Empty;
     public string? TipoEsocial { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+}
+
+// ============================
+// Simulação e Conformidade (ADR-006)
+// ============================
+public sealed record SimulacaoResultadoDto
+{
+    public Dictionary<Guid, decimal> ValoresPorRubrica { get; init; } = new();
+    public decimal TotalVencimentos { get; init; }
+    public decimal TotalDescontos { get; init; }
+    public decimal Liquido { get; init; }
+    public decimal BaseInss { get; init; }
+    public decimal BaseIrrf { get; init; }
+    public decimal BaseFgts { get; init; }
+    public List<string> Erros { get; init; } = new();
+}
+
+public sealed record ConformidadeRubricaDto
+{
+    public Guid RubricaId { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Descricao { get; init; } = string.Empty;
+    public string? TipoEsocial { get; init; }
+    public string Problema { get; init; } = string.Empty;
+}
+
+public sealed record ProcessoAdministrativoDto
+{
+    public Guid Id { get; init; }
+    public Guid EmpresaId { get; init; }
+    public string NumeroProcesso { get; init; } = string.Empty;
+    public string Tipo { get; init; } = string.Empty;
+    public string? Orgao { get; init; }
+    public DateTime? DataInicio { get; init; }
+    public DateTime? DataFim { get; init; }
+    public string? Observacao { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
 }

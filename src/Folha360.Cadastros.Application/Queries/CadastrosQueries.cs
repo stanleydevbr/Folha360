@@ -58,6 +58,9 @@ public sealed record ListarRubricasQuery : IRequest<PaginatedResult<RubricaDto>>
     public Guid? EmpresaId { get; init; }
     public string? Natureza { get; init; }
     public string? TipoEsocial { get; init; }
+    public string? TipoCalculo { get; init; }
+    public Guid? GrupoRubricaId { get; init; }
+    public bool? Ativo { get; init; }
 }
 
 // ============================
