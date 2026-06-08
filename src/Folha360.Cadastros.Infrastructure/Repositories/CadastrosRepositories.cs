@@ -304,3 +304,267 @@ public class LotacaoRepository : ILotacaoRepository
     public async Task<bool> HasFuncionariosVinculadosAsync(Guid id, CancellationToken ct = default)
         => await _db.Funcionarios.AnyAsync(f => f.LotacaoId == id, ct);
 }
+
+// ============================
+// Subsistema de Rubricas (ADR-006)
+// ============================
+
+// --- GrupoRubrica Repository ---
+public class GrupoRubricaRepository : IGrupoRubricaRepository
+{
+    private readonly CadastrosDbContext _db;
+    public GrupoRubricaRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<GrupoRubrica?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.GruposRubrica.FirstOrDefaultAsync(g => g.Id == id, ct);
+
+    public async Task<GrupoRubrica?> GetByCodigoAsync(Guid empresaId, string codigo, CancellationToken ct = default)
+        => await _db.GruposRubrica.FirstOrDefaultAsync(g => g.EmpresaId == empresaId && g.Codigo == codigo, ct);
+
+    public async Task<IEnumerable<GrupoRubrica>> GetAllByEmpresaAsync(Guid empresaId, CancellationToken ct = default)
+        => await _db.GruposRubrica.Where(g => g.EmpresaId == empresaId).OrderBy(g => g.OrdemExibicao).ToListAsync(ct);
+
+    public async Task<(IEnumerable<GrupoRubrica> Items, int TotalCount)> GetPagedAsync(
+        int page, int pageSize, string? orderBy = null,
+        Guid? empresaId = null, string? natureza = null,
+        CancellationToken ct = default)
+    {
+        var query = _db.GruposRubrica.AsQueryable();
+        if (empresaId.HasValue)
+            query = query.Where(g => g.EmpresaId == empresaId.Value);
+        if (!string.IsNullOrWhiteSpace(natureza))
+            query = query.Where(g => g.Natureza == natureza);
+
+        var total = await query.CountAsync(ct);
+        var items = await query.OrderBy(g => g.OrdemExibicao).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+        return (items, total);
+    }
+
+    public async Task<bool> HasRubricasVinculadasAsync(Guid id, CancellationToken ct = default)
+        => await _db.Rubricas.AnyAsync(r => r.GrupoRubricaId == id, ct);
+
+    public async Task AddAsync(GrupoRubrica grupo, CancellationToken ct = default)
+    {
+        _db.GruposRubrica.Add(grupo);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task UpdateAsync(GrupoRubrica grupo, CancellationToken ct = default)
+    {
+        _db.GruposRubrica.Update(grupo);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task SoftDeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        var grupo = await _db.GruposRubrica.FindAsync([id], ct);
+        if (grupo is not null)
+        {
+            _db.GruposRubrica.Remove(grupo);
+            await _db.SaveChangesAsync(ct);
+        }
+    }
+}
+
+// --- RubricaComposicao Repository ---
+public class RubricaComposicaoRepository : IRubricaComposicaoRepository
+{
+    private readonly CadastrosDbContext _db;
+    public RubricaComposicaoRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<IEnumerable<RubricaComposicao>> GetByPrincipalAsync(Guid rubricaPrincipalId, CancellationToken ct = default)
+        => await _db.RubricasComposicao
+            .Where(c => c.RubricaPrincipalId == rubricaPrincipalId)
+            .OrderBy(c => c.Ordem)
+            .ToListAsync(ct);
+
+    public async Task<RubricaComposicao?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.RubricasComposicao.FirstOrDefaultAsync(c => c.Id == id, ct);
+
+    public async Task<bool> ExistsCaminhoAsync(Guid origemId, Guid destinoId, CancellationToken ct = default)
+    {
+        // DFS para detectar se já existe caminho do componente para o principal
+        var visited = new HashSet<Guid>();
+        var stack = new Stack<Guid>();
+        stack.Push(origemId);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            if (current == destinoId)
+                return true;
+            if (!visited.Add(current))
+                continue;
+
+            var filhos = await _db.RubricasComposicao
+                .Where(c => c.RubricaPrincipalId == current)
+                .Select(c => c.RubricaComponenteId)
+                .ToListAsync(ct);
+
+            foreach (var filho in filhos)
+                stack.Push(filho);
+        }
+
+        return false;
+    }
+
+    public async Task AddAsync(RubricaComposicao composicao, CancellationToken ct = default)
+    {
+        _db.RubricasComposicao.Add(composicao);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        var comp = await _db.RubricasComposicao.FindAsync([id], ct);
+        if (comp is not null)
+        {
+            _db.RubricasComposicao.Remove(comp);
+            await _db.SaveChangesAsync(ct);
+        }
+    }
+}
+
+// --- RubricaFormula Repository ---
+public class RubricaFormulaRepository : IRubricaFormulaRepository
+{
+    private readonly CadastrosDbContext _db;
+    public RubricaFormulaRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<RubricaFormula?> GetByRubricaAsync(Guid rubricaId, CancellationToken ct = default)
+        => await _db.RubricasFormula.FirstOrDefaultAsync(f => f.RubricaId == rubricaId, ct);
+
+    public async Task AddAsync(RubricaFormula formula, CancellationToken ct = default)
+    {
+        _db.RubricasFormula.Add(formula);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task UpdateAsync(RubricaFormula formula, CancellationToken ct = default)
+    {
+        _db.RubricasFormula.Update(formula);
+        await _db.SaveChangesAsync(ct);
+    }
+}
+
+// --- RubricaTabelaProgressiva Repository ---
+public class RubricaTabelaProgressivaRepository : IRubricaTabelaProgressivaRepository
+{
+    private readonly CadastrosDbContext _db;
+    public RubricaTabelaProgressivaRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<IEnumerable<RubricaTabelaProgressiva>> GetByAnoVigenciaAsync(Guid rubricaId, int ano, CancellationToken ct = default)
+        => await _db.RubricasTabelaProgressiva
+            .Where(t => t.RubricaId == rubricaId && t.AnoVigencia == ano)
+            .OrderBy(t => t.Ordem)
+            .ToListAsync(ct);
+
+    public async Task<IEnumerable<RubricaTabelaProgressiva>> GetByRubricaAsync(Guid rubricaId, CancellationToken ct = default)
+        => await _db.RubricasTabelaProgressiva
+            .Where(t => t.RubricaId == rubricaId)
+            .OrderBy(t => t.AnoVigencia).ThenBy(t => t.Ordem)
+            .ToListAsync(ct);
+
+    public async Task<RubricaTabelaProgressiva?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.RubricasTabelaProgressiva.FirstOrDefaultAsync(t => t.Id == id, ct);
+
+    public async Task<bool> HasSobreposicaoAsync(Guid rubricaId, int anoVigencia, decimal faixaDe, decimal? faixaAte, Guid? excludeId = null, CancellationToken ct = default)
+    {
+        var query = _db.RubricasTabelaProgressiva
+            .Where(t => t.RubricaId == rubricaId && t.AnoVigencia == anoVigencia);
+
+        if (excludeId.HasValue)
+            query = query.Where(t => t.Id != excludeId.Value);
+
+        // Verifica se alguma faixa existente se sobrepõe com [faixaDe, faixaAte]
+        var faixas = await query.ToListAsync(ct);
+        foreach (var faixa in faixas)
+        {
+            var existingEnd = faixa.FaixaAte ?? decimal.MaxValue;
+            var newEnd = faixaAte ?? decimal.MaxValue;
+
+            // Sobreposição: [faixaDe, newEnd] ∩ [faixa.FaixaDe, existingEnd] ≠ ∅
+            if (faixaDe < existingEnd && newEnd > faixa.FaixaDe)
+                return true;
+        }
+
+        return false;
+    }
+
+    public async Task AddAsync(RubricaTabelaProgressiva faixa, CancellationToken ct = default)
+    {
+        _db.RubricasTabelaProgressiva.Add(faixa);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task UpdateAsync(RubricaTabelaProgressiva faixa, CancellationToken ct = default)
+    {
+        _db.RubricasTabelaProgressiva.Update(faixa);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        var faixa = await _db.RubricasTabelaProgressiva.FindAsync([id], ct);
+        if (faixa is not null)
+        {
+            _db.RubricasTabelaProgressiva.Remove(faixa);
+            await _db.SaveChangesAsync(ct);
+        }
+    }
+}
+
+// --- RubricaHistorico Repository ---
+public class RubricaHistoricoRepository : IRubricaHistoricoRepository
+{
+    private readonly CadastrosDbContext _db;
+    public RubricaHistoricoRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<(IEnumerable<RubricaHistorico> Items, int TotalCount)> GetByRubricaPagedAsync(
+        Guid rubricaId, int page, int pageSize, CancellationToken ct = default)
+    {
+        var query = _db.RubricasHistorico.Where(h => h.RubricaId == rubricaId);
+        var total = await query.CountAsync(ct);
+        var items = await query.OrderByDescending(h => h.CreatedAt)
+            .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+        return (items, total);
+    }
+
+    public async Task AddAsync(RubricaHistorico historico, CancellationToken ct = default)
+    {
+        _db.RubricasHistorico.Add(historico);
+        await _db.SaveChangesAsync(ct);
+    }
+}
+
+// --- RubricaIncidencia Repository ---
+public class RubricaIncidenciaRepository : IRubricaIncidenciaRepository
+{
+    private readonly CadastrosDbContext _db;
+    public RubricaIncidenciaRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<IEnumerable<RubricaIncidencia>> GetByRubricaAsync(Guid rubricaId, CancellationToken ct = default)
+        => await _db.RubricasIncidencia.Where(i => i.RubricaId == rubricaId).ToListAsync(ct);
+
+    public async Task<RubricaIncidencia?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.RubricasIncidencia.FirstOrDefaultAsync(i => i.Id == id, ct);
+
+    public async Task<bool> ExistsAsync(Guid rubricaId, string tipoIncidencia, CancellationToken ct = default)
+        => await _db.RubricasIncidencia.AnyAsync(i => i.RubricaId == rubricaId && i.TipoIncidencia == tipoIncidencia, ct);
+
+    public async Task AddAsync(RubricaIncidencia incidencia, CancellationToken ct = default)
+    {
+        _db.RubricasIncidencia.Add(incidencia);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        var inc = await _db.RubricasIncidencia.FindAsync([id], ct);
+        if (inc is not null)
+        {
+            _db.RubricasIncidencia.Remove(inc);
+            await _db.SaveChangesAsync(ct);
+        }
+    }
+}

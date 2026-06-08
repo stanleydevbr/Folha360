@@ -133,6 +133,20 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Folha360.Cadastros.Domain.Abstractions.ILotacaoRepository,
             Folha360.Cadastros.Infrastructure.Repositories.LotacaoRepository>();
 
+        // Subsistema de Rubricas (ADR-006) — Repositories
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IGrupoRubricaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.GrupoRubricaRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IRubricaComposicaoRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.RubricaComposicaoRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IRubricaFormulaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.RubricaFormulaRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IRubricaTabelaProgressivaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.RubricaTabelaProgressivaRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IRubricaHistoricoRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.RubricaHistoricoRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IRubricaIncidenciaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.RubricaIncidenciaRepository>();
+
         // MediatR — registra handlers, behaviors do módulo de Cadastros
         services.AddMediatR(cfg =>
         {

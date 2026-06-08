@@ -153,3 +153,80 @@ public sealed record ProcessoAdministrativoDto
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
 }
+
+// ============================
+// Subsistema de Rubricas (ADR-006)
+// ============================
+public sealed record GrupoRubricaDto
+{
+    public Guid Id { get; init; }
+    public Guid EmpresaId { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Descricao { get; init; } = string.Empty;
+    public string Natureza { get; init; } = string.Empty;
+    public int OrdemExibicao { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+}
+
+public sealed record RubricaComposicaoDto
+{
+    public Guid Id { get; init; }
+    public Guid RubricaPrincipalId { get; init; }
+    public Guid RubricaComponenteId { get; init; }
+    public string Operador { get; init; } = "+";
+    public decimal? PercentualComposicao { get; init; }
+    public int Ordem { get; init; }
+    public bool Obrigatorio { get; init; } = true;
+    public string? RubricaPrincipalCodigo { get; init; }
+    public string? RubricaComponenteCodigo { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+}
+
+public sealed record RubricaFormulaDto
+{
+    public Guid Id { get; init; }
+    public Guid RubricaId { get; init; }
+    public string Expressao { get; init; } = string.Empty;
+    public string? Parametros { get; init; }
+    public string? DescricaoFormal { get; init; }
+    public int Versao { get; init; } = 1;
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+}
+
+public sealed record RubricaTabelaProgressivaDto
+{
+    public Guid Id { get; init; }
+    public Guid RubricaId { get; init; }
+    public int AnoVigencia { get; init; }
+    public decimal FaixaDe { get; init; }
+    public decimal? FaixaAte { get; init; }
+    public decimal Aliquota { get; init; }
+    public decimal Deducao { get; init; }
+    public int Ordem { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+}
+
+public sealed record RubricaHistoricoDto
+{
+    public Guid Id { get; init; }
+    public Guid RubricaId { get; init; }
+    public string? DadosAnteriores { get; init; }
+    public string DadosNovos { get; init; } = string.Empty;
+    public string? Motivo { get; init; }
+    public Guid UsuarioId { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+}
+
+public sealed record RubricaIncidenciaDto
+{
+    public Guid Id { get; init; }
+    public Guid RubricaId { get; init; }
+    public string TipoIncidencia { get; init; } = string.Empty;
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+}
