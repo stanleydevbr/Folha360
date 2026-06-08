@@ -30,7 +30,9 @@ public static class ServiceCollectionExtensions
             .UseNpgsql(
                 configuration.GetConnectionString("Postgres"),
                 npgsql => npgsql.EnableRetryOnFailure(3))
-            .AddInterceptors(new AuditInterceptor()));
+            .AddInterceptors(new AuditInterceptor())
+            .ConfigureWarnings(w => w.Ignore(
+                Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
 
         services.AddScoped<Folha360DbContext>(sp =>
             sp.GetRequiredService<IDbContextFactory<Folha360DbContext>>().CreateDbContext());
@@ -251,6 +253,14 @@ public static class ServiceCollectionExtensions
             Folha360.Processamento.Domain.Services.AvaliadorCondicional>();
         services.AddScoped<Folha360.Processamento.Domain.Services.IMotorCalculo,
             Folha360.Processamento.Domain.Services.MotorCalculo>();
+
+        // Redis
+        var redisConnectionString = configuration.GetConnectionString("Redis");
+        if (!string.IsNullOrEmpty(redisConnectionString))
+        {
+            services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(
+                _ => StackExchange.Redis.ConnectionMultiplexer.Connect(redisConnectionString));
+        }
 
         // Infrastructure Services
         services.AddScoped<Folha360.Processamento.Domain.Services.IExpressionEvaluator,
