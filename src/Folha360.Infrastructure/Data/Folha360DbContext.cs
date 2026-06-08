@@ -2,6 +2,7 @@ using Folha360.Domain.Entities;
 using Folha360.Infrastructure.Data.Configurations.Base;
 using Folha360.Infrastructure.Data.Configurations.Cadastros;
 using Folha360.Infrastructure.Data.Configurations.Eventos;
+using Folha360.Infrastructure.Data.Configurations.Processamento;
 using Microsoft.EntityFrameworkCore;
 
 namespace Folha360.Infrastructure.Data;
@@ -63,6 +64,14 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Eventos.Domain.Entities.Desligamento> Desligamentos => Set<Folha360.Eventos.Domain.Entities.Desligamento>();
     public DbSet<Folha360.Eventos.Domain.Entities.AlteracaoContratual> AlteracoesContratuais => Set<Folha360.Eventos.Domain.Entities.AlteracaoContratual>();
 
+    // ============================
+    // Módulo F04 — Processamento da Folha (schema tenant)
+    // ============================
+    public DbSet<Folha360.Processamento.Domain.Entities.ProcessamentoFolha> ProcessamentosFolha => Set<Folha360.Processamento.Domain.Entities.ProcessamentoFolha>();
+    public DbSet<Folha360.Processamento.Domain.Entities.ItemFolha> ItensFolha => Set<Folha360.Processamento.Domain.Entities.ItemFolha>();
+    public DbSet<Folha360.Processamento.Domain.Entities.Holerite> Holerites => Set<Folha360.Processamento.Domain.Entities.Holerite>();
+    public DbSet<Folha360.Processamento.Domain.Entities.CadeiaFechamento> CadeiasFechamento => Set<Folha360.Processamento.Domain.Entities.CadeiaFechamento>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("public");
@@ -108,6 +117,14 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new AfastamentoConfiguration());
         modelBuilder.ApplyConfiguration(new DesligamentoConfiguration());
         modelBuilder.ApplyConfiguration(new AlteracaoContratualConfiguration());
+
+        // ============================
+        // Módulo F04 — Processamento da Folha
+        // ============================
+        modelBuilder.ApplyConfiguration(new ProcessamentoFolhaConfiguration());
+        modelBuilder.ApplyConfiguration(new ItemFolhaConfiguration());
+        modelBuilder.ApplyConfiguration(new HoleriteConfiguration());
+        modelBuilder.ApplyConfiguration(new CadeiaFechamentoConfiguration());
 
         // ============================
         // Query Filter Global: Soft Delete

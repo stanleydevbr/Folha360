@@ -19,6 +19,10 @@ COPY src/Folha360.Eventos.Domain/*.csproj src/Folha360.Eventos.Domain/
 COPY src/Folha360.Eventos.Application/*.csproj src/Folha360.Eventos.Application/
 COPY src/Folha360.Eventos.Infrastructure/*.csproj src/Folha360.Eventos.Infrastructure/
 COPY src/Folha360.Eventos.Presentation/*.csproj src/Folha360.Eventos.Presentation/
+COPY src/Folha360.Processamento.Domain/*.csproj src/Folha360.Processamento.Domain/
+COPY src/Folha360.Processamento.Application/*.csproj src/Folha360.Processamento.Application/
+COPY src/Folha360.Processamento.Infrastructure/*.csproj src/Folha360.Processamento.Infrastructure/
+COPY src/Folha360.Processamento.Presentation/*.csproj src/Folha360.Processamento.Presentation/
 COPY tests/Folha360.Tests/*.csproj tests/Folha360.Tests/
 
 # Restore

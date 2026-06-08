@@ -1,5 +1,6 @@
 using Folha360.IoC;
 using Folha360.Infrastructure.Data;
+using Folha360.Processamento.Application.Hubs;
 using Folha360.WebApi.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -44,6 +45,7 @@ app.UseMiddleware<TenantResolutionMiddleware>();
 
 // 7. Endpoints
 app.MapControllers();
+app.MapHub<ProcessamentoHub>("/hubs/processamento");
 app.MapHealthChecks("/health");
 app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {
