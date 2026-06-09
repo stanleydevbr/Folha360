@@ -1,4 +1,5 @@
 using Folha360.Application;
+using Folha360.Cadastros.Domain.Abstractions;
 using Folha360.Domain.Abstractions;
 using Folha360.Fiscais.Application.Commands;
 using Folha360.Fiscais.Application.DTOs;
@@ -6,6 +7,7 @@ using Folha360.Fiscais.Domain;
 using Folha360.Fiscais.Domain.Abstractions;
 using Folha360.Fiscais.Domain.Entities;
 using Folha360.Fiscais.Domain.Events;
+using Folha360.Processamento.Domain.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +18,9 @@ public class ApurarObrigacoesHandler : IRequestHandler<ApurarObrigacoesCommand, 
     private readonly IApuracaoFiscalRepository _apuracaoRepo;
     private readonly IRegraFiscalRepository _regraRepo;
     private readonly IRegraFiscalFactory _regraFactory;
+    private readonly IEmpresaRepository _empresaRepo;
+    private readonly IProcessamentoRepository _processamentoRepo;
+    private readonly IItemFolhaRepository _itemFolhaRepo;
     private readonly IMessageBus _messageBus;
     private readonly ILogger<ApurarObrigacoesHandler> _logger;
 
@@ -30,12 +35,18 @@ public class ApurarObrigacoesHandler : IRequestHandler<ApurarObrigacoesCommand, 
         IApuracaoFiscalRepository apuracaoRepo,
         IRegraFiscalRepository regraRepo,
         IRegraFiscalFactory regraFactory,
+        IEmpresaRepository empresaRepo,
+        IProcessamentoRepository processamentoRepo,
+        IItemFolhaRepository itemFolhaRepo,
         IMessageBus messageBus,
         ILogger<ApurarObrigacoesHandler> logger)
     {
         _apuracaoRepo = apuracaoRepo;
         _regraRepo = regraRepo;
         _regraFactory = regraFactory;
+        _empresaRepo = empresaRepo;
+        _processamentoRepo = processamentoRepo;
+        _itemFolhaRepo = itemFolhaRepo;
         _messageBus = messageBus;
         _logger = logger;
     }
@@ -44,7 +55,7 @@ public class ApurarObrigacoesHandler : IRequestHandler<ApurarObrigacoesCommand, 
     {
         var periodo = DateOnly.ParseExact(request.Periodo + "-01", "yyyy-MM-dd");
 
-        // Idempotência: verificar se já existe apuração para este processamento
+        // Idempotência
         foreach (var tributo in Tributos)
         {
             if (await _apuracaoRepo.ExistsAsync(request.EmpresaId, periodo, tributo, request.ProcessamentoId, ct))
@@ -53,8 +64,27 @@ public class ApurarObrigacoesHandler : IRequestHandler<ApurarObrigacoesCommand, 
             }
         }
 
+        // Buscar dados da empresa (regime tributário, município) — F02
+        var empresa = await _empresaRepo.GetByIdAsync(request.EmpresaId, ct);
+        var regimeTributario = empresa?.RegimeTributario ?? "Lucro Presumido";
+        var municipio = empresa?.EnderecoMunicipio;
+
+        // Buscar dados do processamento da folha — F04
+        var processamento = await _processamentoRepo.GetByIdAsync(request.ProcessamentoId, ct);
+        if (processamento == null)
+        {
+            return Result<ResumoApuracaoDto>.Failure("NOT_FOUND", $"Processamento {request.ProcessamentoId} não encontrado.");
+        }
+
+        // Buscar itens da folha para obter bases de cálculo e valores
+        var itensFolha = await _itemFolhaRepo.GetByProcessamentoAsync(request.ProcessamentoId, ct);
+        var itensList = itensFolha.ToList();
+        var funcionariosIds = itensList.Select(i => i.FuncionarioId).Distinct().ToList();
+        var baseCalculoTotal = itensList.Sum(i => i.BaseCalculo);
+        var valorTotalFolha = itensList.Sum(i => i.Valor);
+
         var totais = new Dictionary<string, decimal>();
-        var apuracoes = new List<ApuracaoFiscal>();
+        var totaisPorTributo = new Dictionary<Tributo, decimal>();
 
         foreach (var tributo in Tributos)
         {
@@ -72,11 +102,11 @@ public class ApurarObrigacoesHandler : IRequestHandler<ApurarObrigacoesCommand, 
                     request.EmpresaId,
                     periodo,
                     request.ProcessamentoId,
-                    "Lucro Presumido", // TODO: buscar do cadastro da empresa
-                    null,
-                    new List<Guid>(),
-                    0,
-                    0);
+                    regimeTributario,
+                    municipio,
+                    funcionariosIds,
+                    baseCalculoTotal,
+                    valorTotalFolha);
 
                 var parametros = new RegraFiscalParametros(tributo, regra.Parametros, regra.CodigoReceita);
                 var result = service.Calcular(contexto, parametros);
@@ -84,9 +114,9 @@ public class ApurarObrigacoesHandler : IRequestHandler<ApurarObrigacoesCommand, 
                 var apuracao = new ApuracaoFiscal(request.EmpresaId, periodo, request.ProcessamentoId, tributo);
                 apuracao.Concluir(result.BaseCalculo, result.Aliquota, result.ValorDevido, result.DataVencimento, regra.Id);
                 await _apuracaoRepo.AddAsync(apuracao, ct);
-                apuracoes.Add(apuracao);
 
                 totais[tributo.ToString()] = result.ValorDevido;
+                totaisPorTributo[tributo] = result.ValorDevido;
             }
             catch (Exception ex)
             {
@@ -94,10 +124,10 @@ public class ApurarObrigacoesHandler : IRequestHandler<ApurarObrigacoesCommand, 
             }
         }
 
-        // Publicar eventos
+        // Publicar eventos com totais reais
         var ocorridoEm = DateTime.UtcNow;
         await _messageBus.PublishAsync(
-            new ObrigacoesApuradasEvent(request.EmpresaId, request.Periodo, request.ProcessamentoId, new Dictionary<Tributo, decimal>(), ocorridoEm),
+            new ObrigacoesApuradasEvent(request.EmpresaId, request.Periodo, request.ProcessamentoId, totaisPorTributo, ocorridoEm),
             "folha360.fiscais",
             "obrigacoes.apuradas",
             ct);

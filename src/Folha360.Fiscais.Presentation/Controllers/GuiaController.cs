@@ -31,7 +31,13 @@ public class GuiaController : ControllerBase
     public async Task<IActionResult> ObterGuia(Guid empresaId, string periodo, string tributo, CancellationToken ct)
     {
         var result = await _mediator.Send(new ObterGuiaQuery(empresaId, periodo, tributo), ct);
-        return result.IsSuccess && result.Value != null ? File(result.Value, "application/pdf") : BadRequest(result);
+        if (result.IsSuccess && result.Value != null)
+        {
+            Response.Headers["Content-Disposition"] = $"attachment; filename=\"{tributo}_{periodo}.pdf\"";
+            return File(result.Value, "application/pdf");
+        }
+
+        return BadRequest(result);
     }
 
     [HttpGet("{empresaId}/{periodo}/{tributo}/dados")]

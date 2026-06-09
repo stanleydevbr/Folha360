@@ -31,6 +31,8 @@ public class RegraFiscalController : ControllerBase
     public async Task<IActionResult> CriarRegra([FromBody] CriarRegraFiscalCommand command, CancellationToken ct)
     {
         var result = await _mediator.Send(command, ct);
-        return result.IsSuccess ? CreatedAtAction(nameof(ListarRegras), null, result) : BadRequest(result);
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(ListarRegras), new { tributo = result.Value?.Tributo }, result)
+            : BadRequest(result);
     }
 }
