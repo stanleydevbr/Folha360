@@ -8,6 +8,13 @@ using Xunit.Abstractions;
 
 namespace Folha360.Tests.Processamento.Carga;
 
+/// <summary>
+/// Testes de carga do módulo de processamento.
+/// Executados serialmente (não paralelizados) porque compartilham estado estático
+/// (HttpClient, _empresaId, _funcionarioId) e abrem conexões diretas ao PostgreSQL,
+/// o que saturaria o pool de conexões em paralelo.
+/// </summary>
+[Collection("Carga")]
 public class ProcessamentoCargaTests
 {
     private readonly ITestOutputHelper _output;
@@ -122,10 +129,44 @@ public class ProcessamentoCargaTests
         return null;
     }
 
+    /// <summary>
+    /// Abre conexão PostgreSQL com retry (exponential backoff) para lidar com
+    /// saturação do pool de conexões (erro 53300: "muitos clientes conectados").
+    /// </summary>
+    private async Task<NpgsqlConnection> OpenWithRetryAsync(int maxRetries = 5, CancellationToken ct = default)
+    {
+        for (int attempt = 0; attempt < maxRetries; attempt++)
+        {
+            try
+            {
+                var conn = new NpgsqlConnection(ConnectionString);
+                await conn.OpenAsync(ct);
+                return conn;
+            }
+            catch (PostgresException ex) when (ex.SqlState == "53300" && attempt < maxRetries - 1)
+            {
+                var delay = TimeSpan.FromMilliseconds(200 * Math.Pow(2, attempt));
+                _output.WriteLine($"PostgreSQL saturado (tentativa {attempt + 1}/{maxRetries}), aguardando {delay.TotalMilliseconds:F0}ms...");
+                await Task.Delay(delay, ct);
+            }
+        }
+
+        // Última tentativa — se falhar, deixa a exceção propagar
+        var lastConn = new NpgsqlConnection(ConnectionString);
+        await lastConn.OpenAsync(ct);
+        return lastConn;
+    }
+
     private async Task<Guid?> BuscarOuCriarEmpresaViaSqlAsync()
     {
-        await using var conn = new NpgsqlConnection(ConnectionString);
-        await conn.OpenAsync();
+        await using var conn = await OpenWithRetryAsync();
+
+        // Garantir que o tenant "demo" existe (necessário para ResolveTenantGuid)
+        var tenantGuid = TenantIdToGuid();
+        await using var tenantCmd = new NpgsqlCommand(
+            """INSERT INTO tenant (id, tenant_id, schema_name, nome, status, created_at, updated_at) VALUES (@id, 'demo', 'tenant_demo', 'Demo Tenant', 1, now(), now()) ON CONFLICT (tenant_id) DO NOTHING""", conn);
+        tenantCmd.Parameters.AddWithValue("id", tenantGuid);
+        await tenantCmd.ExecuteNonQueryAsync();
 
         // Buscar empresa existente no tenant demo
         await using var cmd = new NpgsqlCommand(
@@ -140,7 +181,6 @@ public class ProcessamentoCargaTests
 
         // Criar empresa via SQL
         var newId = Guid.NewGuid();
-        var tenantGuid = TenantIdToGuid();
         var cnpj = RandomCnpjNumerico();
 
         await using var insertCmd = new NpgsqlCommand(
@@ -197,8 +237,7 @@ public class ProcessamentoCargaTests
 
     private async Task<Guid?> BuscarOuCriarFuncionarioViaSqlAsync()
     {
-        await using var conn = new NpgsqlConnection(ConnectionString);
-        await conn.OpenAsync();
+        await using var conn = await OpenWithRetryAsync();
 
         // Buscar funcionário existente da empresa
         await using var cmd = new NpgsqlCommand(
