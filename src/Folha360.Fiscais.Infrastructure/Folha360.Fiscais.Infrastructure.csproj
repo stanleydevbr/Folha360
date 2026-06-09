@@ -3,8 +3,6 @@
         <ProjectReference Include="..\Folha360.Fiscais.Domain\Folha360.Fiscais.Domain.csproj" />
         <ProjectReference Include="..\Folha360.Fiscais.Application\Folha360.Fiscais.Application.csproj" />
         <ProjectReference Include="..\Folha360.Infrastructure\Folha360.Infrastructure.csproj" />
-        <ProjectReference Include="..\Folha360.Cadastros.Infrastructure\Folha360.Cadastros.Infrastructure.csproj" />
-        <ProjectReference Include="..\Folha360.Processamento.Infrastructure\Folha360.Processamento.Infrastructure.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="QuestPDF" Version="2025.1.7" />

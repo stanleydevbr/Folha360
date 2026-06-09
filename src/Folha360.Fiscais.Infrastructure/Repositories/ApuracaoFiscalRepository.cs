@@ -29,12 +29,15 @@ public class ApuracaoFiscalRepository : IApuracaoFiscalRepository
             .ToListAsync(ct);
 
     public async Task AddAsync(ApuracaoFiscal apuracao, CancellationToken ct = default)
-        => await _context.ApuracoesFiscais.AddAsync(apuracao, ct);
+    {
+        await _context.ApuracoesFiscais.AddAsync(apuracao, ct);
+        await _context.SaveChangesAsync(ct);
+    }
 
-    public Task UpdateAsync(ApuracaoFiscal apuracao, CancellationToken ct = default)
+    public async Task UpdateAsync(ApuracaoFiscal apuracao, CancellationToken ct = default)
     {
         _context.ApuracoesFiscais.Update(apuracao);
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<bool> ExistsAsync(Guid empresaId, DateOnly periodo, Tributo tributo, Guid processamentoId, CancellationToken ct = default)

@@ -41,12 +41,15 @@ public class RegraFiscalRepository : IRegraFiscalRepository
     }
 
     public async Task AddAsync(RegraFiscal regra, CancellationToken ct = default)
-        => await _context.RegrasFiscais.AddAsync(regra, ct);
+    {
+        await _context.RegrasFiscais.AddAsync(regra, ct);
+        await _context.SaveChangesAsync(ct);
+    }
 
-    public Task UpdateAsync(RegraFiscal regra, CancellationToken ct = default)
+    public async Task UpdateAsync(RegraFiscal regra, CancellationToken ct = default)
     {
         _context.RegrasFiscais.Update(regra);
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<bool> ExistsAsync(Tributo tributo, int versao, CancellationToken ct = default)

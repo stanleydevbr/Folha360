@@ -34,11 +34,14 @@ public class GuiaRecolhimentoRepository : IGuiaRecolhimentoRepository
             .ToListAsync(ct);
 
     public async Task AddAsync(GuiaRecolhimento guia, CancellationToken ct = default)
-        => await _context.GuiasRecolhimento.AddAsync(guia, ct);
+    {
+        await _context.GuiasRecolhimento.AddAsync(guia, ct);
+        await _context.SaveChangesAsync(ct);
+    }
 
-    public Task UpdateAsync(GuiaRecolhimento guia, CancellationToken ct = default)
+    public async Task UpdateAsync(GuiaRecolhimento guia, CancellationToken ct = default)
     {
         _context.GuiasRecolhimento.Update(guia);
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync(ct);
     }
 }

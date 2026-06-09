@@ -23,11 +23,14 @@ public class LancamentoContabilRepository : ILancamentoContabilRepository
             .ToListAsync(ct);
 
     public async Task AddAsync(LancamentoContabil lancamento, CancellationToken ct = default)
-        => await _context.LancamentosContabeis.AddAsync(lancamento, ct);
+    {
+        await _context.LancamentosContabeis.AddAsync(lancamento, ct);
+        await _context.SaveChangesAsync(ct);
+    }
 
-    public Task UpdateAsync(LancamentoContabil lancamento, CancellationToken ct = default)
+    public async Task UpdateAsync(LancamentoContabil lancamento, CancellationToken ct = default)
     {
         _context.LancamentosContabeis.Update(lancamento);
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync(ct);
     }
 }
