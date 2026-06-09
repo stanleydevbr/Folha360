@@ -1,6 +1,6 @@
 namespace Folha360.Processamento.Domain.Events;
 
-public record ReverterObrigacoesCommand(
+public record ReverterObrigacoesEvent(
     Guid EmpresaId,
     string Periodo,
     Guid ProcessamentoId);

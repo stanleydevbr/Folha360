@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Folha360.Fiscais.Application.Consumers;
 
-public class ReverterObrigacoesConsumer : IConsumer<Folha360.Processamento.Domain.Events.ReverterObrigacoesCommand>
+public class ReverterObrigacoesConsumer : IConsumer<Folha360.Processamento.Domain.Events.ReverterObrigacoesEvent>
 {
     private readonly IMediator _mediator;
     private readonly ILogger<ReverterObrigacoesConsumer> _logger;
@@ -16,7 +16,7 @@ public class ReverterObrigacoesConsumer : IConsumer<Folha360.Processamento.Domai
         _logger = logger;
     }
 
-    public async Task Consume(ConsumeContext<Folha360.Processamento.Domain.Events.ReverterObrigacoesCommand> context)
+    public async Task Consume(ConsumeContext<Folha360.Processamento.Domain.Events.ReverterObrigacoesEvent> context)
     {
         var evt = context.Message;
         _logger.LogInformation("Revertendo obrigações fiscais para empresa {EmpresaId} período {Periodo}",
