@@ -345,6 +345,16 @@ public static class ServiceCollectionExtensions
             cfg.RegisterServicesFromAssembly(typeof(Folha360.Fiscais.Application.Commands.ApurarObrigacoesCommand).Assembly);
         });
 
+        // Infrastructure Services — PDF, CSV/SPED, SFTP, Redis Cache
+        services.AddScoped<Folha360.Fiscais.Application.Services.IGeradorGuiaPdfService,
+            Folha360.Fiscais.Infrastructure.Services.GeradorGuiaPdfService>();
+        services.AddScoped<Folha360.Fiscais.Application.Services.IExportadorContabilService,
+            Folha360.Fiscais.Infrastructure.Services.ExportadorContabilService>();
+        services.AddScoped<Folha360.Fiscais.Application.Services.ISftpService,
+            Folha360.Fiscais.Infrastructure.Services.SftpService>();
+        services.AddSingleton<Folha360.Fiscais.Application.Services.IRedisCacheService,
+            Folha360.Fiscais.Infrastructure.Services.RedisCacheService>();
+
         return services;
     }
 
