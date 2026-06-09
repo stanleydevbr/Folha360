@@ -29,6 +29,9 @@
     <ProjectReference Include="..\..\src\Folha360.Eventos.Domain\Folha360.Eventos.Domain.csproj" />
     <ProjectReference Include="..\..\src\Folha360.Eventos.Infrastructure\Folha360.Eventos.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Folha360.WebApi\Folha360.WebApi.csproj" />
+    <ProjectReference Include="..\..\src\Folha360.Fiscais.Domain\Folha360.Fiscais.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Folha360.Fiscais.Application\Folha360.Fiscais.Application.csproj" />
+    <ProjectReference Include="..\..\src\Folha360.Fiscais.Infrastructure\Folha360.Fiscais.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

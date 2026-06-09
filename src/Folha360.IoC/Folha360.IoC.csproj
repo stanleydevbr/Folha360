@@ -17,6 +17,9 @@
     <ProjectReference Include="..\Folha360.Processamento.Application\Folha360.Processamento.Application.csproj" />
     <ProjectReference Include="..\Folha360.Processamento.Infrastructure\Folha360.Processamento.Infrastructure.csproj" />
     <ProjectReference Include="..\Folha360.Processamento.Presentation\Folha360.Processamento.Presentation.csproj" />
+    <ProjectReference Include="..\Folha360.Fiscais.Application\Folha360.Fiscais.Application.csproj" />
+    <ProjectReference Include="..\Folha360.Fiscais.Infrastructure\Folha360.Fiscais.Infrastructure.csproj" />
+    <ProjectReference Include="..\Folha360.Fiscais.Presentation\Folha360.Fiscais.Presentation.csproj" />
     <ProjectReference Include="..\Folha360.Infrastructure\Folha360.Infrastructure.csproj" />
   </ItemGroup>
 

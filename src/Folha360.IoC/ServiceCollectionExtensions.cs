@@ -107,6 +107,9 @@ public static class ServiceCollectionExtensions
         // Processamento da Folha Module (F04)
         services.AddFolha360Processamento(configuration);
 
+        // Obrigações Fiscais Module (F05)
+        services.AddFolha360Fiscais(configuration);
+
         // MassTransit + RabbitMQ (centralizado — único AddMassTransit por container)
         services.AddFolha360MassTransit(configuration);
 
@@ -285,6 +288,66 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddFolha360Fiscais(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        // DbContext
+        services.AddDbContextFactory<Folha360.Fiscais.Infrastructure.Data.FiscaisDbContext>(options =>
+            options.UseSnakeCaseNamingConvention()
+            .UseNpgsql(
+                configuration.GetConnectionString("Postgres"),
+                npgsql => npgsql.EnableRetryOnFailure(3)));
+
+        services.AddScoped<Folha360.Fiscais.Infrastructure.Data.FiscaisDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<Folha360.Fiscais.Infrastructure.Data.FiscaisDbContext>>().CreateDbContext());
+
+        // Repositories
+        services.AddScoped<Folha360.Fiscais.Domain.Abstractions.IApuracaoFiscalRepository,
+            Folha360.Fiscais.Infrastructure.Repositories.ApuracaoFiscalRepository>();
+        services.AddScoped<Folha360.Fiscais.Domain.Abstractions.IGuiaRecolhimentoRepository,
+            Folha360.Fiscais.Infrastructure.Repositories.GuiaRecolhimentoRepository>();
+        services.AddScoped<Folha360.Fiscais.Domain.Abstractions.IRegraFiscalRepository,
+            Folha360.Fiscais.Infrastructure.Repositories.RegraFiscalRepository>();
+        services.AddScoped<Folha360.Fiscais.Domain.Abstractions.ILancamentoContabilRepository,
+            Folha360.Fiscais.Infrastructure.Repositories.LancamentoContabilRepository>();
+
+        // Domain Services — Strategy Pattern (8 implementações)
+        services.AddScoped<Folha360.Fiscais.Domain.Services.IrpfRegraFiscalService>();
+        services.AddScoped<Folha360.Fiscais.Domain.Services.InssRegraFiscalService>();
+        services.AddScoped<Folha360.Fiscais.Domain.Services.FgtsRegraFiscalService>();
+        services.AddScoped<Folha360.Fiscais.Domain.Services.PisRegraFiscalService>();
+        services.AddScoped<Folha360.Fiscais.Domain.Services.CofinsRegraFiscalService>();
+        services.AddScoped<Folha360.Fiscais.Domain.Services.CsllRegraFiscalService>();
+        services.AddScoped<Folha360.Fiscais.Domain.Services.SindicalRegraFiscalService>();
+        services.AddScoped<Folha360.Fiscais.Domain.Services.IssRegraFiscalService>();
+
+        // Factory
+        services.AddSingleton<Folha360.Fiscais.Domain.Abstractions.IRegraFiscalFactory>(sp =>
+        {
+            var dict = new Dictionary<Folha360.Fiscais.Domain.Tributo, Folha360.Fiscais.Domain.Abstractions.IRegraFiscalService>
+            {
+                [Folha360.Fiscais.Domain.Tributo.IRRF] = sp.GetRequiredService<Folha360.Fiscais.Domain.Services.IrpfRegraFiscalService>(),
+                [Folha360.Fiscais.Domain.Tributo.INSS] = sp.GetRequiredService<Folha360.Fiscais.Domain.Services.InssRegraFiscalService>(),
+                [Folha360.Fiscais.Domain.Tributo.FGTS] = sp.GetRequiredService<Folha360.Fiscais.Domain.Services.FgtsRegraFiscalService>(),
+                [Folha360.Fiscais.Domain.Tributo.PIS] = sp.GetRequiredService<Folha360.Fiscais.Domain.Services.PisRegraFiscalService>(),
+                [Folha360.Fiscais.Domain.Tributo.COFINS] = sp.GetRequiredService<Folha360.Fiscais.Domain.Services.CofinsRegraFiscalService>(),
+                [Folha360.Fiscais.Domain.Tributo.CSLL] = sp.GetRequiredService<Folha360.Fiscais.Domain.Services.CsllRegraFiscalService>(),
+                [Folha360.Fiscais.Domain.Tributo.ContribuicaoSindical] = sp.GetRequiredService<Folha360.Fiscais.Domain.Services.SindicalRegraFiscalService>(),
+                [Folha360.Fiscais.Domain.Tributo.ISS] = sp.GetRequiredService<Folha360.Fiscais.Domain.Services.IssRegraFiscalService>(),
+            };
+            return new Folha360.Fiscais.Domain.Services.RegraFiscalFactory(dict);
+        });
+
+        // MediatR
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Folha360.Fiscais.Application.Commands.ApurarObrigacoesCommand).Assembly);
+        });
+
+        return services;
+    }
+
     public static IServiceCollection AddFolha360MassTransit(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -303,6 +366,11 @@ public static class ServiceCollectionExtensions
             x.AddConsumer<Folha360.Processamento.Application.Consumers.ProcessarFolhaConsumer>();
             x.AddConsumer<Folha360.Processamento.Application.Consumers.RubricaAlteradaConsumer>();
             x.AddConsumer<Folha360.Processamento.Application.Consumers.ReaberturaSolicitadaConsumer>();
+
+            // Consumers — Módulo F05 (Obrigações Fiscais)
+            x.AddConsumer<Folha360.Fiscais.Application.Consumers.ApurarObrigacoesFiscaisConsumer>();
+            x.AddConsumer<Folha360.Fiscais.Application.Consumers.ReverterObrigacoesConsumer>();
+            x.AddConsumer<Folha360.Fiscais.Application.Consumers.FolhaReabertaConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {

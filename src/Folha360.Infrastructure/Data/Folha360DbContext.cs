@@ -2,6 +2,7 @@ using Folha360.Domain.Entities;
 using Folha360.Infrastructure.Data.Configurations.Base;
 using Folha360.Infrastructure.Data.Configurations.Cadastros;
 using Folha360.Infrastructure.Data.Configurations.Eventos;
+using Folha360.Infrastructure.Data.Configurations.Fiscais;
 using Folha360.Infrastructure.Data.Configurations.Processamento;
 using Microsoft.EntityFrameworkCore;
 
@@ -72,6 +73,14 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Processamento.Domain.Entities.Holerite> Holerites => Set<Folha360.Processamento.Domain.Entities.Holerite>();
     public DbSet<Folha360.Processamento.Domain.Entities.CadeiaFechamento> CadeiasFechamento => Set<Folha360.Processamento.Domain.Entities.CadeiaFechamento>();
 
+    // ============================
+    // Módulo F05 — Obrigações Fiscais (schema tenant)
+    // ============================
+    public DbSet<Folha360.Fiscais.Domain.Entities.ApuracaoFiscal> ApuracoesFiscais => Set<Folha360.Fiscais.Domain.Entities.ApuracaoFiscal>();
+    public DbSet<Folha360.Fiscais.Domain.Entities.GuiaRecolhimento> GuiasRecolhimento => Set<Folha360.Fiscais.Domain.Entities.GuiaRecolhimento>();
+    public DbSet<Folha360.Fiscais.Domain.Entities.RegraFiscal> RegrasFiscais => Set<Folha360.Fiscais.Domain.Entities.RegraFiscal>();
+    public DbSet<Folha360.Fiscais.Domain.Entities.LancamentoContabil> LancamentosContabeis => Set<Folha360.Fiscais.Domain.Entities.LancamentoContabil>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("public");
@@ -125,6 +134,14 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new ItemFolhaConfiguration());
         modelBuilder.ApplyConfiguration(new HoleriteConfiguration());
         modelBuilder.ApplyConfiguration(new CadeiaFechamentoConfiguration());
+
+        // ============================
+        // Módulo F05 — Obrigações Fiscais
+        // ============================
+        modelBuilder.ApplyConfiguration(new ApuracaoFiscalConfiguration());
+        modelBuilder.ApplyConfiguration(new GuiaRecolhimentoConfiguration());
+        modelBuilder.ApplyConfiguration(new RegraFiscalConfiguration());
+        modelBuilder.ApplyConfiguration(new LancamentoContabilConfiguration());
 
         // ============================
         // Query Filter Global: Soft Delete
