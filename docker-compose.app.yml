@@ -36,6 +36,8 @@ services:
       MinIO__AccessKey: ${MINIO_ROOT_USER:-minioadmin}
       MinIO__SecretKey: ${MINIO_ROOT_PASSWORD:-minioadmin}
       MinIO__BucketName: folha360-documentos
+      MinIO__BucketGuias: folha360-guias
+      MinIO__BucketExportacoes: folha360-exportacoes
       Jwt__Secret: ${JWT_SECRET:-Folha360@DevSecretKey@2026!TempKey}
       Seq__Url: http://seq:5341
     networks:

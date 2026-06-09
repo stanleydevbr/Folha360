@@ -117,6 +117,10 @@ services:
       mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin};
       mc mb local/folha360-documentos --ignore-existing;
       mc policy set public local/folha360-documentos;
+      mc mb local/folha360-guias --ignore-existing;
+      mc policy set public local/folha360-guias;
+      mc mb local/folha360-exportacoes --ignore-existing;
+      mc policy set public local/folha360-exportacoes;
       echo 'MinIO initialized successfully';
       "
 
