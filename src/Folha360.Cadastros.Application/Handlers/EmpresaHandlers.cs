@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Folha360.Cadastros.Application.Commands;
 using Folha360.Cadastros.Application.DTOs;
 using Folha360.Cadastros.Application.Queries;
@@ -25,7 +27,8 @@ public class CriarEmpresaHandler : IRequestHandler<CriarEmpresaCommand, Result<E
 
     public async Task<Result<EmpresaDto>> Handle(CriarEmpresaCommand cmd, CancellationToken ct)
     {
-        if (!Guid.TryParse(_tenantContext.TenantId, out var tenantId) || tenantId == Guid.Empty)
+        var tenantId = ResolveTenantGuid(_tenantContext.TenantId);
+        if (tenantId == Guid.Empty)
             return Result<EmpresaDto>.Failure("VALIDACAO", "TenantId inválido.");
 
         try
@@ -89,6 +92,24 @@ public class CriarEmpresaHandler : IRequestHandler<CriarEmpresaCommand, Result<E
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt,
     };
+
+    /// <summary>
+    /// Converte um TenantId string (ex.: "demo") em GUID determinístico via MD5.
+    /// Se a string já for um GUID válido, faz parse direto.
+    /// </summary>
+    private static Guid ResolveTenantGuid(string tenantId)
+    {
+        if (string.IsNullOrEmpty(tenantId))
+            return Guid.Empty;
+
+        // Se já for GUID, parse direto
+        if (Guid.TryParse(tenantId, out var guid))
+            return guid;
+
+        // Gera GUID determinístico a partir da string (MD5)
+        var hash = MD5.HashData(Encoding.UTF8.GetBytes(tenantId));
+        return new Guid(hash);
+    }
 }
 
 public class AtualizarEmpresaHandler : IRequestHandler<AtualizarEmpresaCommand, Result<EmpresaDto>>
