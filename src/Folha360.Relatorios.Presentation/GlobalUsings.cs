@@ -1,0 +1,10 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using MediatR;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.Extensions.DependencyInjection;
+global using Folha360.Relatorios.Application.Commands;
+global using Folha360.Relatorios.Application.DTOs;
+global using Folha360.Relatorios.Application.Queries;

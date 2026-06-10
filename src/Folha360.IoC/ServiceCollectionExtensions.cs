@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Quartz;
 
 namespace Folha360.IoC;
 
@@ -96,7 +97,8 @@ public static class ServiceCollectionExtensions
         services.AddHealthChecks()
             .AddCheck<Infrastructure.HealthChecks.PostgresqlHealthCheck>("postgresql")
             .AddCheck<Infrastructure.HealthChecks.RedisHealthCheck>("redis")
-            .AddCheck<Infrastructure.HealthChecks.RabbitMqHealthCheck>("rabbitmq");
+            .AddCheck<Infrastructure.HealthChecks.RabbitMqHealthCheck>("rabbitmq")
+            .AddCheck<Folha360.Relatorios.Infrastructure.Health.ReadReplicaHealthCheck>("read_replica");
 
         // Cadastros Module (F02)
         services.AddFolha360Cadastros(configuration);
@@ -109,6 +111,9 @@ public static class ServiceCollectionExtensions
 
         // Obrigações Fiscais Module (F05)
         services.AddFolha360Fiscais(configuration);
+
+        // Relatórios & Exportações Module (F06)
+        services.AddFolha360Relatorios(configuration);
 
         // MassTransit + RabbitMQ (centralizado — único AddMassTransit por container)
         services.AddFolha360MassTransit(configuration);
@@ -358,6 +363,76 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddFolha360Relatorios(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        // DbContext
+        services.AddDbContextFactory<Folha360.Relatorios.Infrastructure.Data.RelatoriosDbContext>(options =>
+            options.UseSnakeCaseNamingConvention()
+            .UseNpgsql(
+                configuration.GetConnectionString("Postgres"),
+                npgsql => npgsql.EnableRetryOnFailure(3)));
+
+        services.AddScoped<Folha360.Relatorios.Infrastructure.Data.RelatoriosDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<Folha360.Relatorios.Infrastructure.Data.RelatoriosDbContext>>().CreateDbContext());
+
+        // Repositories
+        services.AddScoped<Folha360.Relatorios.Domain.Abstractions.IRelatorioRepository,
+            Folha360.Relatorios.Infrastructure.Repositories.RelatorioRepository>();
+        services.AddScoped<Folha360.Relatorios.Domain.Abstractions.IAgendamentoRepository,
+            Folha360.Relatorios.Infrastructure.Repositories.AgendamentoRepository>();
+
+        // Domain Services — Storage & Cache
+        services.AddScoped<Folha360.Relatorios.Domain.Abstractions.IRelatorioStorageService,
+            Folha360.Relatorios.Infrastructure.Services.RelatorioStorageService>();
+        services.AddSingleton<Folha360.Relatorios.Application.Services.IRedisCacheService,
+            Folha360.Relatorios.Infrastructure.Services.RedisCacheService>();
+
+        // Application Services — PDF, Export, Email, Agendamento
+        services.AddScoped<Folha360.Relatorios.Application.Services.IRelatorioPdfService,
+            Folha360.Relatorios.Infrastructure.Services.RelatorioPdfService>();
+        services.AddScoped<Folha360.Relatorios.Application.Services.IRelatorioExportService,
+            Folha360.Relatorios.Infrastructure.Services.RelatorioExportService>();
+        services.AddScoped<Folha360.Relatorios.Application.Services.IRelatorioEmailService,
+            Folha360.Relatorios.Infrastructure.Services.RelatorioEmailService>();
+        services.AddScoped<Folha360.Relatorios.Application.Services.IAgendamentoService,
+            Folha360.Relatorios.Infrastructure.Services.AgendamentoService>();
+
+        // Metrics
+        services.AddSingleton<Folha360.Relatorios.Infrastructure.Metrics.RelatoriosMetrics>();
+
+        // Quartz.NET
+        services.AddQuartz(q =>
+        {
+            q.UsePersistentStore(store =>
+            {
+                store.UsePostgres(postgres =>
+                {
+                    postgres.ConnectionString = configuration.GetConnectionString("Postgres")!;
+                });
+            });
+
+            var jobKey = new JobKey("gerar_relatorio_job");
+            q.AddJob<Folha360.Relatorios.Infrastructure.Jobs.GerarRelatorioJob>(jobKey, j => j
+                .StoreDurably()
+                .WithDescription("Job de geração de relatórios agendados"));
+        });
+
+        services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+        // MediatR
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Folha360.Relatorios.Application.Commands.GerarHoleritesLoteCommand).Assembly);
+        });
+
+        // FluentValidation
+        services.AddValidatorsFromAssemblyContaining<Folha360.Relatorios.Application.Validators.GerarHoleritesLoteCommandValidator>();
+
+        return services;
+    }
+
     public static IServiceCollection AddFolha360MassTransit(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -381,6 +456,11 @@ public static class ServiceCollectionExtensions
             x.AddConsumer<Folha360.Fiscais.Application.Consumers.ApurarObrigacoesFiscaisConsumer>();
             x.AddConsumer<Folha360.Fiscais.Application.Consumers.ReverterObrigacoesConsumer>();
             x.AddConsumer<Folha360.Fiscais.Application.Consumers.FolhaReabertaConsumer>();
+
+            // Consumers — Módulo F06 (Relatórios & Exportações)
+            x.AddConsumer<Folha360.Relatorios.Application.Consumers.FolhaFechadaConsumer>();
+            x.AddConsumer<Folha360.Relatorios.Application.Consumers.ObrigacoesApuradasConsumer>();
+            x.AddConsumer<Folha360.Relatorios.Application.Consumers.FolhaReabertaConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {

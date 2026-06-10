@@ -1,0 +1,12 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using Microsoft.EntityFrameworkCore;
+global using Folha360.Infrastructure.Data;
+global using Folha360.Relatorios.Application.Services;
+global using Folha360.Relatorios.Domain.Abstractions;
+global using Folha360.Relatorios.Domain.Entities;
+global using Folha360.Relatorios.Domain.Enums;
+global using Folha360.Relatorios.Domain.Events;
