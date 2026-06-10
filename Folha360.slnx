@@ -18,6 +18,10 @@
     <Project Path="src/Folha360.Fiscais.Domain/Folha360.Fiscais.Domain.csproj" />
     <Project Path="src/Folha360.Fiscais.Infrastructure/Folha360.Fiscais.Infrastructure.csproj" />
     <Project Path="src/Folha360.Fiscais.Presentation/Folha360.Fiscais.Presentation.csproj" />
+    <Project Path="src/Folha360.Relatorios.Domain/Folha360.Relatorios.Domain.csproj" />
+    <Project Path="src/Folha360.Relatorios.Application/Folha360.Relatorios.Application.csproj" />
+    <Project Path="src/Folha360.Relatorios.Infrastructure/Folha360.Relatorios.Infrastructure.csproj" />
+    <Project Path="src/Folha360.Relatorios.Presentation/Folha360.Relatorios.Presentation.csproj" />
     <Project Path="src/Folha360.Infrastructure/Folha360.Infrastructure.csproj" />
     <Project Path="src/Folha360.IoC/Folha360.IoC.csproj" />
     <Project Path="src/Folha360.WebApi/Folha360.WebApi.csproj" />

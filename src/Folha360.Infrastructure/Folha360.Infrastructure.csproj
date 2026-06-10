@@ -10,6 +10,7 @@
     <ProjectReference Include="..\Folha360.Eventos.Domain\Folha360.Eventos.Domain.csproj" />
     <ProjectReference Include="..\Folha360.Processamento.Domain\Folha360.Processamento.Domain.csproj" />
     <ProjectReference Include="..\Folha360.Fiscais.Domain\Folha360.Fiscais.Domain.csproj" />
+    <ProjectReference Include="..\Folha360.Relatorios.Domain\Folha360.Relatorios.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

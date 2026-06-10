@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <NoWarn>SA1122;SA1519;SA1413;SA1127;SA1501;SA1407;SA1214;SA1520;NU1903</NoWarn>
+    <NoWarn>SA1122;SA1519;SA1413;SA1127;SA1501;SA1407;SA1214;SA1520;NU1902;NU1903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

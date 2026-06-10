@@ -38,6 +38,9 @@ services:
       MinIO__BucketName: folha360-documentos
       MinIO__BucketGuias: folha360-guias
       MinIO__BucketExportacoes: folha360-exportacoes
+      MinIO__BucketHolerites: folha360-holerites
+      MinIO__BucketRelatorios: folha360-relatorios
+      ConnectionStrings__PostgresReadReplica: Host=postgres-replica;Port=5433;Database=folha360;Username=folha360_user;Password=${POSTGRES_PASSWORD:-Folha360@Dev}
       Jwt__Secret: ${JWT_SECRET:-Folha360@DevSecretKey@2026!TempKey}
       Seq__Url: http://seq:5341
     networks:

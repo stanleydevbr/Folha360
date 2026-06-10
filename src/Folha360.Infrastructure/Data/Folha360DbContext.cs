@@ -4,6 +4,7 @@ using Folha360.Infrastructure.Data.Configurations.Cadastros;
 using Folha360.Infrastructure.Data.Configurations.Eventos;
 using Folha360.Infrastructure.Data.Configurations.Fiscais;
 using Folha360.Infrastructure.Data.Configurations.Processamento;
+using Folha360.Infrastructure.Data.Configurations.Relatorios;
 using Microsoft.EntityFrameworkCore;
 
 namespace Folha360.Infrastructure.Data;
@@ -81,6 +82,16 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Fiscais.Domain.Entities.RegraFiscal> RegrasFiscais => Set<Folha360.Fiscais.Domain.Entities.RegraFiscal>();
     public DbSet<Folha360.Fiscais.Domain.Entities.LancamentoContabil> LancamentosContabeis => Set<Folha360.Fiscais.Domain.Entities.LancamentoContabil>();
 
+    // ============================
+    // Módulo F06 — Relatórios & Exportações (schema tenant)
+    // ============================
+    public DbSet<Folha360.Relatorios.Domain.Entities.RelatorioAgendamento> RelatorioAgendamentos => Set<Folha360.Relatorios.Domain.Entities.RelatorioAgendamento>();
+    public DbSet<Folha360.Relatorios.Domain.Entities.RelatorioExecucao> RelatorioExecucoes => Set<Folha360.Relatorios.Domain.Entities.RelatorioExecucao>();
+    public DbSet<Folha360.Relatorios.Domain.Entities.RelatorioArquivo> RelatorioArquivos => Set<Folha360.Relatorios.Domain.Entities.RelatorioArquivo>();
+    public DbSet<Folha360.Relatorios.Domain.Entities.ItemFolhaView> ItemFolhaViews => Set<Folha360.Relatorios.Domain.Entities.ItemFolhaView>();
+    public DbSet<Folha360.Relatorios.Domain.Entities.DirfAnualView> DirfAnualViews => Set<Folha360.Relatorios.Domain.Entities.DirfAnualView>();
+    public DbSet<Folha360.Relatorios.Domain.Entities.RaisAnualView> RaisAnualViews => Set<Folha360.Relatorios.Domain.Entities.RaisAnualView>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("public");
@@ -142,6 +153,16 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new GuiaRecolhimentoConfiguration());
         modelBuilder.ApplyConfiguration(new RegraFiscalConfiguration());
         modelBuilder.ApplyConfiguration(new LancamentoContabilConfiguration());
+
+        // ============================
+        // Módulo F06 — Relatórios & Exportações
+        // ============================
+        modelBuilder.ApplyConfiguration(new RelatorioAgendamentoConfiguration());
+        modelBuilder.ApplyConfiguration(new RelatorioExecucaoConfiguration());
+        modelBuilder.ApplyConfiguration(new RelatorioArquivoConfiguration());
+        modelBuilder.ApplyConfiguration(new ItemFolhaViewConfiguration());
+        modelBuilder.ApplyConfiguration(new DirfAnualViewConfiguration());
+        modelBuilder.ApplyConfiguration(new RaisAnualViewConfiguration());
 
         // ============================
         // Query Filter Global: Soft Delete

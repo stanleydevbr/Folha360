@@ -27,6 +27,10 @@ COPY src/Folha360.Fiscais.Domain/*.csproj src/Folha360.Fiscais.Domain/
 COPY src/Folha360.Fiscais.Application/*.csproj src/Folha360.Fiscais.Application/
 COPY src/Folha360.Fiscais.Infrastructure/*.csproj src/Folha360.Fiscais.Infrastructure/
 COPY src/Folha360.Fiscais.Presentation/*.csproj src/Folha360.Fiscais.Presentation/
+COPY src/Folha360.Relatorios.Domain/*.csproj src/Folha360.Relatorios.Domain/
+COPY src/Folha360.Relatorios.Application/*.csproj src/Folha360.Relatorios.Application/
+COPY src/Folha360.Relatorios.Infrastructure/*.csproj src/Folha360.Relatorios.Infrastructure/
+COPY src/Folha360.Relatorios.Presentation/*.csproj src/Folha360.Relatorios.Presentation/
 COPY tests/Folha360.Tests/*.csproj tests/Folha360.Tests/
 
 # Restore

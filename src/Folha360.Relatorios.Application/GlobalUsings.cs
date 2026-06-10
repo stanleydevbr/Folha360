@@ -1,0 +1,16 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using FluentValidation;
+global using MediatR;
+global using Folha360.Application;
+global using Folha360.Relatorios.Application.Commands;
+global using Folha360.Relatorios.Application.DTOs;
+global using Folha360.Relatorios.Application.Queries;
+global using Folha360.Relatorios.Application.Services;
+global using Folha360.Relatorios.Domain.Abstractions;
+global using Folha360.Relatorios.Domain.Entities;
+global using Folha360.Relatorios.Domain.Enums;
+global using Folha360.Relatorios.Domain.Events;
