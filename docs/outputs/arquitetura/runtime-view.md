@@ -3,6 +3,8 @@
 ## Summary
 Descrição dos principais fluxos de execução do Folha360, incluindo interações síncronas e assíncronas, componentes envolvidos em tempo de execução, pontos de falha e estratégias de recuperação. Foco nos dois fluxos mais críticos: **Processamento da Folha Mensal** e **Envio de Eventos ao e-Social**.
 
+> **Atualização (Junho 2026)**: O fluxo de processamento da folha foi detalhado com o motor de cálculo de 4 fases e resolução de rubricas. Consulte o [runtime-view-calculo-rubricas.md](../rubricas/runtime-view-calculo-rubricas.md) para o detalhamento completo do algoritmo de aplicação de rubricas (ordem de processamento, fases, composição hierárquica, tabelas progressivas).
+
 ---
 
 ## Fluxo 1: Processamento da Folha Mensal
@@ -30,13 +32,27 @@ sequenceDiagram
 
         Note over API: Processamento em background (Task Parallel)
 
+        Note over API,Cache: FASE 1: Carregar Rubricas Vigentes
+        API->>Cache: GET rubricas:{empresaId}:vigentes
+        alt Cache miss
+            API->>CAD: GET /api/rubricas?empresaId={id}&ativo=true
+            API->>CAD: GET /api/rubricas/{id}/composicao (para cada rubrica)
+            API->>CAD: GET /api/rubricas/{id}/formula (para cada rubrica)
+            API->>CAD: GET /api/tabelas-progressivas?ano=2026
+            API->>Cache: SET rubricas:{empresaId}:vigentes TTL=1h
+        end
+
+        Note over API: FASE 2: Ordenar Rubricas (ordem_calculo)
+        API->>API: Ordena rubricas: 1.Vencimentos 2.Bases 3.Descontos 4.Totais
+
         par Para cada funcionário (em lotes de 1000)
-            API->>Cache: Busca tabelas progressivas (IRRF, INSS)
             API->>CAD: GET /api/funcionarios/{id}/dados-contratuais
             API->>EVT: GET /api/eventos?funcionarioId={id}&periodo={mes}
-            API->>Cache: Busca rubricas vigentes
-            API->>API: Calcula vencimentos, descontos, líquido
-            API->>DB: Insere FolhaMensal (batch de 1000)
+            API->>API: MotorCalculo: Fase 1 - Vencimentos
+            API->>API: MotorCalculo: Fase 2 - Bases (INSS, IRRF, FGTS)
+            API->>API: MotorCalculo: Fase 3 - Descontos (Tabela Progressiva)
+            API->>API: MotorCalculo: Fase 4 - Totais e Líquido
+            API->>DB: Insere FolhaMensal + FolhaRubrica (batch de 1000)
         end
 
         API->>DB: Atualiza ProcessamentoFolha (status=CONCLUIDO)
@@ -49,9 +65,9 @@ sequenceDiagram
 
 | Elemento | Papel no Fluxo | Escala |
 |---|---|---|
-| **api-folha** | Orquestrador do cálculo; processamento paralelo | 3+ réplicas; cada uma processa N lotes |
-| **Redis** | Cache de tabelas progressivas (IRRF, INSS) e rubricas | Hit rate esperado > 95% |
-| **api-cadastros** | Fornece dados contratuais dos funcionários | Consultas em cache local |
+| **api-folha** | Orquestrador do cálculo; processamento paralelo; coordena `MotorCalculo`, `AvaliadorExpressao`, `ResolvedorComposicao`, `AplicadorTabelaProgressiva`, `CalculadorMedia`, `AvaliadorCondicional` | 3+ réplicas; cada uma processa N lotes |
+| **Redis** | Cache de rubricas, composições, fórmulas, tabelas progressivas (IRRF, INSS) | Hit rate esperado > 95%; invalidação via pub/sub |
+| **api-cadastros** | Fornece dados contratuais dos funcionários, rubricas vigentes, composições e fórmulas | Consultas em cache local |
 | **api-eventos** | Fornece eventos trabalhistas do período | Consultas em cache local |
 | **PostgreSQL** | Persiste folhas calculadas e status do processamento | Batch insert otimizado |
 | **RabbitMQ** | Notifica conclusão para módulo fiscal | 1 mensagem por empresa/período |
@@ -71,6 +87,8 @@ sequenceDiagram
 |---|---|---|---|
 | **api-cadastros indisponível** | Não consegue ler dados de funcionários | Cálculo não inicia para funcionários órfãos | Retry 3x com backoff; marca como `PENDENTE_CADASTRO`; reprocessa após recuperação |
 | **Redis indisponível** | Cache miss → consulta PostgreSQL | Degradação de performance (3-5x mais lento) | Fallback para PostgreSQL; recalcula tabelas em memória |
+| **Timeout em fórmula NCalc** | Fórmula com loop ou complexa demais | Funcionário não processado; lote marcado com erro | Sandbox com timeout 100ms; fórmula marcada como `formula_erro`; fallback para valor anterior |
+| **Ciclo em composição de rubricas** | Composição circular (A → B → A) | Loop infinito no cálculo | Detecção de ciclos via DFS no cadastro; validação pré-cálculo |
 | **Timeout no batch insert** | Lote de 1000 registros falha | Perda parcial do processamento | Rollback do lote; retry com lote menor (500); marca lote como `ERRO` |
 | **Estouro de memória** | 100K funcionários carregados simultaneamente | OOM kill no container | Streaming/batch processing; limite de 1000 funcionários por vez |
 | **Processamento excede 2h** | SLA não atendido | Atraso no fechamento e envio e-Social | Alerta em 1h30; escala horizontal (HPA); particionar por empresa |

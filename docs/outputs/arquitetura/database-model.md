@@ -3,6 +3,8 @@
 ## Summary
 Modelo de banco de dados relacional PostgreSQL para o sistema Folha360, organizado por bounded context (6 módulos) com estratégia de multi-tenant via **schema por tenant** (ADR-003). Cada módulo possui suas próprias tabelas dentro do schema do tenant. O schema `public` contém tabelas compartilhadas (usuários, configurações globais, fila de eventos). Dados sensíveis (CPF, salários, documentos) são identificados para criptografia em repouso (AES-256). Todas as tabelas incluem colunas de auditoria para conformidade LGPD.
 
+> **Atualização (Junho 2026)**: O subsistema de rubricas foi significativamente expandido. A tabela `rubrica` original foi substituída por um modelo completo com 7 tabelas. Consulte o [modelo de dados detalhado das rubricas](../rubricas/database-model-rubricas.md) para a especificação completa.
+
 ---
 
 ## Entity-Relationship Diagram
@@ -91,7 +93,7 @@ PostgreSQL
 | **documento** | `id` (uuid), `funcionario_id` (uuid), `tipo` (varchar 30), `numero` (varchar 50 encrypted), `data_emissao` (date), `data_validade` (date, nullable), `arquivo_path` (varchar 500), `created_at` (timestamptz) | `id` PK | `funcionario_id` → `funcionario(id)` | `idx_doc_func` (funcionario_id), `idx_doc_tipo` (tipo) | RG, CNH, Reservista, etc. Número criptografado. |
 | **cargo** | `id` (uuid), `empresa_id` (uuid), `nome` (varchar 150), `cbo` (varchar 10), `descricao` (text), `salario_base` (numeric 18,2), `created_at` (timestamptz), `updated_at` (timestamptz) | `id` PK | `empresa_id` → `public.empresa(id)` | `idx_cargo_empresa` (empresa_id), `idx_cargo_cbo` (cbo) | CBO compatível com e-Social. |
 | **lotacao** | `id` (uuid), `empresa_id` (uuid), `codigo` (varchar 30), `descricao` (varchar 200), `created_at` (timestamptz), `updated_at` (timestamptz) | `id` PK | `empresa_id` → `public.empresa(id)` | `idx_lot_empresa` (empresa_id) | Departamento, filial, setor. |
-| **rubrica** | `id` (uuid), `empresa_id` (uuid), `codigo` (varchar 20), `descricao` (varchar 200), `natureza` (varchar 20), `incide_inss` (boolean), `incide_irrf` (boolean), `incide_fgts` (boolean), `tipo_esocial` (varchar 10), `created_at` (timestamptz), `updated_at` (timestamptz) | `id` PK | `empresa_id` → `public.empresa(id)` | `idx_rub_empresa` (empresa_id), `idx_rub_codigo` (codigo) | Natureza: vencimento/desconto. `tipo_esocial` compatível com Tabela 03 e-Social. |
+| **rubrica** | `id` (uuid), `empresa_id` (uuid), `codigo` (varchar 20), `descricao` (varchar 200), `natureza` (varchar 20), `incide_inss` (boolean), `incide_irrf` (boolean), `incide_fgts` (boolean), `tipo_esocial` (varchar 10), `created_at` (timestamptz), `updated_at` (timestamptz) | `id` PK | `empresa_id` → `public.empresa(id)` | `idx_rub_empresa` (empresa_id), `idx_rub_codigo` (codigo) | ⚠️ **Modelo expandido**. A tabela `rubrica` foi estendida com 30+ colunas e 6 tabelas de apoio. Consulte [database-model-rubricas.md](../rubricas/database-model-rubricas.md). Natureza: Vencimento/Desconto/Beneficio/Informativo/Provisao/Base/Complemento/Reembolso/Estagio. `tipo_esocial` compatível com Tabela 03 e-Social. |
 
 ### Module: Eventos Trabalhistas
 

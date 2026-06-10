@@ -29,6 +29,16 @@ public class CadastrosDbContext : Folha360DbContext
     public new DbSet<Convenio> Convenios => Set<Convenio>();
     public new DbSet<HorarioTrabalho> HorariosTrabalho => Set<HorarioTrabalho>();
 
+    // Subsistema de Rubricas (ADR-006)
+    public new DbSet<GrupoRubrica> GruposRubrica => Set<GrupoRubrica>();
+    public new DbSet<RubricaComposicao> RubricasComposicao => Set<RubricaComposicao>();
+    public new DbSet<RubricaFormula> RubricasFormula => Set<RubricaFormula>();
+    public new DbSet<RubricaIncidencia> RubricasIncidencia => Set<RubricaIncidencia>();
+    public new DbSet<RubricaTabelaProgressiva> RubricasTabelaProgressiva => Set<RubricaTabelaProgressiva>();
+    public new DbSet<RubricaHistorico> RubricasHistorico => Set<RubricaHistorico>();
+    public new DbSet<ProcessoAdministrativo> ProcessosAdministrativos => Set<ProcessoAdministrativo>();
+    public new DbSet<RubricaProcesso> RubricasProcesso => Set<RubricaProcesso>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Delega totalmente para o modelo canônico (Folha360DbContext)

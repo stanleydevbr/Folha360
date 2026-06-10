@@ -3,6 +3,9 @@
   <ItemGroup>
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
     <PackageReference Include="MediatR" Version="12.5.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
+    <PackageReference Include="Quartz.Serialization.SystemTextJson" Version="3.14.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -13,6 +16,15 @@
     <ProjectReference Include="..\Folha360.Eventos.Application\Folha360.Eventos.Application.csproj" />
     <ProjectReference Include="..\Folha360.Eventos.Infrastructure\Folha360.Eventos.Infrastructure.csproj" />
     <ProjectReference Include="..\Folha360.Eventos.Presentation\Folha360.Eventos.Presentation.csproj" />
+    <ProjectReference Include="..\Folha360.Processamento.Application\Folha360.Processamento.Application.csproj" />
+    <ProjectReference Include="..\Folha360.Processamento.Infrastructure\Folha360.Processamento.Infrastructure.csproj" />
+    <ProjectReference Include="..\Folha360.Processamento.Presentation\Folha360.Processamento.Presentation.csproj" />
+    <ProjectReference Include="..\Folha360.Fiscais.Application\Folha360.Fiscais.Application.csproj" />
+    <ProjectReference Include="..\Folha360.Fiscais.Infrastructure\Folha360.Fiscais.Infrastructure.csproj" />
+    <ProjectReference Include="..\Folha360.Fiscais.Presentation\Folha360.Fiscais.Presentation.csproj" />
+    <ProjectReference Include="..\Folha360.Relatorios.Application\Folha360.Relatorios.Application.csproj" />
+    <ProjectReference Include="..\Folha360.Relatorios.Infrastructure\Folha360.Relatorios.Infrastructure.csproj" />
+    <ProjectReference Include="..\Folha360.Relatorios.Presentation\Folha360.Relatorios.Presentation.csproj" />
     <ProjectReference Include="..\Folha360.Infrastructure\Folha360.Infrastructure.csproj" />
   </ItemGroup>
 

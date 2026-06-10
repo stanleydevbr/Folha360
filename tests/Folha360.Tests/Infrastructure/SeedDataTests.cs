@@ -2,6 +2,7 @@ using Folha360.Domain;
 
 namespace Folha360.Tests.Infrastructure;
 
+[Trait("Category", "Unit")]
 public class PasswordHelperTests
 {
     [Fact]

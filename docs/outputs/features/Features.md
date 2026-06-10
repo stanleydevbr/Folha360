@@ -105,21 +105,24 @@ flowchart TD
 
 **Objetivo**: Implementar o módulo raiz de cadastros — a fonte da verdade para todos os dados mestres do sistema. Nenhum outro módulo de negócio funciona sem este.
 
+> ⚠️ **Impacto da atualização de rubricas (Junho 2026)**: O subsistema de rubricas foi significativamente expandido. A implementação original do F02 cobria apenas o CRUD básico da tabela `rubrica`. O [plano de ação de rubricas](../outputs/rubricas/plano-acao-rubricas.md) introduz 7 tabelas, 13 sprints de trabalho e 11 tipos de cálculo. **É necessária uma tarefa de refatoração/expansão do F02** para implementar as Fases 1-2 do plano (Fundação + Composição e Fórmulas). Ver tarefa `refactor-f02-rubricas-expandido`.
+
 **Escopo**:
 - CRUD completo de:
   - Empresas (com configurações de tenant)
   - Funcionários (com dados sensíveis criptografados AES-256)
   - Cargos e salários
-  - Rubricas (conforme Tabela 03 e-Social)
+  - Rubricas (conforme Tabela 03 e-Social) — **expandido**: incluir `grupo_rubrica`, `rubrica_composicao`, `rubrica_formula`, `rubrica_incidencia`, `rubrica_tabela_progressiva`, `rubrica_historico`
   - Lotações/departamentos
   - Dependentes
   - Documentos (CTPS, PIS/PASEP, RG, CPF)
-- Validação com FluentValidation
+- Validação com FluentValidation (incluindo validador de unicidade `(empresa_id, codigo)` e validador de `tipo_esocial`)
 - Criptografia de dados sensíveis (CPF, CTPS, PIS/PASEP)
 - Soft delete + auditoria (`audit_log` imutável)
-- Eventos de domínio via RabbitMQ: `FuncionarioCadastrado`, `EmpresaCadastrada`, `RubricaAlterada`
+- Eventos de domínio via RabbitMQ: `FuncionarioCadastrado`, `EmpresaCadastrada`, `RubricaAlterada`, `RubricaCriada`, `TabelaProgressivaAtualizada`
 - API RESTful documentada (Swagger/OpenAPI)
 - Testes unitários + integração
+- Seed data com rubricas padrão (Tabela 03 e-Social) e tabelas progressivas oficiais (IRRF 2026, INSS 2026)
 
 **Entregáveis**:
 - CRUD completo de todas as entidades de cadastro
@@ -167,18 +170,28 @@ flowchart TD
 
 **Objetivo**: Implementar o core do sistema — o cálculo da folha de pagamento mensal. Esta é a feature de maior valor de negócio e maior complexidade técnica.
 
+> ⚠️ **Impacto da atualização de rubricas (Junho 2026)**: O motor de cálculo foi expandido para suportar 4 fases de processamento e 11 tipos de cálculo. A implementação original do F04 cobria apenas o cálculo mensal básico. **É necessária uma tarefa de refatoração/expansão do F04** para implementar as Fases 3 do plano de ação (Motor de Cálculo completo). Ver tarefa `refactor-f04-motor-calculo-expandido`.
+
 **Escopo**:
 - Cálculo completo da folha mensal:
-  - Vencimentos (salário base, horas extras, adicionais, comissões)
-  - Descontos (IRRF, INSS, pensão alimentícia, faltas, atrasos)
-  - Benefícios (vale-transporte, vale-refeição, plano de saúde)
-  - Cálculo de férias, 13º salário, rescisão
+  - **Fase 1 — Vencimentos**: salário base, horas extras, adicionais, comissões, DSR
+  - **Fase 2 — Bases**: BASE-INSS, BASE-FGTS, BASE-IRRF, BASE-DISSIDIO, BASE-MATERNIDADE
+  - **Fase 3 — Descontos**: IRRF (tabela progressiva), INSS (tabela progressiva), pensão alimentícia, faltas, atrasos, vale-transporte, vale-refeição
+  - **Fase 4 — Totais**: TOTAL-VENCIMENTOS, TOTAL-DESCONTOS, LÍQUIDO
+- Suporte a 11 tipos de cálculo: mensal, férias, 13º, rescisão, dissídio, complementar, auxílio-doença, salário-maternidade, acordo, estágio, RPA
+- Motor de cálculo com componentes especializados:
+  - `MotorCalculo` — orquestrador das 4 fases
+  - `AvaliadorExpressao` — NCalc + sandbox (timeout 100ms)
+  - `ResolvedorComposicao` — composição hierárquica com detecção de ciclos
+  - `AplicadorTabelaProgressiva` — IRRF/INSS com versionamento anual
+  - `CalculadorMedia` — médias móveis (12 meses)
+  - `AvaliadorCondicional` — rubricas condicionais
 - Processamento assíncrono (ADR-004):
   - `POST /api/folha/processar` → `202 Accepted` + `processamentoId`
   - Background job com Task Parallel (batches de 1000 funcionários)
   - Progresso via SignalR (tempo real)
 - Idempotência: `UNIQUE(empresa_id, periodo)`
-- Cache Redis para tabelas progressivas (IRRF, INSS) e rubricas (ADR-005)
+- Cache Redis para tabelas progressivas (IRRF, INSS), rubricas, composições e fórmulas (ADR-005); invalidação via pub/sub
 - Consumo de eventos: `FuncionarioAdmitido`, `FeriasConcedidas`, `FuncionarioDesligado`
 - Publicação de eventos: `FolhaFechada`, `EventoRemuneracaoGerado` (S-1200/S-1210)
 - Geração de holerites

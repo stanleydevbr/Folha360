@@ -3,6 +3,8 @@
 ## Summary
 Mapeamento das fronteiras de integração entre os módulos internos do Folha360 e com sistemas externos (e-Social gov.br, sistemas de contabilidade). Cada fronteira define produtor, consumidor, contrato (schema/API), modo de comunicação (síncrono/assíncrono) e riscos associados.
 
+> **Atualização (Junho 2026)**: Adicionadas fronteiras do subsistema de rubricas: Cadastros → Cálculo Folha (composições, fórmulas, tabelas progressivas), Cadastros → e-Social (S-1010, S-1070), e cache Redis com invalidação pub/sub. Ver [runtime-view-calculo-rubricas](../rubricas/runtime-view-calculo-rubricas.md).
+
 ## Mapa de Integrações
 
 ```mermaid
@@ -57,6 +59,9 @@ graph LR
 | 12 | **Obrig. Fiscais → Contábil** | Obrigações Fiscais | Sistema Contábil | Arquivo CSV/XML: lançamentos contábeis por período | Assíncrono (arquivo/SFTP) | Obrigações Fiscais | Baixo — processo batch mensal |
 | 13 | **Relatórios → Email** | Relatórios | Serviço de Email | SMTP/API: PDF anexado para admin/contador | Assíncrono (SMTP) | Relatórios | Baixo — entrega de relatórios |
 | 14 | **Relatórios → Object Storage** | Relatórios | Object Storage (MinIO/S3) | S3 API: arquivos PDF/CSV exportados | Síncrono (S3 API) | Relatórios | Baixo — armazenamento de exportações |
+| 15 | **Cadastros → Cálculo Folha (Rubricas)** | Cadastros API | Cálculo da Folha | REST API: `GET /api/rubricas?vigencia=`, `GET /api/rubricas/{id}/composicao`, `GET /api/rubricas/{id}/formula`, `GET /api/tabelas-progressivas?ano=` | Síncrono (leitura com cache Redis) | Cadastros | Alto — rubricas, composições e fórmulas são a base de todo o cálculo |
+| 16 | **Cadastros → Redis (Cache)** | Cadastros API | Redis | Evento: `RubricaAlterada`, `RubricaCriada`, `TabelaProgressivaAtualizada` → invalidação de cache | Assíncrono (Redis pub/sub) | Cadastros | Médio — cache inconsistente gera cálculos errados |
+| 17 | **Cadastros → e-Social (S-1010/S-1070)** | Cadastros API | Integração e-Social | Evento: `TabelaRubricaAtualizada { empresaId, rubricas[] }`, `ProcessoAdministrativoCriado { empresaId, processo }` | Assíncrono (RabbitMQ) | Cadastros | Alto — obrigação legal de envio da Tabela de Rubricas |
 
 ## Riscos de Contrato
 
@@ -64,9 +69,11 @@ graph LR
 |---|---|---|---|
 | **Schema XSD desatualizado** | #11 | Layouts e-Social mudam (NT — Notas Técnicas). Schema antigo causa rejeição. | Versionar schemas; CI/CD monitora portal e-Social; testes de validação XSD automatizados |
 | **Indisponibilidade do e-Social** | #11 | Portal gov.br fora do ar no prazo de envio. | Retry com exponential backoff (1min, 5min, 15min, 1h); fila dead-letter; alerta operacional |
-| **Inconsistência de rubricas** | #2 | Rubrica alterada no Cadastros após início do cálculo. | Snapshot de rubricas no momento do cálculo; evento `RubricaAlterada` invalida cache |
-| **Perda de eventos** | #3, #4, #5, #6 | Falha no RabbitMQ causa perda de eventos de domínio. | Persistência de mensagens; confirmação de publicação; dead-letter queue; reconciliação batch |
+| **Inconsistência de rubricas** | #2, #15 | Rubrica alterada no Cadastros após início do cálculo; composição ou fórmula modificada durante processamento. | Snapshot de rubricas no momento do cálculo; evento `RubricaAlterada` invalida cache Redis via pub/sub; versionamento de fórmulas (`rubrica_formula.versao`) |
+| **Perda de eventos** | #3, #4, #5, #6, #16, #17 | Falha no RabbitMQ causa perda de eventos de domínio. | Persistência de mensagens; confirmação de publicação; dead-letter queue; reconciliação batch |
 | **Divergência fiscal** | #4, #12 | Diferença entre valores calculados e lançamentos contábeis. | Conciliação automática; relatório de divergências; bloqueio de fechamento se não conciliado |
+| **Fórmula maliciosa ou com erro** | #15 | Fórmula NCalc com loop infinito ou acesso a recursos indevidos causa degradação ou crash. | Sandbox com timeout 100ms e memory limit; whitelist de funções permitidas; validador de sintaxe pré-execução |
+| **Tabela progressiva desatualizada** | #15 | Tabela de IRRF/INSS não atualizada para o ano corrente gera cálculos fiscais incorretos. | Versionamento anual de tabelas; script de seed com tabelas oficiais; alerta de vigência; endpoint de consulta de conformidade |
 
 ## Análise de Risco de Coordenação
 

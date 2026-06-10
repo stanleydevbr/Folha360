@@ -126,9 +126,9 @@ Cenários concretos e mensuráveis de atributos de qualidade para guiar decisõe
 - **Attribute**: Maintainability (modifiability)
 - **Source/stimulus**: Receita Federal publica nova tabela progressiva de IRRF
 - **Environment**: Desenvolvimento → Homologação → Produção
-- **Artifact**: Módulo de Cálculo da Folha (estratégia de cálculo)
+- **Artifact**: Módulo de Cálculo da Folha (estratégia de cálculo) + Tabela `rubrica_tabela_progressiva`
 - **Response**: Equipe atualiza tabela e implanta em produção
-- **Response measure**: Tempo para atualizar e implantar < 4 horas; sem alteração de código (tabela parametrizada)
+- **Response measure**: Tempo para atualizar e implantar < 4 horas; sem alteração de código (tabela parametrizada e versionada por ano); nova versão da tabela coexiste com anterior até virada do ano
 - **Priority**: Alta
 
 ### Cenário M2: Novo Layout e-Social (Nova Nota Técnica)
@@ -139,6 +139,15 @@ Cenários concretos e mensuráveis de atributos de qualidade para guiar decisõe
 - **Response**: Equipe atualiza schemas XSD e regras de validação
 - **Response measure**: Tempo para compatibilidade < 2 semanas; schemas versionados; testes de regressão automatizados
 - **Priority**: Alta
+
+### Cenário M3: Customização de Rubrica por Convenção Coletiva
+- **Attribute**: Maintainability (flexibility)
+- **Source/stimulus**: Empresa precisa criar rubrica específica de convenção coletiva (ex.: "Adicional de Quebra de Caixa" com fórmula `{SALARIO_BASE} * 0.20` limitado a teto de R$ 500)
+- **Environment**: Produção, interface de cadastro de rubricas
+- **Artifact**: Módulo de Cadastros (subsistema de rubricas) + Editor de fórmulas
+- **Response**: Usuário cria rubrica com fórmula, teto e composição sem necessidade de deploy ou alteração de código
+- **Response measure**: Tempo para criar e testar rubrica < 15 minutos; fórmula validada em sandbox; simulação disponível imediatamente
+- **Priority**: Média
 
 ---
 
@@ -170,6 +179,7 @@ Cenários concretos e mensuráveis de atributos de qualidade para guiar decisõe
 | SC1 | Crescimento 10K → 100K func. | Scalability | Alta |
 | M1 | Alteração tabela IRRF < 4h | Maintainability | Alta |
 | M2 | Novo layout e-Social < 2 sem | Maintainability | Alta |
+| M3 | Customização rubrica < 15min | Maintainability | Média |
 | P3 | DIRF anual < 10 min | Performance | Média |
 | SC2 | Multi-tenant 10 empresas | Scalability | Média |
 | U1 | Dashboard de progresso | Usability | Média |

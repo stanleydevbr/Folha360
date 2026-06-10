@@ -29,24 +29,63 @@ public class CriarRubricaHandler : IRequestHandler<CriarRubricaCommand, Result<R
         if (existente is not null)
             return Result<RubricaDto>.Failure("CODIGO_DUPLICADO", "Já existe uma rubrica com este código.");
 
-        var rubrica = new Rubrica(cmd.EmpresaId, cmd.Codigo, cmd.Descricao, cmd.Natureza,
-            cmd.TipoEsocial, cmd.IncideInss, cmd.IncideIrrf, cmd.IncideFgts,
-            cmd.IncideContribuicaoSindical, cmd.IncideDecimoTerceiro,
-            cmd.IncideFerias, cmd.IncideAvisoPrevio, cmd.FormulaCalculo, cmd.OrdemExibicao);
+        var rubrica = new Rubrica(
+            empresaId: cmd.EmpresaId,
+            codigo: cmd.Codigo,
+            descricao: cmd.Descricao,
+            natureza: cmd.Natureza,
+            tipoEsocial: cmd.TipoEsocial,
+            descricaoAbreviada: cmd.DescricaoAbreviada,
+            enviarEsocial: cmd.EnviarEsocial,
+            incideInss: cmd.IncideInss,
+            incideIrrf: cmd.IncideIrrf,
+            incideFgts: cmd.IncideFgts,
+            incideContribuicaoSindical: cmd.IncideContribuicaoSindical,
+            incideDecimoTerceiro: cmd.IncideDecimoTerceiro,
+            incideFerias: cmd.IncideFerias,
+            incideAvisoPrevio: cmd.IncideAvisoPrevio,
+            incideRescisao: cmd.IncideRescisao,
+            incideDissidio: cmd.IncideDissidio,
+            incideSalarioMaternidade: cmd.IncideSalarioMaternidade,
+            incideAuxilioDoenca: cmd.IncideAuxilioDoenca,
+            incideAdiantamento: cmd.IncideAdiantamento,
+            tipoCalculo: cmd.TipoCalculo,
+            formulaCalculo: cmd.FormulaCalculo,
+            valorFixo: cmd.ValorFixo,
+            percentual: cmd.Percentual,
+            rubricaBaseId: cmd.RubricaBaseId,
+            ordemCalculo: cmd.OrdemCalculo,
+            ordemExibicao: cmd.OrdemExibicao,
+            prioridadeDesconto: cmd.PrioridadeDesconto,
+            tetoMaximo: cmd.TetoMaximo,
+            pisoMinimo: cmd.PisoMinimo,
+            ativo: cmd.Ativo,
+            dataInicioVigencia: cmd.DataInicioVigencia.HasValue ? new DateTime(cmd.DataInicioVigencia.Value.Year, cmd.DataInicioVigencia.Value.Month, cmd.DataInicioVigencia.Value.Day) : null,
+            dataFimVigencia: cmd.DataFimVigencia.HasValue ? new DateTime(cmd.DataFimVigencia.Value.Year, cmd.DataFimVigencia.Value.Month, cmd.DataFimVigencia.Value.Day) : null,
+            observacao: cmd.Observacao,
+            grupoRubricaId: cmd.GrupoRubricaId);
 
         await _repo.AddAsync(rubrica, ct);
 
-        return Result<RubricaDto>.Success(MapRubrica(rubrica));
+        return Result<RubricaDto>.Success(RubricaMapper.Map(rubrica));
     }
 
-    private static RubricaDto MapRubrica(Rubrica r) => new()
+    private static RubricaDto MapRubrica(Rubrica r) => RubricaMapper.Map(r);
+}
+
+internal static class RubricaMapper
+{
+    public static RubricaDto Map(Rubrica r) => new()
     {
         Id = r.Id,
         EmpresaId = r.EmpresaId,
+        GrupoRubricaId = r.GrupoRubricaId,
         Codigo = r.Codigo,
         Descricao = r.Descricao,
+        DescricaoAbreviada = r.DescricaoAbreviada,
         Natureza = r.Natureza,
         TipoEsocial = r.TipoEsocial,
+        EnviarEsocial = r.EnviarEsocial,
         IncideInss = r.IncideInss,
         IncideIrrf = r.IncideIrrf,
         IncideFgts = r.IncideFgts,
@@ -54,8 +93,25 @@ public class CriarRubricaHandler : IRequestHandler<CriarRubricaCommand, Result<R
         IncideDecimoTerceiro = r.IncideDecimoTerceiro,
         IncideFerias = r.IncideFerias,
         IncideAvisoPrevio = r.IncideAvisoPrevio,
+        IncideRescisao = r.IncideRescisao,
+        IncideDissidio = r.IncideDissidio,
+        IncideSalarioMaternidade = r.IncideSalarioMaternidade,
+        IncideAuxilioDoenca = r.IncideAuxilioDoenca,
+        IncideAdiantamento = r.IncideAdiantamento,
+        TipoCalculo = r.TipoCalculo,
         FormulaCalculo = r.FormulaCalculo,
+        ValorFixo = r.ValorFixo,
+        Percentual = r.Percentual,
+        RubricaBaseId = r.RubricaBaseId,
+        OrdemCalculo = r.OrdemCalculo,
         OrdemExibicao = r.OrdemExibicao,
+        PrioridadeDesconto = r.PrioridadeDesconto,
+        TetoMaximo = r.TetoMaximo,
+        PisoMinimo = r.PisoMinimo,
+        Ativo = r.Ativo,
+        DataInicioVigencia = r.DataInicioVigencia,
+        DataFimVigencia = r.DataFimVigencia,
+        Observacao = r.Observacao,
         CreatedAt = r.CreatedAt,
         UpdatedAt = r.UpdatedAt,
     };
@@ -81,10 +137,39 @@ public class AtualizarRubricaHandler : IRequestHandler<AtualizarRubricaCommand, 
         if (rubrica is null)
             return Result<RubricaDto>.Failure("NAO_ENCONTRADO", "Rubrica não encontrada.");
 
-        rubrica.Atualizar(cmd.Descricao, cmd.Natureza, cmd.TipoEsocial,
-            cmd.IncideInss, cmd.IncideIrrf, cmd.IncideFgts, cmd.IncideContribuicaoSindical,
-            cmd.IncideDecimoTerceiro, cmd.IncideFerias, cmd.IncideAvisoPrevio,
-            cmd.FormulaCalculo, cmd.OrdemExibicao);
+        rubrica.Atualizar(
+            descricao: cmd.Descricao,
+            natureza: cmd.Natureza,
+            tipoEsocial: cmd.TipoEsocial,
+            descricaoAbreviada: cmd.DescricaoAbreviada,
+            enviarEsocial: cmd.EnviarEsocial,
+            incideInss: cmd.IncideInss,
+            incideIrrf: cmd.IncideIrrf,
+            incideFgts: cmd.IncideFgts,
+            incideContribuicaoSindical: cmd.IncideContribuicaoSindical,
+            incideDecimoTerceiro: cmd.IncideDecimoTerceiro,
+            incideFerias: cmd.IncideFerias,
+            incideAvisoPrevio: cmd.IncideAvisoPrevio,
+            incideRescisao: cmd.IncideRescisao,
+            incideDissidio: cmd.IncideDissidio,
+            incideSalarioMaternidade: cmd.IncideSalarioMaternidade,
+            incideAuxilioDoenca: cmd.IncideAuxilioDoenca,
+            incideAdiantamento: cmd.IncideAdiantamento,
+            tipoCalculo: cmd.TipoCalculo,
+            formulaCalculo: cmd.FormulaCalculo,
+            valorFixo: cmd.ValorFixo,
+            percentual: cmd.Percentual,
+            rubricaBaseId: cmd.RubricaBaseId,
+            ordemCalculo: cmd.OrdemCalculo,
+            ordemExibicao: cmd.OrdemExibicao,
+            prioridadeDesconto: cmd.PrioridadeDesconto,
+            tetoMaximo: cmd.TetoMaximo,
+            pisoMinimo: cmd.PisoMinimo,
+            ativo: cmd.Ativo,
+            dataInicioVigencia: cmd.DataInicioVigencia.HasValue ? new DateTime(cmd.DataInicioVigencia.Value.Year, cmd.DataInicioVigencia.Value.Month, cmd.DataInicioVigencia.Value.Day) : null,
+            dataFimVigencia: cmd.DataFimVigencia.HasValue ? new DateTime(cmd.DataFimVigencia.Value.Year, cmd.DataFimVigencia.Value.Month, cmd.DataFimVigencia.Value.Day) : null,
+            observacao: cmd.Observacao,
+            grupoRubricaId: cmd.GrupoRubricaId);
 
         await _repo.UpdateAsync(rubrica, ct);
 
@@ -95,16 +180,7 @@ public class AtualizarRubricaHandler : IRequestHandler<AtualizarRubricaCommand, 
                 rubrica.IncideFerias, rubrica.IncideAvisoPrevio)),
             "folha360.cadastros", "RubricaAlterada", ct);
 
-        return Result<RubricaDto>.Success(new RubricaDto
-        {
-            Id = rubrica.Id,
-            EmpresaId = rubrica.EmpresaId,
-            Codigo = rubrica.Codigo,
-            Descricao = rubrica.Descricao,
-            Natureza = rubrica.Natureza,
-            CreatedAt = rubrica.CreatedAt,
-            UpdatedAt = rubrica.UpdatedAt,
-        });
+        return Result<RubricaDto>.Success(RubricaMapper.Map(rubrica));
     }
 }
 

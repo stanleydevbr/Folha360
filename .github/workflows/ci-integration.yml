@@ -5,6 +5,13 @@ on:
   push:
     branches: [master]
 
+permissions:
+  contents: read
+  checks: write
+
+env:
+  DOTNET_VERSION: "10.0.x"
+
 jobs:
   integration:
     runs-on: ubuntu-latest
@@ -14,7 +21,13 @@ jobs:
       - name: Setup .NET ${{ env.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
 
       - name: Start Docker services
         run: docker compose up -d postgres redis rabbitmq
@@ -24,8 +37,23 @@ jobs:
           sleep 10
           docker compose ps
 
+      - name: Start WebApi
+        run: |
+          dotnet run --project src/Folha360.WebApi/Folha360.WebApi.csproj --urls "http://localhost:5000" &
+          sleep 15
+
       - name: Run integration tests
-        run: dotnet test --filter "Category=Integration" --logger trx
+        run: dotnet test --no-build --filter "Category=Integration" --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
+
+      - name: Report test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Integration Test Results
+          path: ./TestResults/test-results.trx
+          reporter: dotnet-trx
+          fail-on-error: false
 
       - name: Cleanup
+        if: always()
         run: docker compose down

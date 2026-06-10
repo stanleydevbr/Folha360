@@ -41,8 +41,8 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
 
-      - name: Test
-        run: dotnet test --no-build --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
+      - name: Test (Unit only)
+        run: dotnet test --no-build --filter "Category=Unit" --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
 
       - name: Report test results
         uses: dorny/test-reporter@v1

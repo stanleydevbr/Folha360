@@ -1,28 +1,30 @@
 using System.Text.Json;
 using Folha360.Domain.Abstractions;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 
 namespace Folha360.Infrastructure.Services;
 
 public class MessageBus : IMessageBus
 {
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<MessageBus> _logger;
 
-    public MessageBus(ILogger<MessageBus> logger)
+    public MessageBus(IPublishEndpoint publishEndpoint, ILogger<MessageBus> logger)
     {
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
-    public Task PublishAsync<T>(T message, string exchange, string routingKey, CancellationToken ct = default)
+    public async Task PublishAsync<T>(T message, string exchange, string routingKey, CancellationToken ct = default)
         where T : class
     {
         var messageJson = JsonSerializer.Serialize(message);
         _logger.LogInformation(
-            "Message published to exchange: {Exchange}, routingKey: {RoutingKey}, message: {Message}",
-            exchange, routingKey, messageJson);
+            "Publishing message {MessageType} to exchange {Exchange}, routingKey: {RoutingKey}, message: {Message}",
+            typeof(T).Name, exchange, routingKey, messageJson);
 
-        // TODO: Implementar RabbitMQ publisher na F03
-        return Task.CompletedTask;
+        await _publishEndpoint.Publish(message, ct);
     }
 
     public Task ConsumeAsync<T>(
@@ -34,10 +36,12 @@ public class MessageBus : IMessageBus
         where T : class
     {
         _logger.LogInformation(
-            "Consumer registered for queue: {Queue}, exchange: {Exchange}, routingKey: {RoutingKey}",
+            "Consumer registration for queue {Queue}, exchange {Exchange}, routingKey {RoutingKey} — MassTransit consumers are registered declaratively via AddConsumer<T>() in DI",
             queue, exchange, routingKey);
 
-        // TODO: Implementar RabbitMQ consumer na F03
+        // MassTransit consumers are registered declaratively via AddConsumer<T>() in DI.
+        // The ConsumeAsync method on IMessageBus exists for interface compatibility;
+        // actual message consumption is handled by MassTransit's IConsumer<T> implementations.
         return Task.CompletedTask;
     }
 }

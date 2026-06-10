@@ -19,6 +19,18 @@ COPY src/Folha360.Eventos.Domain/*.csproj src/Folha360.Eventos.Domain/
 COPY src/Folha360.Eventos.Application/*.csproj src/Folha360.Eventos.Application/
 COPY src/Folha360.Eventos.Infrastructure/*.csproj src/Folha360.Eventos.Infrastructure/
 COPY src/Folha360.Eventos.Presentation/*.csproj src/Folha360.Eventos.Presentation/
+COPY src/Folha360.Processamento.Domain/*.csproj src/Folha360.Processamento.Domain/
+COPY src/Folha360.Processamento.Application/*.csproj src/Folha360.Processamento.Application/
+COPY src/Folha360.Processamento.Infrastructure/*.csproj src/Folha360.Processamento.Infrastructure/
+COPY src/Folha360.Processamento.Presentation/*.csproj src/Folha360.Processamento.Presentation/
+COPY src/Folha360.Fiscais.Domain/*.csproj src/Folha360.Fiscais.Domain/
+COPY src/Folha360.Fiscais.Application/*.csproj src/Folha360.Fiscais.Application/
+COPY src/Folha360.Fiscais.Infrastructure/*.csproj src/Folha360.Fiscais.Infrastructure/
+COPY src/Folha360.Fiscais.Presentation/*.csproj src/Folha360.Fiscais.Presentation/
+COPY src/Folha360.Relatorios.Domain/*.csproj src/Folha360.Relatorios.Domain/
+COPY src/Folha360.Relatorios.Application/*.csproj src/Folha360.Relatorios.Application/
+COPY src/Folha360.Relatorios.Infrastructure/*.csproj src/Folha360.Relatorios.Infrastructure/
+COPY src/Folha360.Relatorios.Presentation/*.csproj src/Folha360.Relatorios.Presentation/
 COPY tests/Folha360.Tests/*.csproj tests/Folha360.Tests/
 
 # Restore

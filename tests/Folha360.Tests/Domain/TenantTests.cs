@@ -3,6 +3,7 @@ using Folha360.Domain.Entities;
 
 namespace Folha360.Tests.Domain;
 
+[Trait("Category", "Unit")]
 public class TenantTests
 {
     [Fact]

@@ -10,6 +10,7 @@ using Moq;
 
 namespace Folha360.Tests.Eventos.Handlers;
 
+[Trait("Category", "Unit")]
 public class CriarAdmissaoHandlerTests
 {
     private readonly Mock<IAdmissaoRepository> _repoMock = new();
