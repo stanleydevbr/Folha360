@@ -402,16 +402,11 @@ public static class ServiceCollectionExtensions
         // Metrics
         services.AddSingleton<Folha360.Relatorios.Infrastructure.Metrics.RelatoriosMetrics>();
 
-        // Quartz.NET
+        // Quartz.NET — usando RAMJobStore para desenvolvimento
+        // Em produção, migrar para PersistentStore com PostgreSQL
         services.AddQuartz(q =>
         {
-            q.UsePersistentStore(store =>
-            {
-                store.UsePostgres(postgres =>
-                {
-                    postgres.ConnectionString = configuration.GetConnectionString("Postgres")!;
-                });
-            });
+            q.UseInMemoryStore();
 
             var jobKey = new JobKey("gerar_relatorio_job");
             q.AddJob<Folha360.Relatorios.Infrastructure.Jobs.GerarRelatorioJob>(jobKey, j => j
