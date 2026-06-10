@@ -1,4 +1,4 @@
-namespace Folha360.Relatorios.Domain.Abstractions;
+namespace Folha360.Relatorios.Application.Services;
 
 public interface IRelatorioStorageService
 {

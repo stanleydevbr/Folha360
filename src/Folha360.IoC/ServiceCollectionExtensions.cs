@@ -384,7 +384,7 @@ public static class ServiceCollectionExtensions
             Folha360.Relatorios.Infrastructure.Repositories.AgendamentoRepository>();
 
         // Domain Services — Storage & Cache
-        services.AddScoped<Folha360.Relatorios.Domain.Abstractions.IRelatorioStorageService,
+        services.AddScoped<Folha360.Relatorios.Application.Services.IRelatorioStorageService,
             Folha360.Relatorios.Infrastructure.Services.RelatorioStorageService>();
         services.AddSingleton<Folha360.Relatorios.Application.Services.IRedisCacheService,
             Folha360.Relatorios.Infrastructure.Services.RedisCacheService>();

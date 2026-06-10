@@ -41,7 +41,7 @@ public class FolhaController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-        return FormatarResposta(result.Value!, "folha_analitica", empresaId, periodo, formato);
+        return await FormatarRespostaAsync(result.Value!, "folha_analitica", empresaId, periodo, formato);
     }
 
     [HttpGet("folha-sintetica/{empresaId:guid}/{periodo}")]
@@ -64,39 +64,43 @@ public class FolhaController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-        return FormatarResposta(result.Value!, "folha_sintetica", empresaId, periodo, formato);
+        return await FormatarRespostaAsync(result.Value!, "folha_sintetica", empresaId, periodo, formato);
     }
 
-    private IActionResult FormatarResposta<T>(T dados, string tipo, Guid empresaId, string periodo, string? formato)
+    private async Task<IActionResult> FormatarRespostaAsync<T>(T dados, string tipo, Guid empresaId, string periodo, string? formato)
     {
-        return formato?.ToLower() switch
+        switch (formato?.ToLower())
         {
-            "csv" => Task.Run(async () =>
-            {
-                var exportService = HttpContext.RequestServices.GetRequiredService<Folha360.Relatorios.Application.Services.IRelatorioExportService>();
-                var list = new List<T> { dados };
-                var stream = await exportService.ExportarCsvAsync(list.AsReadOnly(), HttpContext.RequestAborted);
-                return File(stream, "text/csv", $"{tipo}_{empresaId}_{periodo}.csv");
-            }).Result,
-            "xml" => Task.Run(async () =>
-            {
-                var exportService = HttpContext.RequestServices.GetRequiredService<Folha360.Relatorios.Application.Services.IRelatorioExportService>();
-                var list = new List<T> { dados };
-                var stream = await exportService.ExportarXmlAsync(list.AsReadOnly(), tipo, HttpContext.RequestAborted);
-                return File(stream, "application/xml", $"{tipo}_{empresaId}_{periodo}.xml");
-            }).Result,
-            "pdf" => Task.Run(async () =>
-            {
-                var pdfService = HttpContext.RequestServices.GetRequiredService<Folha360.Relatorios.Application.Services.IRelatorioPdfService>();
-                Stream stream = dados switch
+            case "csv":
                 {
-                    FolhaAnaliticaDto fa => await pdfService.GerarFolhaAnaliticaPdfAsync(fa, HttpContext.RequestAborted),
-                    FolhaSinteticaDto fs => await pdfService.GerarFolhaSinteticaPdfAsync(fs, HttpContext.RequestAborted),
-                    _ => throw new NotSupportedException("Formato PDF não suportado para este tipo."),
-                };
-                return File(stream, "application/pdf", $"{tipo}_{empresaId}_{periodo}.pdf");
-            }).Result,
-            _ => Ok(dados),
-        };
+                    var exportService = HttpContext.RequestServices.GetRequiredService<Folha360.Relatorios.Application.Services.IRelatorioExportService>();
+                    var list = new List<T> { dados };
+                    var stream = await exportService.ExportarCsvAsync(list.AsReadOnly(), HttpContext.RequestAborted);
+                    return File(stream, "text/csv", $"{tipo}_{empresaId}_{periodo}.csv");
+                }
+
+            case "xml":
+                {
+                    var exportService = HttpContext.RequestServices.GetRequiredService<Folha360.Relatorios.Application.Services.IRelatorioExportService>();
+                    var list = new List<T> { dados };
+                    var stream = await exportService.ExportarXmlAsync(list.AsReadOnly(), tipo, HttpContext.RequestAborted);
+                    return File(stream, "application/xml", $"{tipo}_{empresaId}_{periodo}.xml");
+                }
+
+            case "pdf":
+                {
+                    var pdfService = HttpContext.RequestServices.GetRequiredService<Folha360.Relatorios.Application.Services.IRelatorioPdfService>();
+                    Stream stream = dados switch
+                    {
+                        FolhaAnaliticaDto fa => await pdfService.GerarFolhaAnaliticaPdfAsync(fa, HttpContext.RequestAborted),
+                        FolhaSinteticaDto fs => await pdfService.GerarFolhaSinteticaPdfAsync(fs, HttpContext.RequestAborted),
+                        _ => throw new NotSupportedException("Formato PDF não suportado para este tipo."),
+                    };
+                    return File(stream, "application/pdf", $"{tipo}_{empresaId}_{periodo}.pdf");
+                }
+
+            default:
+                return Ok(dados);
+        }
     }
 }

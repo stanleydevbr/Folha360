@@ -141,16 +141,12 @@ public class ObterFolhaSinteticaHandler : IRequestHandler<ObterFolhaSinteticaQue
         {
             EmpresaId = request.EmpresaId,
             Periodo = request.Periodo,
-            TotaisPorRubrica = totais.Select(kvp =>
+            TotaisPorRubrica = totais.Select(t => new RubricaTotalDto
             {
-                var parts = kvp.Key.Split('|');
-                return new RubricaTotalDto
-                {
-                    Codigo = parts[0],
-                    Nome = parts.Length > 1 ? parts[1] : string.Empty,
-                    Natureza = parts.Length > 2 ? parts[2] : string.Empty,
-                    Valor = kvp.Value,
-                };
+                Codigo = t.CodigoRubrica,
+                Nome = t.NomeRubrica,
+                Natureza = t.Natureza,
+                Valor = t.Total,
             }).ToList(),
         });
     }
@@ -173,13 +169,13 @@ public class ObterResumoMensalHandler : IRequestHandler<ObterResumoMensalQuery, 
         {
             EmpresaId = request.EmpresaId,
             Periodo = request.Periodo,
-            TotalFuncionarios = Convert.ToInt32(dados["total_funcionarios"]),
-            TotalVencimentos = Convert.ToDecimal(dados["total_vencimentos"]),
-            TotalDescontos = Convert.ToDecimal(dados["total_descontos"]),
-            TotalLiquido = Convert.ToDecimal(dados["total_liquido"]),
-            TotalIrrf = Convert.ToDecimal(dados["total_irrf"]),
-            TotalInss = Convert.ToDecimal(dados["total_inss"]),
-            TotalFgts = Convert.ToDecimal(dados["total_fgts"]),
+            TotalFuncionarios = dados.TotalFuncionarios,
+            TotalVencimentos = dados.TotalVencimentos,
+            TotalDescontos = dados.TotalDescontos,
+            TotalLiquido = dados.TotalLiquido,
+            TotalIrrf = dados.TotalIrrf,
+            TotalInss = dados.TotalInss,
+            TotalFgts = dados.TotalFgts,
         });
     }
 }
@@ -200,11 +196,11 @@ public class ObterResumoAnualHandler : IRequestHandler<ObterResumoAnualQuery, Re
         var meses = dados.Select(d => new ResumoMensalDto
         {
             EmpresaId = request.EmpresaId,
-            Periodo = d["periodo"].ToString()!,
-            TotalVencimentos = Convert.ToDecimal(d["total_vencimentos"]),
-            TotalDescontos = Convert.ToDecimal(d["total_descontos"]),
-            TotalLiquido = Convert.ToDecimal(d["total_liquido"]),
-            TotalFuncionarios = Convert.ToInt32(d["total_funcionarios"]),
+            Periodo = d.Periodo,
+            TotalVencimentos = d.TotalVencimentos,
+            TotalDescontos = d.TotalDescontos,
+            TotalLiquido = d.TotalLiquido,
+            TotalFuncionarios = d.TotalFuncionarios,
         }).ToList();
 
         return Result<ResumoAnualDto>.Success(new ResumoAnualDto

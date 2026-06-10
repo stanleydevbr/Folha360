@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Folha360.Relatorios.Application.Services;
 
 namespace Folha360.Relatorios.Presentation.Controllers;
 
@@ -21,29 +22,45 @@ public class HoleritesController : ControllerBase
         var result = await _mediator.Send(command);
 
         if (!result.IsSuccess)
+        {
             return BadRequest(result.Errors);
+        }
 
         var loteId = result.Value;
         return Accepted(new { lote_id = loteId, status_url = $"/api/relatorios/holerites/lote/{loteId}/status" });
     }
 
     [HttpGet("lote/{loteId:guid}/status")]
-    public IActionResult ObterStatusLote(Guid loteId)
+    public async Task<IActionResult> ObterStatusLote(Guid loteId)
     {
-        // Simplified status — in production, track via distributed cache or DB
-        return Ok(new LoteStatusDto
+        var cache = HttpContext.RequestServices.GetRequiredService<IRedisCacheService>();
+        var status = await cache.ObterAsync<LoteStatusDto>($"lote:{loteId}", HttpContext.RequestAborted);
+
+        if (status is null)
         {
-            LoteId = loteId,
-            Status = "concluido",
-            ProgressoPercentual = 100,
-            EstimativaSegundos = 0,
-        });
+            return NotFound(new { mensagem = "Lote não encontrado ou expirado." });
+        }
+
+        return Ok(status);
     }
 
     [HttpGet("{empresaId:guid}/{periodo}")]
-    public IActionResult ListarHolerites(Guid empresaId, string periodo)
+    public async Task<IActionResult> ListarHolerites(Guid empresaId, string periodo)
     {
-        // Simplified — in production, list from relatorio_arquivo table
-        return Ok(new { empresa_id = empresaId, periodo, holerites = Array.Empty<object>() });
+        var agendamentoRepo = HttpContext.RequestServices.GetRequiredService<Folha360.Relatorios.Domain.Abstractions.IAgendamentoRepository>();
+        var arquivos = await agendamentoRepo.ListarArquivosAsync(empresaId, periodo, HttpContext.RequestAborted);
+
+        var holerites = arquivos
+            .Where(a => a.TipoRelatorio == Folha360.Relatorios.Domain.Enums.TipoRelatorio.Holerite)
+            .Select(a => new
+            {
+                funcionario_id = a.Chave.Split('/').Last().Replace(".pdf", string.Empty),
+                periodo = a.Periodo,
+                criado_em = a.CriadoEm,
+                download_url = $"/api/relatorios/holerites/{empresaId}/{periodo}/{a.Chave.Split('/').Last()}",
+            })
+            .ToList();
+
+        return Ok(new { empresa_id = empresaId, periodo, holerites });
     }
 }

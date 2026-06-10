@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Folha360.Relatorios.Application.Services;
 using Folha360.Relatorios.Domain.Abstractions;
 using Folha360.Relatorios.Domain.Entities;
@@ -70,7 +71,7 @@ public class GerarRelatorioJob : IJob
                 await _agendamentoRepository.AdicionarArquivoAsync(arquivo, context.CancellationToken);
 
                 // Send email to recipients
-                var destinatarios = System.Text.Json.JsonSerializer.Deserialize<List<string>>(destinatariosStr) ?? new();
+                var destinatarios = JsonSerializer.Deserialize<List<string>>(destinatariosStr) ?? new();
                 if (destinatarios.Count > 0)
                 {
                     relatorioStream.Position = 0;
@@ -182,16 +183,12 @@ public class GerarRelatorioJob : IJob
         {
             EmpresaId = empresaId,
             Periodo = periodo,
-            TotaisPorRubrica = totais.Select(kvp =>
+            TotaisPorRubrica = totais.Select(t => new Application.DTOs.RubricaTotalDto
             {
-                var parts = kvp.Key.Split('|');
-                return new Application.DTOs.RubricaTotalDto
-                {
-                    Codigo = parts[0],
-                    Nome = parts.Length > 1 ? parts[1] : string.Empty,
-                    Natureza = parts.Length > 2 ? parts[2] : string.Empty,
-                    Valor = kvp.Value,
-                };
+                Codigo = t.CodigoRubrica,
+                Nome = t.NomeRubrica,
+                Natureza = t.Natureza,
+                Valor = t.Total,
             }).ToList(),
         };
 
@@ -205,13 +202,13 @@ public class GerarRelatorioJob : IJob
         {
             EmpresaId = empresaId,
             Periodo = periodo,
-            TotalFuncionarios = Convert.ToInt32(dados["total_funcionarios"]),
-            TotalVencimentos = Convert.ToDecimal(dados["total_vencimentos"]),
-            TotalDescontos = Convert.ToDecimal(dados["total_descontos"]),
-            TotalLiquido = Convert.ToDecimal(dados["total_liquido"]),
-            TotalIrrf = Convert.ToDecimal(dados["total_irrf"]),
-            TotalInss = Convert.ToDecimal(dados["total_inss"]),
-            TotalFgts = Convert.ToDecimal(dados["total_fgts"]),
+            TotalFuncionarios = dados.TotalFuncionarios,
+            TotalVencimentos = dados.TotalVencimentos,
+            TotalDescontos = dados.TotalDescontos,
+            TotalLiquido = dados.TotalLiquido,
+            TotalIrrf = dados.TotalIrrf,
+            TotalInss = dados.TotalInss,
+            TotalFgts = dados.TotalFgts,
         };
 
         return formato switch

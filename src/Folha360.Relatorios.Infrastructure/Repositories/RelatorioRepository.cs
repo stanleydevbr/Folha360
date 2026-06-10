@@ -57,26 +57,22 @@ public class RelatorioRepository : IRelatorioRepository
             .ToListAsync(ct);
     }
 
-    public async Task<Dictionary<string, decimal>> ObterFolhaSinteticaAsync(Guid empresaId, string periodo, CancellationToken ct)
+    public async Task<IReadOnlyList<FolhaSinteticaItemView>> ObterFolhaSinteticaAsync(Guid empresaId, string periodo, CancellationToken ct)
     {
-        var dados = await _context.ItemFolhaViews
+        return await _context.ItemFolhaViews
             .Where(v => v.EmpresaId == empresaId && v.Periodo == periodo)
             .GroupBy(v => new { v.CodigoRubrica, v.NomeRubrica, v.Natureza })
-            .Select(g => new
+            .Select(g => new FolhaSinteticaItemView
             {
-                g.Key.CodigoRubrica,
-                g.Key.NomeRubrica,
-                g.Key.Natureza,
+                CodigoRubrica = g.Key.CodigoRubrica,
+                NomeRubrica = g.Key.NomeRubrica,
+                Natureza = g.Key.Natureza,
                 Total = g.Sum(v => v.Valor),
             })
             .ToListAsync(ct);
-
-        return dados.ToDictionary(
-            d => $"{d.CodigoRubrica}|{d.NomeRubrica}|{d.Natureza}",
-            d => d.Total);
     }
 
-    public async Task<Dictionary<string, object>> ObterResumoMensalAsync(Guid empresaId, string periodo, CancellationToken ct)
+    public async Task<ResumoMensalView> ObterResumoMensalAsync(Guid empresaId, string periodo, CancellationToken ct)
     {
         var dados = await _context.ItemFolhaViews
             .Where(v => v.EmpresaId == empresaId && v.Periodo == periodo)
@@ -89,40 +85,33 @@ public class RelatorioRepository : IRelatorioRepository
         var totalInss = dados.Where(v => v.CodigoRubrica == "INSS").Sum(v => v.Valor);
         var totalFgts = dados.Where(v => v.CodigoRubrica == "FGTS").Sum(v => v.Valor);
 
-        return new Dictionary<string, object>
+        return new ResumoMensalView
         {
-            ["total_funcionarios"] = totalFuncionarios,
-            ["total_vencimentos"] = totalVencimentos,
-            ["total_descontos"] = Math.Abs(totalDescontos),
-            ["total_liquido"] = totalVencimentos - Math.Abs(totalDescontos),
-            ["total_irrf"] = Math.Abs(totalIrrf),
-            ["total_inss"] = Math.Abs(totalInss),
-            ["total_fgts"] = Math.Abs(totalFgts),
+            TotalFuncionarios = totalFuncionarios,
+            TotalVencimentos = totalVencimentos,
+            TotalDescontos = Math.Abs(totalDescontos),
+            TotalLiquido = totalVencimentos - Math.Abs(totalDescontos),
+            TotalIrrf = Math.Abs(totalIrrf),
+            TotalInss = Math.Abs(totalInss),
+            TotalFgts = Math.Abs(totalFgts),
         };
     }
 
-    public async Task<IReadOnlyList<Dictionary<string, object>>> ObterResumoAnualAsync(Guid empresaId, int ano, CancellationToken ct)
+    public async Task<IReadOnlyList<ResumoAnualItemView>> ObterResumoAnualAsync(Guid empresaId, int ano, CancellationToken ct)
     {
-        var dados = await _context.ItemFolhaViews
+        return await _context.ItemFolhaViews
             .Where(v => v.EmpresaId == empresaId && v.Periodo.StartsWith(ano.ToString()))
             .GroupBy(v => v.Periodo)
-            .Select(g => new
+            .Select(g => new ResumoAnualItemView
             {
                 Periodo = g.Key,
                 TotalVencimentos = g.Where(v => v.Natureza == "VENCIMENTO").Sum(v => v.Valor),
-                TotalDescontos = g.Where(v => v.Natureza == "DESCONTO").Sum(v => v.Valor),
+                TotalDescontos = Math.Abs(g.Where(v => v.Natureza == "DESCONTO").Sum(v => v.Valor)),
+                TotalLiquido = g.Where(v => v.Natureza == "VENCIMENTO").Sum(v => v.Valor)
+                    - Math.Abs(g.Where(v => v.Natureza == "DESCONTO").Sum(v => v.Valor)),
                 TotalFuncionarios = g.Select(v => v.FuncionarioId).Distinct().Count(),
             })
             .OrderBy(g => g.Periodo)
             .ToListAsync(ct);
-
-        return dados.Select(d => new Dictionary<string, object>
-        {
-            ["periodo"] = d.Periodo,
-            ["total_vencimentos"] = d.TotalVencimentos,
-            ["total_descontos"] = Math.Abs(d.TotalDescontos),
-            ["total_liquido"] = d.TotalVencimentos - Math.Abs(d.TotalDescontos),
-            ["total_funcionarios"] = d.TotalFuncionarios,
-        }).ToList();
     }
 }
