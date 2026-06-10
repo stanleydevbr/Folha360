@@ -1,4 +1,4 @@
-using Folha360.Cadastros.Application;
+using Folha360.Application;
 using Folha360.Eventos.Application.DTOs;
 using MediatR;
 

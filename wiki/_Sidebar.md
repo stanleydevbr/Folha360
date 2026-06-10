@@ -23,6 +23,7 @@
 - [ADR-003: Schema por Tenant](./adr-003-schema-por-tenant)
 - [ADR-004: Processamento Assíncrono da Folha](./adr-004-processamento-assincrono-folha)
 - [ADR-005: Redis para Cache de Tabelas](./adr-005-redis-cache-tabelas)
+- [ADR-006: Subsistema de Rubricas](./adr-006-subsistema-rubricas)
 
 ---
 
@@ -31,6 +32,15 @@
 - [Registro de Riscos Arquiteturais](./architecture-risk-register)
 - [Matriz de Tradeoffs](./tradeoff-matrix)
 - [Opções Arquiteturais (Em Aberto)](./architecture-options)
+
+---
+
+## 📊 Subsistema de Rubricas
+- [Pesquisa de Mercado](./pesquisa-mercado-rubricas)
+- [Modelo de Dados](./database-model-rubricas)
+- [Runtime View — Cálculo](./runtime-view-calculo-rubricas)
+- [Diagrama de Composição](./diagrama-composicao-dependencia-rubricas)
+- [Plano de Ação](./plano-acao-rubricas)
 
 ---
 

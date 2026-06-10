@@ -2,6 +2,8 @@ using Folha360.Domain.Entities;
 using Folha360.Infrastructure.Data.Configurations.Base;
 using Folha360.Infrastructure.Data.Configurations.Cadastros;
 using Folha360.Infrastructure.Data.Configurations.Eventos;
+using Folha360.Infrastructure.Data.Configurations.Fiscais;
+using Folha360.Infrastructure.Data.Configurations.Processamento;
 using Microsoft.EntityFrameworkCore;
 
 namespace Folha360.Infrastructure.Data;
@@ -43,6 +45,18 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Cadastros.Domain.Entities.HorarioTrabalho> HorariosTrabalho => Set<Folha360.Cadastros.Domain.Entities.HorarioTrabalho>();
 
     // ============================
+    // Módulo F02 — Cadastros (schema tenant) — Subsistema de Rubricas (ADR-006)
+    // ============================
+    public DbSet<Folha360.Cadastros.Domain.Entities.GrupoRubrica> GruposRubrica => Set<Folha360.Cadastros.Domain.Entities.GrupoRubrica>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaComposicao> RubricasComposicao => Set<Folha360.Cadastros.Domain.Entities.RubricaComposicao>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaFormula> RubricasFormula => Set<Folha360.Cadastros.Domain.Entities.RubricaFormula>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaIncidencia> RubricasIncidencia => Set<Folha360.Cadastros.Domain.Entities.RubricaIncidencia>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaTabelaProgressiva> RubricasTabelaProgressiva => Set<Folha360.Cadastros.Domain.Entities.RubricaTabelaProgressiva>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaHistorico> RubricasHistorico => Set<Folha360.Cadastros.Domain.Entities.RubricaHistorico>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.ProcessoAdministrativo> ProcessosAdministrativos => Set<Folha360.Cadastros.Domain.Entities.ProcessoAdministrativo>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RubricaProcesso> RubricasProcesso => Set<Folha360.Cadastros.Domain.Entities.RubricaProcesso>();
+
+    // ============================
     // Módulo F03 — Eventos Trabalhistas (schema tenant)
     // ============================
     public DbSet<Folha360.Eventos.Domain.Entities.Admissao> Admissoes => Set<Folha360.Eventos.Domain.Entities.Admissao>();
@@ -50,6 +64,22 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Eventos.Domain.Entities.Afastamento> Afastamentos => Set<Folha360.Eventos.Domain.Entities.Afastamento>();
     public DbSet<Folha360.Eventos.Domain.Entities.Desligamento> Desligamentos => Set<Folha360.Eventos.Domain.Entities.Desligamento>();
     public DbSet<Folha360.Eventos.Domain.Entities.AlteracaoContratual> AlteracoesContratuais => Set<Folha360.Eventos.Domain.Entities.AlteracaoContratual>();
+
+    // ============================
+    // Módulo F04 — Processamento da Folha (schema tenant)
+    // ============================
+    public DbSet<Folha360.Processamento.Domain.Entities.ProcessamentoFolha> ProcessamentosFolha => Set<Folha360.Processamento.Domain.Entities.ProcessamentoFolha>();
+    public DbSet<Folha360.Processamento.Domain.Entities.ItemFolha> ItensFolha => Set<Folha360.Processamento.Domain.Entities.ItemFolha>();
+    public DbSet<Folha360.Processamento.Domain.Entities.Holerite> Holerites => Set<Folha360.Processamento.Domain.Entities.Holerite>();
+    public DbSet<Folha360.Processamento.Domain.Entities.CadeiaFechamento> CadeiasFechamento => Set<Folha360.Processamento.Domain.Entities.CadeiaFechamento>();
+
+    // ============================
+    // Módulo F05 — Obrigações Fiscais (schema tenant)
+    // ============================
+    public DbSet<Folha360.Fiscais.Domain.Entities.ApuracaoFiscal> ApuracoesFiscais => Set<Folha360.Fiscais.Domain.Entities.ApuracaoFiscal>();
+    public DbSet<Folha360.Fiscais.Domain.Entities.GuiaRecolhimento> GuiasRecolhimento => Set<Folha360.Fiscais.Domain.Entities.GuiaRecolhimento>();
+    public DbSet<Folha360.Fiscais.Domain.Entities.RegraFiscal> RegrasFiscais => Set<Folha360.Fiscais.Domain.Entities.RegraFiscal>();
+    public DbSet<Folha360.Fiscais.Domain.Entities.LancamentoContabil> LancamentosContabeis => Set<Folha360.Fiscais.Domain.Entities.LancamentoContabil>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -77,6 +107,18 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new HorarioTrabalhoConfiguration());
 
         // ============================
+        // Módulo F02 — Cadastros — Subsistema de Rubricas (ADR-006)
+        // ============================
+        modelBuilder.ApplyConfiguration(new GrupoRubricaConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaComposicaoConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaFormulaConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaIncidenciaConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaTabelaProgressivaConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaHistoricoConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcessoAdministrativoConfiguration());
+        modelBuilder.ApplyConfiguration(new RubricaProcessoConfiguration());
+
+        // ============================
         // Módulo F03 — Eventos Trabalhistas
         // ============================
         modelBuilder.ApplyConfiguration(new AdmissaoConfiguration());
@@ -84,6 +126,22 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new AfastamentoConfiguration());
         modelBuilder.ApplyConfiguration(new DesligamentoConfiguration());
         modelBuilder.ApplyConfiguration(new AlteracaoContratualConfiguration());
+
+        // ============================
+        // Módulo F04 — Processamento da Folha
+        // ============================
+        modelBuilder.ApplyConfiguration(new ProcessamentoFolhaConfiguration());
+        modelBuilder.ApplyConfiguration(new ItemFolhaConfiguration());
+        modelBuilder.ApplyConfiguration(new HoleriteConfiguration());
+        modelBuilder.ApplyConfiguration(new CadeiaFechamentoConfiguration());
+
+        // ============================
+        // Módulo F05 — Obrigações Fiscais
+        // ============================
+        modelBuilder.ApplyConfiguration(new ApuracaoFiscalConfiguration());
+        modelBuilder.ApplyConfiguration(new GuiaRecolhimentoConfiguration());
+        modelBuilder.ApplyConfiguration(new RegraFiscalConfiguration());
+        modelBuilder.ApplyConfiguration(new LancamentoContabilConfiguration());
 
         // ============================
         // Query Filter Global: Soft Delete

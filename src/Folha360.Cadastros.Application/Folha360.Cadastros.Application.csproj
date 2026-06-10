@@ -2,9 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Folha360.Cadastros.Domain\Folha360.Cadastros.Domain.csproj" />
+    <ProjectReference Include="..\Folha360.Application\Folha360.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="12.5.0" />

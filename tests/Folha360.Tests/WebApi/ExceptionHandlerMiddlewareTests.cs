@@ -7,6 +7,7 @@ using Moq;
 
 namespace Folha360.Tests.WebApi;
 
+[Trait("Category", "Unit")]
 public class ExceptionHandlerMiddlewareTests
 {
     [Fact]

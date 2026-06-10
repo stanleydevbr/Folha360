@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <ProjectReference Include="..\Folha360.Processamento.Domain\Folha360.Processamento.Domain.csproj" />
+        <ProjectReference Include="..\Folha360.Application\Folha360.Application.csproj" />
+        <ProjectReference Include="..\Folha360.Cadastros.Domain\Folha360.Cadastros.Domain.csproj" />
+        <ProjectReference Include="..\Folha360.Eventos.Domain\Folha360.Eventos.Domain.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="12.1.1" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+        <PackageReference Include="MediatR" Version="12.5.0" />
+        <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.0" />
+    </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <NoWarn>NU1903;SA1127;SA1519</NoWarn>
+    </PropertyGroup>
+</Project>

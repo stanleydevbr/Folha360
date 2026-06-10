@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Folha360.Tests.WebApi;
 
+[Trait("Category", "Unit")]
 public class CorrelationIdMiddlewareTests
 {
     [Fact]

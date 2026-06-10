@@ -3,6 +3,7 @@ using Folha360.Eventos.Domain.Entities;
 
 namespace Folha360.Tests.Eventos.Domain;
 
+[Trait("Category", "Unit")]
 public class AfastamentoTests
 {
     [Fact]

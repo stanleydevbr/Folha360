@@ -20,7 +20,7 @@ O Folha360 é um sistema distribuído e modular para processamento de folha de p
 ### Módulos do Sistema
 1. **Cadastros** — Funcionários, empresas, cargos, rubricas
 2. **Eventos Trabalhistas** — Admissão, férias, afastamentos, desligamentos (S-2200, S-2230, S-2299)
-3. **Cálculo da Folha** — Remuneração, descontos, holerites (S-1200/S-1210)
+3. **Cálculo da Folha** — Remuneração, descontos, holerites (S-1200/S-1210) — [ADR-007](outputs/arquitetura/adr-007-motor-calculo-folha.md) | [Runbook](outputs/instrucoes/runbook-f04-processamento.md)
 4. **Obrigações Fiscais** — IRRF, INSS, FGTS (S-5001/S-5002)
 5. **Relatórios** — Holerites, DIRF, RAIS, exportações
 6. **Integração e-Social** — Envio de eventos, consulta de recibos

@@ -7,6 +7,7 @@ using Moq;
 
 namespace Folha360.Tests.Eventos.Infrastructure;
 
+[Trait("Category", "Unit")]
 public class XmlGeradorServiceTests
 {
     private readonly XmlGeradorService _service;

@@ -37,6 +37,7 @@ public class GerarXmlAlteracaoContratualConsumer : IConsumer<GerarXmlAlteracaoCo
         var alteracao = await _repo.GetByIdAsync(msg.AlteracaoContratualId, context.CancellationToken);
         if (alteracao is null)
         {
+            _logger.LogWarning("AlteracaoContratual {AlteracaoContratualId} não encontrada para geração de XML", msg.AlteracaoContratualId);
             return;
         }
 
@@ -44,6 +45,7 @@ public class GerarXmlAlteracaoContratualConsumer : IConsumer<GerarXmlAlteracaoCo
         var empresa = await _empresaRepo.GetByIdAsync(alteracao.EmpresaId, context.CancellationToken);
         if (funcionario is null || empresa is null)
         {
+            _logger.LogWarning("Dados complementares não encontrados para AlteracaoContratualId={AlteracaoContratualId}", msg.AlteracaoContratualId);
             return;
         }
 

@@ -8,9 +8,12 @@
     <ProjectReference Include="..\Folha360.Domain\Folha360.Domain.csproj" />
     <ProjectReference Include="..\Folha360.Cadastros.Domain\Folha360.Cadastros.Domain.csproj" />
     <ProjectReference Include="..\Folha360.Eventos.Domain\Folha360.Eventos.Domain.csproj" />
+    <ProjectReference Include="..\Folha360.Processamento.Domain\Folha360.Processamento.Domain.csproj" />
+    <ProjectReference Include="..\Folha360.Fiscais.Domain\Folha360.Fiscais.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MassTransit.Abstractions" Version="8.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

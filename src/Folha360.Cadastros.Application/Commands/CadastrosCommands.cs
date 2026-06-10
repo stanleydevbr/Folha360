@@ -149,6 +149,8 @@ public sealed record CriarRubricaCommand : IRequest<Result<RubricaDto>>
     public string Descricao { get; init; } = string.Empty;
     public string Natureza { get; init; } = string.Empty;
     public string? TipoEsocial { get; init; }
+    public string? DescricaoAbreviada { get; init; }
+    public bool EnviarEsocial { get; init; } = true;
     public bool IncideInss { get; init; }
     public bool IncideIrrf { get; init; }
     public bool IncideFgts { get; init; }
@@ -156,8 +158,26 @@ public sealed record CriarRubricaCommand : IRequest<Result<RubricaDto>>
     public bool IncideDecimoTerceiro { get; init; }
     public bool IncideFerias { get; init; }
     public bool IncideAvisoPrevio { get; init; }
+    public bool IncideRescisao { get; init; }
+    public bool IncideDissidio { get; init; }
+    public bool IncideSalarioMaternidade { get; init; }
+    public bool IncideAuxilioDoenca { get; init; }
+    public bool IncideAdiantamento { get; init; }
+    public string TipoCalculo { get; init; } = "VALOR_FIXO";
     public string? FormulaCalculo { get; init; }
+    public decimal? ValorFixo { get; init; }
+    public decimal? Percentual { get; init; }
+    public Guid? RubricaBaseId { get; init; }
+    public int OrdemCalculo { get; init; }
     public int OrdemExibicao { get; init; }
+    public int? PrioridadeDesconto { get; init; }
+    public decimal? TetoMaximo { get; init; }
+    public decimal? PisoMinimo { get; init; }
+    public bool Ativo { get; init; } = true;
+    public DateTime? DataInicioVigencia { get; init; }
+    public DateTime? DataFimVigencia { get; init; }
+    public string? Observacao { get; init; }
+    public Guid? GrupoRubricaId { get; init; }
 }
 
 public sealed record AtualizarRubricaCommand : IRequest<Result<RubricaDto>>
@@ -166,6 +186,8 @@ public sealed record AtualizarRubricaCommand : IRequest<Result<RubricaDto>>
     public string Descricao { get; init; } = string.Empty;
     public string Natureza { get; init; } = string.Empty;
     public string? TipoEsocial { get; init; }
+    public string? DescricaoAbreviada { get; init; }
+    public bool? EnviarEsocial { get; init; }
     public bool? IncideInss { get; init; }
     public bool? IncideIrrf { get; init; }
     public bool? IncideFgts { get; init; }
@@ -173,11 +195,67 @@ public sealed record AtualizarRubricaCommand : IRequest<Result<RubricaDto>>
     public bool? IncideDecimoTerceiro { get; init; }
     public bool? IncideFerias { get; init; }
     public bool? IncideAvisoPrevio { get; init; }
+    public bool? IncideRescisao { get; init; }
+    public bool? IncideDissidio { get; init; }
+    public bool? IncideSalarioMaternidade { get; init; }
+    public bool? IncideAuxilioDoenca { get; init; }
+    public bool? IncideAdiantamento { get; init; }
+    public string? TipoCalculo { get; init; }
     public string? FormulaCalculo { get; init; }
+    public decimal? ValorFixo { get; init; }
+    public decimal? Percentual { get; init; }
+    public Guid? RubricaBaseId { get; init; }
+    public int? OrdemCalculo { get; init; }
     public int? OrdemExibicao { get; init; }
+    public int? PrioridadeDesconto { get; init; }
+    public decimal? TetoMaximo { get; init; }
+    public decimal? PisoMinimo { get; init; }
+    public bool? Ativo { get; init; }
+    public DateTime? DataInicioVigencia { get; init; }
+    public DateTime? DataFimVigencia { get; init; }
+    public string? Observacao { get; init; }
+    public Guid? GrupoRubricaId { get; init; }
 }
 
 public sealed record ExcluirRubricaCommand(Guid Id) : IRequest<Result<bool>>;
+
+// ============================
+// Rubrica — Simulação e Conformidade (ADR-006)
+// ============================
+public sealed record SimularRubricaCommand : IRequest<Result<SimulacaoResultadoDto>>
+{
+    public Guid EmpresaId { get; init; }
+    public decimal SalarioBase { get; init; }
+    public string? TipoContrato { get; init; }
+    public decimal? QuantidadeHoras { get; init; }
+    public decimal? QuantidadeDias { get; init; }
+    public List<Guid> RubricasIds { get; init; } = new();
+}
+
+public sealed record VerificarConformidadeQuery : IRequest<Result<List<ConformidadeRubricaDto>>>
+{
+    public Guid EmpresaId { get; init; }
+}
+
+// ============================
+// Processo Administrativo (S-1070)
+// ============================
+public sealed record CriarProcessoAdministrativoCommand : IRequest<Result<ProcessoAdministrativoDto>>
+{
+    public Guid EmpresaId { get; init; }
+    public string NumeroProcesso { get; init; } = string.Empty;
+    public string Tipo { get; init; } = string.Empty;
+    public string? Orgao { get; init; }
+    public DateTime? DataInicio { get; init; }
+    public DateTime? DataFim { get; init; }
+    public string? Observacao { get; init; }
+}
+
+public sealed record VincularRubricaProcessoCommand : IRequest<Result<bool>>
+{
+    public Guid ProcessoAdministrativoId { get; init; }
+    public Guid RubricaId { get; init; }
+}
 
 // ============================
 // Lotacao
@@ -199,3 +277,91 @@ public sealed record AtualizarLotacaoCommand : IRequest<Result<LotacaoDto>>
 }
 
 public sealed record ExcluirLotacaoCommand(Guid Id) : IRequest<Result<bool>>;
+
+// ============================
+// Subsistema de Rubricas (ADR-006)
+// ============================
+
+// --- GrupoRubrica ---
+public sealed record CriarGrupoRubricaCommand : IRequest<Result<GrupoRubricaDto>>
+{
+    public Guid EmpresaId { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Descricao { get; init; } = string.Empty;
+    public string Natureza { get; init; } = string.Empty;
+    public int OrdemExibicao { get; init; }
+}
+
+public sealed record AtualizarGrupoRubricaCommand : IRequest<Result<GrupoRubricaDto>>
+{
+    public Guid Id { get; init; }
+    public string Descricao { get; init; } = string.Empty;
+    public string Natureza { get; init; } = string.Empty;
+    public int? OrdemExibicao { get; init; }
+}
+
+public sealed record ExcluirGrupoRubricaCommand(Guid Id) : IRequest<Result<bool>>;
+
+// --- RubricaComposicao ---
+public sealed record AdicionarComponenteCommand : IRequest<Result<RubricaComposicaoDto>>
+{
+    public Guid RubricaPrincipalId { get; init; }
+    public Guid RubricaComponenteId { get; init; }
+    public string Operador { get; init; } = "+";
+    public decimal? PercentualComposicao { get; init; }
+    public int Ordem { get; init; }
+    public bool Obrigatorio { get; init; } = true;
+}
+
+public sealed record RemoverComponenteCommand(Guid RubricaPrincipalId, Guid ComposicaoId) : IRequest<Result<bool>>;
+
+// --- RubricaFormula ---
+public sealed record CriarRubricaFormulaCommand : IRequest<Result<RubricaFormulaDto>>
+{
+    public Guid RubricaId { get; init; }
+    public string Expressao { get; init; } = string.Empty;
+    public string? Parametros { get; init; }
+    public string? DescricaoFormal { get; init; }
+}
+
+public sealed record AtualizarRubricaFormulaCommand : IRequest<Result<RubricaFormulaDto>>
+{
+    public Guid RubricaId { get; init; }
+    public string Expressao { get; init; } = string.Empty;
+    public string? Parametros { get; init; }
+    public string? DescricaoFormal { get; init; }
+}
+
+// --- RubricaTabelaProgressiva ---
+public sealed record CriarFaixaProgressivaCommand : IRequest<Result<RubricaTabelaProgressivaDto>>
+{
+    public Guid RubricaId { get; init; }
+    public int AnoVigencia { get; init; }
+    public decimal FaixaDe { get; init; }
+    public decimal? FaixaAte { get; init; }
+    public decimal Aliquota { get; init; }
+    public decimal Deducao { get; init; }
+    public int Ordem { get; init; }
+}
+
+public sealed record AtualizarFaixaProgressivaCommand : IRequest<Result<RubricaTabelaProgressivaDto>>
+{
+    public Guid Id { get; init; }
+    public int AnoVigencia { get; init; }
+    public decimal FaixaDe { get; init; }
+    public decimal? FaixaAte { get; init; }
+    public decimal Aliquota { get; init; }
+    public decimal Deducao { get; init; }
+    public int Ordem { get; init; }
+}
+
+public sealed record ExcluirFaixaProgressivaCommand(Guid Id) : IRequest<Result<bool>>;
+
+// --- RubricaIncidencia ---
+public sealed record AdicionarIncidenciaCommand : IRequest<Result<RubricaIncidenciaDto>>
+{
+    public Guid RubricaId { get; init; }
+    public string TipoIncidencia { get; init; } = string.Empty;
+}
+
+public sealed record RemoverIncidenciaCommand(Guid RubricaId, Guid IncidenciaId) : IRequest<Result<bool>>;

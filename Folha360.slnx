@@ -9,7 +9,15 @@
     <Project Path="src/Folha360.Eventos.Application/Folha360.Eventos.Application.csproj" />
     <Project Path="src/Folha360.Eventos.Infrastructure/Folha360.Eventos.Infrastructure.csproj" />
     <Project Path="src/Folha360.Eventos.Presentation/Folha360.Eventos.Presentation.csproj" />
+    <Project Path="src/Folha360.Processamento.Domain/Folha360.Processamento.Domain.csproj" />
+    <Project Path="src/Folha360.Processamento.Application/Folha360.Processamento.Application.csproj" />
+    <Project Path="src/Folha360.Processamento.Infrastructure/Folha360.Processamento.Infrastructure.csproj" />
+    <Project Path="src/Folha360.Processamento.Presentation/Folha360.Processamento.Presentation.csproj" />
     <Project Path="src/Folha360.Domain/Folha360.Domain.csproj" />
+    <Project Path="src/Folha360.Fiscais.Application/Folha360.Fiscais.Application.csproj" />
+    <Project Path="src/Folha360.Fiscais.Domain/Folha360.Fiscais.Domain.csproj" />
+    <Project Path="src/Folha360.Fiscais.Infrastructure/Folha360.Fiscais.Infrastructure.csproj" />
+    <Project Path="src/Folha360.Fiscais.Presentation/Folha360.Fiscais.Presentation.csproj" />
     <Project Path="src/Folha360.Infrastructure/Folha360.Infrastructure.csproj" />
     <Project Path="src/Folha360.IoC/Folha360.IoC.csproj" />
     <Project Path="src/Folha360.WebApi/Folha360.WebApi.csproj" />

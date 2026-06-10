@@ -52,12 +52,20 @@ Consulte a página **[Features & Roadmap](./Features)** para:
 - [ADR-003: Schema por Tenant](./adr-003-schema-por-tenant)
 - [ADR-004: Processamento Assíncrono da Folha](./adr-004-processamento-assincrono-folha)
 - [ADR-005: Redis para Cache de Tabelas](./adr-005-redis-cache-tabelas)
+- [ADR-006: Subsistema de Rubricas com Composição e Fórmulas](./adr-006-subsistema-rubricas)
 
 ### 🔍 Análises e Avaliações
 - [Cenários de Atributos de Qualidade](./quality-attribute-scenarios) — Performance, segurança, disponibilidade
 - [Registro de Riscos](./architecture-risk-register) — Heatmap e mitigações
 - [Matriz de Tradeoffs](./tradeoff-matrix) — Análise comparativa de decisões
 - [Opções Arquiteturais](./architecture-options) — Decisões em aberto
+
+### 📊 Subsistema de Rubricas
+- [Pesquisa de Mercado — Rubricas](./pesquisa-mercado-rubricas) — Análise competitiva
+- [Modelo de Dados — Rubricas](./database-model-rubricas) — Tabelas expandidas
+- [Runtime View — Cálculo de Rubricas](./runtime-view-calculo-rubricas) — Motor de 4 fases
+- [Diagrama de Composição](./diagrama-composicao-dependencia-rubricas) — Dependências
+- [Plano de Ação](./plano-acao-rubricas) — 13 sprints, 7 fases
 
 ### 📋 Boas Práticas de Desenvolvimento
 - [Backend .NET 10](./instrucoes-backend) — Convenções de código, MediatR, EF Core

@@ -22,6 +22,7 @@ public class AdmissaoConfiguration : IEntityTypeConfiguration<Admissao>
         entity.Property(e => e.UpdatedAt).IsRequired();
         entity.Property(e => e.DeletedAt);
         entity.HasIndex(e => e.FuncionarioId).HasFilter("deleted_at IS NULL");
+        entity.HasIndex(e => e.FuncionarioId).IsUnique().HasFilter("deleted_at IS NULL");
         entity.HasIndex(e => e.EmpresaId);
         entity.HasIndex(e => e.DataAdmissao);
     }

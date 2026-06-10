@@ -37,6 +37,7 @@ public class GerarXmlFeriasConsumer : IConsumer<GerarXmlFeriasCommand>
         var ferias = await _repo.GetByIdAsync(msg.FeriasId, context.CancellationToken);
         if (ferias is null)
         {
+            _logger.LogWarning("Ferias {FeriasId} não encontrada para geração de XML", msg.FeriasId);
             return;
         }
 
@@ -44,6 +45,7 @@ public class GerarXmlFeriasConsumer : IConsumer<GerarXmlFeriasCommand>
         var empresa = await _empresaRepo.GetByIdAsync(ferias.EmpresaId, context.CancellationToken);
         if (funcionario is null || empresa is null)
         {
+            _logger.LogWarning("Dados complementares não encontrados para FeriasId={FeriasId}", msg.FeriasId);
             return;
         }
 

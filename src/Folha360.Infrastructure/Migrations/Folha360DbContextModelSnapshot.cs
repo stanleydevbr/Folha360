@@ -604,6 +604,61 @@ namespace Folha360.Infrastructure.Migrations
                     b.ToTable("funcionario", "public");
                 });
 
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.GrupoRubrica", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("codigo");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("descricao");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<string>("Natureza")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("natureza");
+
+                    b.Property<int>("OrdemExibicao")
+                        .HasColumnType("integer")
+                        .HasColumnName("ordem_exibicao");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_grupo_rubrica");
+
+                    b.HasIndex("EmpresaId", "Codigo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_grupo_rubrica_empresa_id_codigo");
+
+                    b.ToTable("grupo_rubrica", "public");
+                });
+
             modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.HorarioTrabalho", b =>
                 {
                     b.Property<Guid>("Id")
@@ -737,12 +792,77 @@ namespace Folha360.Infrastructure.Migrations
                     b.ToTable("lotacao", "public");
                 });
 
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.ProcessoAdministrativo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DataFim")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_fim");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_inicio");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<string>("NumeroProcesso")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("numero_processo");
+
+                    b.Property<string>("Observacao")
+                        .HasColumnType("text")
+                        .HasColumnName("observacao");
+
+                    b.Property<string>("Orgao")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("orgao");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipo");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_processo_administrativo");
+
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("ix_processo_administrativo_empresa_id");
+
+                    b.ToTable("processo_administrativo", "public");
+                });
+
             modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.Rubrica", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
 
                     b.Property<string>("Codigo")
                         .IsRequired()
@@ -754,6 +874,14 @@ namespace Folha360.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<DateTime?>("DataFimVigencia")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_fim_vigencia");
+
+                    b.Property<DateTime?>("DataInicioVigencia")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_inicio_vigencia");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
@@ -764,14 +892,34 @@ namespace Folha360.Infrastructure.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("descricao");
 
+                    b.Property<string>("DescricaoAbreviada")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("descricao_abreviada");
+
                     b.Property<Guid>("EmpresaId")
                         .HasColumnType("uuid")
                         .HasColumnName("empresa_id");
 
+                    b.Property<bool>("EnviarEsocial")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enviar_esocial");
+
                     b.Property<string>("FormulaCalculo")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("formula_calculo");
+
+                    b.Property<Guid?>("GrupoRubricaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("grupo_rubrica_id");
+
+                    b.Property<bool>("IncideAdiantamento")
+                        .HasColumnType("boolean")
+                        .HasColumnName("incide_adiantamento");
+
+                    b.Property<bool>("IncideAuxilioDoenca")
+                        .HasColumnType("boolean")
+                        .HasColumnName("incide_auxilio_doenca");
 
                     b.Property<bool>("IncideAvisoPrevio")
                         .HasColumnType("boolean")
@@ -784,6 +932,10 @@ namespace Folha360.Infrastructure.Migrations
                     b.Property<bool>("IncideDecimoTerceiro")
                         .HasColumnType("boolean")
                         .HasColumnName("incide_decimo_terceiro");
+
+                    b.Property<bool>("IncideDissidio")
+                        .HasColumnType("boolean")
+                        .HasColumnName("incide_dissidio");
 
                     b.Property<bool>("IncideFerias")
                         .HasColumnType("boolean")
@@ -801,15 +953,57 @@ namespace Folha360.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("incide_irrf");
 
+                    b.Property<bool>("IncideRescisao")
+                        .HasColumnType("boolean")
+                        .HasColumnName("incide_rescisao");
+
+                    b.Property<bool>("IncideSalarioMaternidade")
+                        .HasColumnType("boolean")
+                        .HasColumnName("incide_salario_maternidade");
+
                     b.Property<string>("Natureza")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("natureza");
 
+                    b.Property<string>("Observacao")
+                        .HasColumnType("text")
+                        .HasColumnName("observacao");
+
+                    b.Property<int>("OrdemCalculo")
+                        .HasColumnType("integer")
+                        .HasColumnName("ordem_calculo");
+
                     b.Property<int>("OrdemExibicao")
                         .HasColumnType("integer")
                         .HasColumnName("ordem_exibicao");
+
+                    b.Property<decimal?>("Percentual")
+                        .HasColumnType("numeric(7,4)")
+                        .HasColumnName("percentual");
+
+                    b.Property<decimal?>("PisoMinimo")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("piso_minimo");
+
+                    b.Property<int?>("PrioridadeDesconto")
+                        .HasColumnType("integer")
+                        .HasColumnName("prioridade_desconto");
+
+                    b.Property<Guid?>("RubricaBaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_base_id");
+
+                    b.Property<decimal?>("TetoMaximo")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("teto_maximo");
+
+                    b.Property<string>("TipoCalculo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipo_calculo");
 
                     b.Property<string>("TipoEsocial")
                         .HasMaxLength(10)
@@ -820,11 +1014,21 @@ namespace Folha360.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<decimal?>("ValorFixo")
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("valor_fixo");
+
                     b.HasKey("Id")
                         .HasName("pk_rubrica");
 
+                    b.HasIndex("GrupoRubricaId")
+                        .HasDatabaseName("ix_rubrica_grupo_rubrica_id");
+
                     b.HasIndex("Natureza")
                         .HasDatabaseName("ix_rubrica_natureza");
+
+                    b.HasIndex("RubricaBaseId")
+                        .HasDatabaseName("ix_rubrica_rubrica_base_id");
 
                     b.HasIndex("TipoEsocial")
                         .HasDatabaseName("ix_rubrica_tipo_esocial");
@@ -835,6 +1039,300 @@ namespace Folha360.Infrastructure.Migrations
                         .HasFilter("deleted_at IS NULL");
 
                     b.ToTable("rubrica", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaComposicao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("Obrigatorio")
+                        .HasColumnType("boolean")
+                        .HasColumnName("obrigatorio");
+
+                    b.Property<string>("Operador")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)")
+                        .HasColumnName("operador");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("integer")
+                        .HasColumnName("ordem");
+
+                    b.Property<decimal?>("PercentualComposicao")
+                        .HasColumnType("numeric(7,4)")
+                        .HasColumnName("percentual_composicao");
+
+                    b.Property<Guid>("RubricaComponenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_componente_id");
+
+                    b.Property<Guid>("RubricaPrincipalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_principal_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rubrica_composicao");
+
+                    b.HasIndex("RubricaComponenteId")
+                        .HasDatabaseName("ix_rubrica_composicao_rubrica_componente_id");
+
+                    b.HasIndex("RubricaPrincipalId", "RubricaComponenteId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_rubrica_composicao_rubrica_principal_id_rubrica_componente_");
+
+                    b.ToTable("rubrica_composicao", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaFormula", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("DescricaoFormal")
+                        .HasColumnType("text")
+                        .HasColumnName("descricao_formal");
+
+                    b.Property<string>("Expressao")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("expressao");
+
+                    b.Property<string>("Parametros")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("parametros");
+
+                    b.Property<Guid>("RubricaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Versao")
+                        .HasColumnType("integer")
+                        .HasColumnName("versao");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rubrica_formula");
+
+                    b.HasIndex("RubricaId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_rubrica_formula_rubrica_id");
+
+                    b.ToTable("rubrica_formula", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaHistorico", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DadosAnteriores")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("dados_anteriores");
+
+                    b.Property<string>("DadosNovos")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("dados_novos");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Motivo")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivo");
+
+                    b.Property<Guid>("RubricaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rubrica_historico");
+
+                    b.HasIndex("RubricaId", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("ix_rubrica_historico_rubrica_id_created_at");
+
+                    b.ToTable("rubrica_historico", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaIncidencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("RubricaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_id");
+
+                    b.Property<string>("TipoIncidencia")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipo_incidencia");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rubrica_incidencia");
+
+                    b.HasIndex("RubricaId", "TipoIncidencia")
+                        .IsUnique()
+                        .HasDatabaseName("ix_rubrica_incidencia_rubrica_id_tipo_incidencia");
+
+                    b.ToTable("rubrica_incidencia", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaProcesso", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("ProcessoAdministrativoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("processo_administrativo_id");
+
+                    b.Property<Guid>("RubricaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rubrica_processo");
+
+                    b.HasIndex("ProcessoAdministrativoId")
+                        .HasDatabaseName("ix_rubrica_processo_processo_administrativo_id");
+
+                    b.HasIndex("RubricaId", "ProcessoAdministrativoId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_rubrica_processo_rubrica_id_processo_administrativo_id");
+
+                    b.ToTable("rubrica_processo", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaTabelaProgressiva", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Aliquota")
+                        .HasColumnType("numeric(7,4)")
+                        .HasColumnName("aliquota");
+
+                    b.Property<int>("AnoVigencia")
+                        .HasColumnType("integer")
+                        .HasColumnName("ano_vigencia");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<decimal>("Deducao")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("deducao");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<decimal?>("FaixaAte")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("faixa_ate");
+
+                    b.Property<decimal>("FaixaDe")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("faixa_de");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("integer")
+                        .HasColumnName("ordem");
+
+                    b.Property<Guid>("RubricaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rubrica_tabela_progressiva");
+
+                    b.HasIndex("RubricaId", "AnoVigencia", "Ordem")
+                        .HasDatabaseName("ix_rubrica_tabela_progressiva_rubrica_id_ano_vigencia_ordem");
+
+                    b.ToTable("rubrica_tabela_progressiva", "public");
                 });
 
             modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.Sindicato", b =>
@@ -1135,6 +1633,7 @@ namespace Folha360.Infrastructure.Migrations
                         .HasDatabaseName("ix_admissao_empresa_id");
 
                     b.HasIndex("FuncionarioId")
+                        .IsUnique()
                         .HasDatabaseName("ix_admissao_funcionario_id")
                         .HasFilter("deleted_at IS NULL");
 
@@ -1383,6 +1882,774 @@ namespace Folha360.Infrastructure.Migrations
                         .HasFilter("deleted_at IS NULL");
 
                     b.ToTable("ferias", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Fiscais.Domain.Entities.ApuracaoFiscal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Aliquota")
+                        .HasColumnType("decimal(7,4)")
+                        .HasColumnName("aliquota");
+
+                    b.Property<decimal>("BaseCalculo")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("base_calculo");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly>("DataVencimento")
+                        .HasColumnType("date")
+                        .HasColumnName("data_vencimento");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<DateOnly>("Periodo")
+                        .HasColumnType("date")
+                        .HasColumnName("periodo");
+
+                    b.Property<Guid>("ProcessamentoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("processamento_id");
+
+                    b.Property<Guid?>("RegraFiscalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("regra_fiscal_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Tributo")
+                        .HasColumnType("integer")
+                        .HasColumnName("tributo");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<decimal>("ValorDevido")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("valor_devido");
+
+                    b.Property<decimal>("ValorPago")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("valor_pago");
+
+                    b.HasKey("Id")
+                        .HasName("pk_apuracao_fiscal");
+
+                    b.HasIndex("ProcessamentoId")
+                        .HasDatabaseName("ix_apuracao_fiscal_processamento_id");
+
+                    b.HasIndex("EmpresaId", "Periodo")
+                        .HasDatabaseName("ix_apuracao_fiscal_empresa_id_periodo");
+
+                    b.HasIndex("EmpresaId", "Periodo", "Tributo", "ProcessamentoId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_apuracao_fiscal_empresa_id_periodo_tributo_processamento_id")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("apuracao_fiscal", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Fiscais.Domain.Entities.GuiaRecolhimento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ApuracaoFiscalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("apuracao_fiscal_id");
+
+                    b.Property<string>("CodigoReceita")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("codigo_receita");
+
+                    b.Property<string>("ComprovanteMinioKey")
+                        .HasColumnType("text")
+                        .HasColumnName("comprovante_minio_key");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DataPagamento")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_pagamento");
+
+                    b.Property<DateOnly>("DataVencimento")
+                        .HasColumnType("date")
+                        .HasColumnName("data_vencimento");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<string>("MinioKey")
+                        .HasColumnType("text")
+                        .HasColumnName("minio_key");
+
+                    b.Property<DateOnly>("Periodo")
+                        .HasColumnType("date")
+                        .HasColumnName("periodo");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("TipoGuia")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipo_guia");
+
+                    b.Property<int>("Tributo")
+                        .HasColumnType("integer")
+                        .HasColumnName("tributo");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("valor");
+
+                    b.Property<decimal?>("ValorPago")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("valor_pago");
+
+                    b.HasKey("Id")
+                        .HasName("pk_guia_recolhimento");
+
+                    b.HasIndex("ApuracaoFiscalId")
+                        .HasDatabaseName("ix_guia_recolhimento_apuracao_fiscal_id");
+
+                    b.HasIndex("DataVencimento")
+                        .HasDatabaseName("ix_guia_recolhimento_data_vencimento");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_guia_recolhimento_status");
+
+                    b.HasIndex("EmpresaId", "Periodo")
+                        .HasDatabaseName("ix_guia_recolhimento_empresa_id_periodo");
+
+                    b.ToTable("guia_recolhimento", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Fiscais.Domain.Entities.LancamentoContabil", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ApuracaoFiscalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("apuracao_fiscal_id");
+
+                    b.Property<string>("ContaCredito")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("conta_credito");
+
+                    b.Property<string>("ContaDebito")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("conta_debito");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly>("Data")
+                        .HasColumnType("date")
+                        .HasColumnName("data");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<int>("Formato")
+                        .HasColumnType("integer")
+                        .HasColumnName("formato");
+
+                    b.Property<string>("Historico")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("historico");
+
+                    b.Property<string>("MinioKey")
+                        .HasColumnType("text")
+                        .HasColumnName("minio_key");
+
+                    b.Property<DateOnly>("Periodo")
+                        .HasColumnType("date")
+                        .HasColumnName("periodo");
+
+                    b.Property<int>("Tributo")
+                        .HasColumnType("integer")
+                        .HasColumnName("tributo");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_lancamento_contabil");
+
+                    b.HasIndex("ApuracaoFiscalId")
+                        .HasDatabaseName("ix_lancamento_contabil_apuracao_fiscal_id");
+
+                    b.HasIndex("EmpresaId", "Periodo")
+                        .HasDatabaseName("ix_lancamento_contabil_empresa_id_periodo");
+
+                    b.ToTable("lancamento_contabil", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Fiscais.Domain.Entities.RegraFiscal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("ativo");
+
+                    b.Property<string>("CodigoReceita")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("codigo_receita");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Parametros")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("parametros");
+
+                    b.Property<int>("Tributo")
+                        .HasColumnType("integer")
+                        .HasColumnName("tributo");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Versao")
+                        .HasColumnType("integer")
+                        .HasColumnName("versao");
+
+                    b.Property<DateOnly?>("VigenciaFim")
+                        .HasColumnType("date")
+                        .HasColumnName("vigencia_fim");
+
+                    b.Property<DateOnly>("VigenciaInicio")
+                        .HasColumnType("date")
+                        .HasColumnName("vigencia_inicio");
+
+                    b.HasKey("Id")
+                        .HasName("pk_regra_fiscal");
+
+                    b.HasIndex("Tributo", "Versao")
+                        .IsUnique()
+                        .HasDatabaseName("ix_regra_fiscal_tributo_versao");
+
+                    b.HasIndex("Tributo", "VigenciaInicio", "VigenciaFim")
+                        .HasDatabaseName("ix_regra_fiscal_tributo_vigencia_inicio_vigencia_fim");
+
+                    b.ToTable("regra_fiscal", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Processamento.Domain.Entities.CadeiaFechamento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DataFim")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_fim");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_inicio");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<string>("Erro")
+                        .HasColumnType("text")
+                        .HasColumnName("erro");
+
+                    b.Property<int>("Etapa")
+                        .HasColumnType("integer")
+                        .HasColumnName("etapa");
+
+                    b.Property<string>("HistoricoVersoes")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("[]")
+                        .HasColumnName("historico_versoes");
+
+                    b.Property<DateOnly>("Periodo")
+                        .HasColumnType("date")
+                        .HasColumnName("periodo");
+
+                    b.Property<Guid>("ProcessamentoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("processamento_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Versao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("versao");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cadeia_fechamento");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_cadeia_fechamento_status");
+
+                    b.HasIndex("EmpresaId", "Periodo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cadeia_fechamento_empresa_id_periodo");
+
+                    b.ToTable("cadeia_fechamento", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Processamento.Domain.Entities.Holerite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("DataGeracao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_geracao");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("funcionario_id");
+
+                    b.Property<string>("MinioKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("minio_key");
+
+                    b.Property<Guid>("ProcessamentoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("processamento_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_holerite");
+
+                    b.HasIndex("FuncionarioId")
+                        .HasDatabaseName("ix_holerite_funcionario_id");
+
+                    b.HasIndex("ProcessamentoId")
+                        .HasDatabaseName("ix_holerite_processamento_id");
+
+                    b.ToTable("holerite", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Processamento.Domain.Entities.ItemFolha", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("BaseCalculo")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("base_calculo");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("DataCalculo")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_calculo");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<int>("Fase")
+                        .HasColumnType("integer")
+                        .HasColumnName("fase");
+
+                    b.Property<string>("FormulaAplicada")
+                        .HasColumnType("text")
+                        .HasColumnName("formula_aplicada");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("funcionario_id");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("integer")
+                        .HasColumnName("ordem");
+
+                    b.Property<Guid>("ProcessamentoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("processamento_id");
+
+                    b.Property<Guid>("RubricaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubrica_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_item_folha");
+
+                    b.HasIndex("RubricaId")
+                        .HasDatabaseName("ix_item_folha_rubrica_id");
+
+                    b.HasIndex("ProcessamentoId", "FuncionarioId")
+                        .HasDatabaseName("ix_item_folha_processamento_id_funcionario_id");
+
+                    b.ToTable("item_folha", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Processamento.Domain.Entities.ProcessamentoFolha", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DataFim")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_fim");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_inicio");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<string>("Erro")
+                        .HasColumnType("text")
+                        .HasColumnName("erro");
+
+                    b.Property<int>("FuncionariosComErro")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("funcionarios_com_erro");
+
+                    b.Property<int>("FuncionariosProcessados")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("funcionarios_processados");
+
+                    b.Property<string>("MotivoReabertura")
+                        .HasColumnType("text")
+                        .HasColumnName("motivo_reabertura");
+
+                    b.Property<DateOnly>("Periodo")
+                        .HasColumnType("date")
+                        .HasColumnName("periodo");
+
+                    b.Property<Guid?>("ProcessamentoOriginalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("processamento_original_id");
+
+                    b.Property<DateTime?>("ReabertoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reaberto_em");
+
+                    b.Property<string>("ReabertoPor")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("reaberto_por");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("TipoCalculo")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipo_calculo");
+
+                    b.Property<decimal>("TotalDescontos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("total_descontos");
+
+                    b.Property<decimal>("TotalFgts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("total_fgts");
+
+                    b.Property<int>("TotalFuncionarios")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("total_funcionarios");
+
+                    b.Property<decimal>("TotalLiquido")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("total_liquido");
+
+                    b.Property<decimal>("TotalVencimentos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("total_vencimentos");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Versao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("versao");
+
+                    b.HasKey("Id")
+                        .HasName("pk_processamento_folha");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_processamento_folha_status");
+
+                    b.HasIndex("EmpresaId", "Periodo")
+                        .HasDatabaseName("ix_processamento_folha_empresa_id_periodo");
+
+                    b.HasIndex("EmpresaId", "Periodo", "TipoCalculo", "Versao")
+                        .IsUnique()
+                        .HasDatabaseName("ix_processamento_folha_empresa_id_periodo_tipo_calculo_versao");
+
+                    b.ToTable("processamento_folha", "public");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.Rubrica", b =>
+                {
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.GrupoRubrica", "GrupoRubrica")
+                        .WithMany("Rubricas")
+                        .HasForeignKey("GrupoRubricaId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_rubrica_grupos_rubrica_grupo_rubrica_id");
+
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.Rubrica", "RubricaBase")
+                        .WithMany()
+                        .HasForeignKey("RubricaBaseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_rubrica_rubrica_rubrica_base_id");
+
+                    b.Navigation("GrupoRubrica");
+
+                    b.Navigation("RubricaBase");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaComposicao", b =>
+                {
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.Rubrica", "RubricaComponente")
+                        .WithMany()
+                        .HasForeignKey("RubricaComponenteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubrica_composicao_rubrica_rubrica_componente_id");
+
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.Rubrica", "RubricaPrincipal")
+                        .WithMany("Composicoes")
+                        .HasForeignKey("RubricaPrincipalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubrica_composicao_rubrica_rubrica_principal_id");
+
+                    b.Navigation("RubricaComponente");
+
+                    b.Navigation("RubricaPrincipal");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaFormula", b =>
+                {
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.Rubrica", "Rubrica")
+                        .WithOne("Formula")
+                        .HasForeignKey("Folha360.Cadastros.Domain.Entities.RubricaFormula", "RubricaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubrica_formula_rubrica_rubrica_id");
+
+                    b.Navigation("Rubrica");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaHistorico", b =>
+                {
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.Rubrica", "Rubrica")
+                        .WithMany("Historico")
+                        .HasForeignKey("RubricaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubrica_historico_rubrica_rubrica_id");
+
+                    b.Navigation("Rubrica");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaIncidencia", b =>
+                {
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.Rubrica", "Rubrica")
+                        .WithMany("Incidencias")
+                        .HasForeignKey("RubricaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubrica_incidencia_rubrica_rubrica_id");
+
+                    b.Navigation("Rubrica");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaProcesso", b =>
+                {
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.ProcessoAdministrativo", "ProcessoAdministrativo")
+                        .WithMany("RubricasProcesso")
+                        .HasForeignKey("ProcessoAdministrativoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubrica_processo_processo_administrativo_processo_administr");
+
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.Rubrica", "Rubrica")
+                        .WithMany()
+                        .HasForeignKey("RubricaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubrica_processo_rubrica_rubrica_id");
+
+                    b.Navigation("ProcessoAdministrativo");
+
+                    b.Navigation("Rubrica");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.RubricaTabelaProgressiva", b =>
+                {
+                    b.HasOne("Folha360.Cadastros.Domain.Entities.Rubrica", "Rubrica")
+                        .WithMany("TabelasProgressivas")
+                        .HasForeignKey("RubricaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubrica_tabela_progressiva_rubrica_rubrica_id");
+
+                    b.Navigation("Rubrica");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.GrupoRubrica", b =>
+                {
+                    b.Navigation("Rubricas");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.ProcessoAdministrativo", b =>
+                {
+                    b.Navigation("RubricasProcesso");
+                });
+
+            modelBuilder.Entity("Folha360.Cadastros.Domain.Entities.Rubrica", b =>
+                {
+                    b.Navigation("Composicoes");
+
+                    b.Navigation("Formula");
+
+                    b.Navigation("Historico");
+
+                    b.Navigation("Incidencias");
+
+                    b.Navigation("TabelasProgressivas");
                 });
 #pragma warning restore 612, 618
         }
