@@ -3,6 +3,7 @@ using FluentValidation.TestHelper;
 
 namespace Folha360.Tests.Application;
 
+[Trait("Category", "Unit")]
 public class LoginCommandValidatorTests
 {
     private readonly LoginCommandValidator _validator = new();

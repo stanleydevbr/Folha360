@@ -3,6 +3,7 @@ using Folha360.Cadastros.Domain.Services;
 
 namespace Folha360.Tests.Cadastros.Domain.Services;
 
+[Trait("Category", "Unit")]
 public class MotorCalculoTests
 {
     private readonly MotorCalculo _motor;

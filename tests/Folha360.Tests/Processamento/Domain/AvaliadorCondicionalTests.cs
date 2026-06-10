@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Folha360.Tests.Processamento.Domain;
 
+[Trait("Category", "Unit")]
 public class AvaliadorCondicionalTests
 {
     private readonly AvaliadorCondicional _avaliador = new();

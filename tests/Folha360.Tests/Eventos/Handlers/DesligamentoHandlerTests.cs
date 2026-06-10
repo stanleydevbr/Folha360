@@ -9,6 +9,7 @@ using Moq;
 
 namespace Folha360.Tests.Eventos.Handlers;
 
+[Trait("Category", "Unit")]
 public class CriarDesligamentoHandlerTests
 {
     [Fact]

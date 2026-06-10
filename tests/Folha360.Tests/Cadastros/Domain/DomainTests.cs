@@ -4,6 +4,7 @@ using Folha360.Cadastros.Domain.ValueObjects;
 
 namespace Folha360.Tests.Cadastros.Domain;
 
+[Trait("Category", "Unit")]
 public class ValueObjectsTests
 {
     [Fact]

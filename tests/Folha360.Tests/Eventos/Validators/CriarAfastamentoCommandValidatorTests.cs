@@ -4,6 +4,7 @@ using Folha360.Eventos.Domain;
 
 namespace Folha360.Tests.Eventos.Validators;
 
+[Trait("Category", "Unit")]
 public class CriarAfastamentoCommandValidatorTests
 {
     private readonly CriarAfastamentoCommandValidator _validator = new();

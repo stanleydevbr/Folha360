@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Folha360.Tests.Fiscais.Domain;
 
+[Trait("Category", "Unit")]
 public class RegraFiscalFactoryTests
 {
     [Fact]

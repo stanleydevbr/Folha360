@@ -3,6 +3,7 @@ using Folha360.Eventos.Application.Validators;
 
 namespace Folha360.Tests.Eventos.Validators;
 
+[Trait("Category", "Unit")]
 public class CriarAlteracaoContratualCommandValidatorTests
 {
     private readonly CriarAlteracaoContratualCommandValidator _validator = new();

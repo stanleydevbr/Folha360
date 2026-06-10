@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Folha360.Tests.Processamento.Domain;
 
+[Trait("Category", "Unit")]
 public class AvaliadorExpressaoTests
 {
     private readonly Mock<IExpressionEvaluator> _evaluatorMock;

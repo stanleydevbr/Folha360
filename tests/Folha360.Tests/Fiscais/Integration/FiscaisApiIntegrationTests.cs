@@ -11,6 +11,7 @@ namespace Folha360.Tests.Fiscais.Integration;
 /// Executa contra o ambiente Docker (docker compose up -d).
 /// Requer: PostgreSQL, RabbitMQ, Redis, MinIO e WebApi rodando.
 /// </summary>
+[Trait("Category", "Integration")]
 public class FiscaisApiIntegrationTests : IClassFixture<FiscaisIntegrationFixture>
 {
     private readonly FiscaisIntegrationFixture _fixture;

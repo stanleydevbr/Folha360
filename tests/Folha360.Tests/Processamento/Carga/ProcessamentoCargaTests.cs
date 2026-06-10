@@ -14,6 +14,7 @@ namespace Folha360.Tests.Processamento.Carga;
 /// (HttpClient, _empresaId, _funcionarioId) e abrem conexões diretas ao PostgreSQL,
 /// o que saturaria o pool de conexões em paralelo.
 /// </summary>
+[Trait("Category", "Integration")]
 [Collection("Carga")]
 public class ProcessamentoCargaTests
 {
