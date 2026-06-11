@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Minio;
 using Quartz;
 
 namespace Folha360.IoC;
@@ -114,6 +115,9 @@ public static class ServiceCollectionExtensions
 
         // Relatórios & Exportações Module (F06)
         services.AddFolha360Relatorios(configuration);
+
+        // Integração e-Social Module (F07)
+        services.AddFolha360Esocial(configuration);
 
         // MassTransit + RabbitMQ (centralizado — único AddMassTransit por container)
         services.AddFolha360MassTransit(configuration);
@@ -457,6 +461,13 @@ public static class ServiceCollectionExtensions
             x.AddConsumer<Folha360.Relatorios.Application.Consumers.ObrigacoesApuradasConsumer>();
             x.AddConsumer<Folha360.Relatorios.Application.Consumers.FolhaReabertaConsumer>();
 
+            // Consumers — Módulo F07 (Integração e-Social)
+            x.AddConsumer<Folha360.Esocial.Application.Consumers.EventoRemuneracaoGeradoConsumer>();
+            x.AddConsumer<Folha360.Esocial.Application.Consumers.FolhaFechadaEsocialConsumer>();
+            x.AddConsumer<Folha360.Esocial.Application.Consumers.FuncionarioAdmitidoEsocialConsumer>();
+            x.AddConsumer<Folha360.Esocial.Application.Consumers.FuncionarioDesligadoEsocialConsumer>();
+            x.AddConsumer<Folha360.Esocial.Application.Consumers.FeriasConcedidasEsocialConsumer>();
+
             x.UsingRabbitMq((ctx, cfg) =>
             {
                 cfg.Host(configuration["RabbitMQ:Host"] ?? "rabbitmq", "/", h =>
@@ -469,6 +480,81 @@ public static class ServiceCollectionExtensions
                 cfg.ConfigureEndpoints(ctx);
             });
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddFolha360Esocial(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        // DbContext
+        services.AddDbContextFactory<Folha360.Esocial.Infrastructure.Data.EsocialDbContext>(options =>
+            options.UseSnakeCaseNamingConvention()
+            .UseNpgsql(
+                configuration.GetConnectionString("Postgres"),
+                npgsql => npgsql.EnableRetryOnFailure(3)));
+
+        services.AddScoped<Folha360.Esocial.Infrastructure.Data.EsocialDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<Folha360.Esocial.Infrastructure.Data.EsocialDbContext>>().CreateDbContext());
+
+        // Repositories
+        services.AddScoped<Folha360.Esocial.Domain.Abstractions.IEventoEsocialRepository,
+            Folha360.Esocial.Infrastructure.Repositories.EventoEsocialRepository>();
+        services.AddScoped<Folha360.Esocial.Domain.Abstractions.ILoteEsocialRepository,
+            Folha360.Esocial.Infrastructure.Repositories.LoteEsocialRepository>();
+        services.AddScoped<Folha360.Esocial.Domain.Abstractions.IFalhaEsocialRepository,
+            Folha360.Esocial.Infrastructure.Repositories.FalhaEsocialRepository>();
+        services.AddScoped<Folha360.Esocial.Domain.Abstractions.ICertificadoDigitalRepository,
+            Folha360.Esocial.Infrastructure.Repositories.CertificadoDigitalRepository>();
+
+        // Application Services
+        services.AddScoped<Folha360.Esocial.Application.Services.IXmlAssinaturaService,
+            Folha360.Esocial.Infrastructure.Services.XmlAssinaturaService>();
+        services.AddScoped<Folha360.Esocial.Application.Services.IEsocialEnvioService,
+            Folha360.Esocial.Infrastructure.Services.EsocialSoapClient>();
+        services.AddScoped<Folha360.Esocial.Application.Services.IXsdSchemaService,
+            Folha360.Esocial.Infrastructure.Services.XsdSchemaService>();
+        services.AddScoped<Folha360.Esocial.Application.Services.ICertificadoService,
+            Folha360.Esocial.Infrastructure.Services.CertificadoService>();
+
+        // Domain Services
+        services.AddScoped<Folha360.Esocial.Application.Services.ILoteEnvioOrchestrator,
+            Folha360.Esocial.Infrastructure.Services.LoteEnvioOrchestrator>();
+
+        // HttpClient para SOAP e-Social
+        services.AddHttpClient<Folha360.Esocial.Application.Services.IEsocialEnvioService, Folha360.Esocial.Infrastructure.Services.EsocialSoapClient>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(300);
+        });
+
+        // MinIO Client (para XSDs)
+        services.AddSingleton<Minio.IMinioClient>(sp =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            var endpoint = config["MinIO:Endpoint"] ?? "minio:9000";
+            var accessKey = config["MinIO:AccessKey"] ?? "minioadmin";
+            var secretKey = config["MinIO:SecretKey"] ?? "minioadmin";
+
+            return new Minio.MinioClient()
+                .WithEndpoint(endpoint)
+                .WithCredentials(accessKey, secretKey)
+                .WithSSL(false)
+                .Build();
+        });
+
+        // Health Check
+        services.AddHealthChecks()
+            .AddCheck<Folha360.Esocial.Infrastructure.Services.EsocialHealthCheck>("esocial");
+
+        // MediatR
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Folha360.Esocial.Application.Commands.EnviarLoteCommand).Assembly);
+        });
+
+        // FluentValidation
+        services.AddValidatorsFromAssemblyContaining<Folha360.Esocial.Application.Validators.EnviarLoteCommandValidator>();
 
         return services;
     }
