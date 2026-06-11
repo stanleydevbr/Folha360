@@ -1,6 +1,7 @@
 using Folha360.Domain.Entities;
 using Folha360.Infrastructure.Data.Configurations.Base;
 using Folha360.Infrastructure.Data.Configurations.Cadastros;
+using Folha360.Infrastructure.Data.Configurations.Esocial;
 using Folha360.Infrastructure.Data.Configurations.Eventos;
 using Folha360.Infrastructure.Data.Configurations.Fiscais;
 using Folha360.Infrastructure.Data.Configurations.Processamento;
@@ -92,6 +93,14 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Relatorios.Domain.Entities.DirfAnualView> DirfAnualViews => Set<Folha360.Relatorios.Domain.Entities.DirfAnualView>();
     public DbSet<Folha360.Relatorios.Domain.Entities.RaisAnualView> RaisAnualViews => Set<Folha360.Relatorios.Domain.Entities.RaisAnualView>();
 
+    // ============================
+    // Módulo F07 — Integração e-Social (schema public)
+    // ============================
+    public DbSet<Folha360.Esocial.Domain.Entities.EventoEsocial> EventosEsocial => Set<Folha360.Esocial.Domain.Entities.EventoEsocial>();
+    public DbSet<Folha360.Esocial.Domain.Entities.LoteEsocial> LotesEsocial => Set<Folha360.Esocial.Domain.Entities.LoteEsocial>();
+    public DbSet<Folha360.Esocial.Domain.Entities.FalhaEsocial> FalhasEsocial => Set<Folha360.Esocial.Domain.Entities.FalhaEsocial>();
+    public DbSet<Folha360.Esocial.Domain.Entities.CertificadoDigital> CertificadosDigitais => Set<Folha360.Esocial.Domain.Entities.CertificadoDigital>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("public");
@@ -163,6 +172,14 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new ItemFolhaViewConfiguration());
         modelBuilder.ApplyConfiguration(new DirfAnualViewConfiguration());
         modelBuilder.ApplyConfiguration(new RaisAnualViewConfiguration());
+
+        // ============================
+        // Módulo F07 — Integração e-Social
+        // ============================
+        modelBuilder.ApplyConfiguration(new EventoEsocialConfiguration());
+        modelBuilder.ApplyConfiguration(new LoteEsocialConfiguration());
+        modelBuilder.ApplyConfiguration(new FalhaEsocialConfiguration());
+        modelBuilder.ApplyConfiguration(new CertificadoDigitalConfiguration());
 
         // ============================
         // Query Filter Global: Soft Delete
