@@ -18,6 +18,7 @@
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
     <PackageReference Include="NBomber" Version="5.8.2" />
+    <PackageReference Include="MassTransit" Version="8.4.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,10 @@
     <ProjectReference Include="..\..\src\Folha360.Fiscais.Domain\Folha360.Fiscais.Domain.csproj" />
     <ProjectReference Include="..\..\src\Folha360.Fiscais.Application\Folha360.Fiscais.Application.csproj" />
     <ProjectReference Include="..\..\src\Folha360.Fiscais.Infrastructure\Folha360.Fiscais.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Folha360.Relatorios.Domain\Folha360.Relatorios.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Folha360.Relatorios.Application\Folha360.Relatorios.Application.csproj" />
+    <ProjectReference Include="..\..\src\Folha360.Relatorios.Infrastructure\Folha360.Relatorios.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Folha360.Processamento.Domain\Folha360.Processamento.Domain.csproj" />
   </ItemGroup>
 
 </Project>
