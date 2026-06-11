@@ -7,6 +7,8 @@ using Folha360.Esocial.Domain;
 using Folha360.Esocial.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
 
 namespace Folha360.Esocial.Infrastructure.Services;
 
@@ -15,6 +17,7 @@ public class EsocialSoapClient : IEsocialEnvioService
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly ILogger<EsocialSoapClient> _logger;
+    private readonly AsyncRetryPolicy<HttpResponseMessage> _retryPolicy;
 
     private static readonly Dictionary<TipoAmbiente, string> Endpoints = new()
     {
@@ -27,6 +30,19 @@ public class EsocialSoapClient : IEsocialEnvioService
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
+
+        _retryPolicy = Policy<HttpResponseMessage>
+            .Handle<HttpRequestException>()
+            .OrResult(r => (int)r.StatusCode >= 500 || r.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            .WaitAndRetryAsync(
+                3,
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                (result, timeSpan, retryCount, _) =>
+                {
+                    _logger.LogWarning(
+                        "Tentativa {RetryCount} de envio SOAP falhou. Aguardando {Delay}s antes da próxima tentativa. Status: {StatusCode}",
+                        retryCount, timeSpan.TotalSeconds, result.Result?.StatusCode);
+                });
     }
 
     public async Task<string> EnviarLoteAsync(LoteEsocial lote, List<EventoEsocial> eventos, CancellationToken ct)
@@ -37,7 +53,7 @@ public class EsocialSoapClient : IEsocialEnvioService
         _logger.LogInformation("Enviando lote {LoteId} com {Count} eventos para {Endpoint}", lote.Id, eventos.Count, endpoint);
 
         using var content = new StringContent(soapEnvelope, Encoding.UTF8, "application/soap+xml");
-        var response = await _httpClient.PostAsync(endpoint, content, ct);
+        var response = await _retryPolicy.ExecuteAsync(() => _httpClient.PostAsync(endpoint, content, ct));
         response.EnsureSuccessStatusCode();
 
         var responseBody = await response.Content.ReadAsStringAsync(ct);
@@ -55,7 +71,7 @@ public class EsocialSoapClient : IEsocialEnvioService
         _logger.LogInformation("Consultando recibo do protocolo {Protocolo}", protocolo);
 
         using var content = new StringContent(soapEnvelope, Encoding.UTF8, "application/soap+xml");
-        var response = await _httpClient.PostAsync(endpoint, content, ct);
+        var response = await _retryPolicy.ExecuteAsync(() => _httpClient.PostAsync(endpoint, content, ct));
         response.EnsureSuccessStatusCode();
 
         var responseBody = await response.Content.ReadAsStringAsync(ct);

@@ -12,23 +12,20 @@ namespace Folha360.Esocial.Application.Handlers;
 
 public class EnviarLoteCommandHandler : IRequestHandler<EnviarLoteCommand, Result<LoteEnvioResultDto>>
 {
-    private readonly IEventoEsocialRepository _eventoRepo;
-    private readonly ILoteEsocialRepository _loteRepo;
+    private readonly ILoteEnvioOrchestrator _orchestrator;
     private readonly IXmlAssinaturaService _assinaturaService;
     private readonly IEsocialEnvioService _envioService;
     private readonly ICertificadoDigitalRepository _certificadoRepo;
     private readonly ILogger<EnviarLoteCommandHandler> _logger;
 
     public EnviarLoteCommandHandler(
-        IEventoEsocialRepository eventoRepo,
-        ILoteEsocialRepository loteRepo,
+        ILoteEnvioOrchestrator orchestrator,
         IXmlAssinaturaService assinaturaService,
         IEsocialEnvioService envioService,
         ICertificadoDigitalRepository certificadoRepo,
         ILogger<EnviarLoteCommandHandler> logger)
     {
-        _eventoRepo = eventoRepo;
-        _loteRepo = loteRepo;
+        _orchestrator = orchestrator;
         _assinaturaService = assinaturaService;
         _envioService = envioService;
         _certificadoRepo = certificadoRepo;
@@ -39,7 +36,6 @@ public class EnviarLoteCommandHandler : IRequestHandler<EnviarLoteCommand, Resul
     {
         var ambiente = Enum.Parse<TipoAmbiente>(request.TipoAmbiente);
 
-        // Buscar certificado ativo
         var certificado = await _certificadoRepo.ObterAtivoPorEmpresaAsync(request.EmpresaId, ct);
         if (certificado == null)
             return Result<LoteEnvioResultDto>.Failure("CERT_NAO_ENCONTRADO", "Nenhum certificado digital ativo encontrado.");
@@ -47,45 +43,34 @@ public class EnviarLoteCommandHandler : IRequestHandler<EnviarLoteCommand, Resul
         if (certificado.EstaExpirado)
             return Result<LoteEnvioResultDto>.Failure("CERT_EXPIRADO", "Certificado digital expirado.");
 
-        // Buscar eventos pendentes
-        var eventos = await _eventoRepo.ObterPendentesPorEmpresaAsync(request.EmpresaId, 100, ct);
+        var eventos = await _orchestrator.ObterEventosPendentesAsync(request.EmpresaId, 100, ct);
         if (eventos.Count == 0)
             return Result<LoteEnvioResultDto>.Failure("SEM_EVENTOS", "Nenhum evento pendente para envio.");
 
-        // Criar lote
-        var lote = new LoteEsocial(request.EmpresaId, ambiente);
-        lote.IniciarAssinatura(eventos.Count);
-        await _loteRepo.AdicionarAsync(lote, ct);
+        var lote = await _orchestrator.CriarLoteAsync(request.EmpresaId, ambiente, eventos.Count, ct);
 
-        // Assinar eventos
         foreach (var evento in eventos)
         {
             try
             {
                 evento.Validar();
                 var xmlAssinado = await _assinaturaService.AssinarXmlAsync(evento.XmlConteudo, certificado, null, ct);
-                evento.Assinar(certificado.Id, xmlAssinado.GetHashCode().ToString("X"));
-                evento.Enviar(lote.Id);
-                await _eventoRepo.AtualizarAsync(evento, ct);
+                await _orchestrator.RegistrarEventoAssinadoAsync(
+                    evento, certificado.Id, xmlAssinado.GetHashCode().ToString("X"), lote.Id, ct);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao assinar evento {EventoId}", evento.Id);
-                evento.MarcarErro();
-                await _eventoRepo.AtualizarAsync(evento, ct);
+                await _orchestrator.RegistrarEventoComErroAsync(evento, ex, ct);
             }
         }
 
-        lote.ConcluirAssinatura();
-        await _loteRepo.AtualizarAsync(lote, ct);
+        await _orchestrator.ConcluirLoteAsync(lote, ct);
 
-        // Enviar lote
         try
         {
             var eventosAssinados = eventos.Where(e => e.Status == StatusEvento.Enviado).ToList();
             var protocolo = await _envioService.EnviarLoteAsync(lote, eventosAssinados, ct);
-            lote.Enviar(protocolo);
-            await _loteRepo.AtualizarAsync(lote, ct);
+            await _orchestrator.RegistrarEnvioLoteAsync(lote, protocolo, ct);
 
             return Result<LoteEnvioResultDto>.Success(new LoteEnvioResultDto(
                 lote.Id, protocolo, eventosAssinados.Count, lote.Status.ToString()));
@@ -93,8 +78,7 @@ public class EnviarLoteCommandHandler : IRequestHandler<EnviarLoteCommand, Resul
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao enviar lote {LoteId}", lote.Id);
-            lote.MarcarErro();
-            await _loteRepo.AtualizarAsync(lote, ct);
+            await _orchestrator.RegistrarErroLoteAsync(lote, ct);
 
             return Result<LoteEnvioResultDto>.Failure("ERRO_ENVIO", $"Erro ao enviar lote: {ex.Message}");
         }

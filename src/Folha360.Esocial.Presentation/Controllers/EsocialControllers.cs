@@ -101,10 +101,12 @@ public class CertificadoController : ControllerBase
     }
 
     [HttpPost("certificados")]
-    public async Task<ActionResult<Result<CertificadoDto>>> UploadCertificado([FromBody] CertificadoUploadRequest request)
+    public async Task<ActionResult<Result<CertificadoDto>>> UploadCertificado(
+        [FromQuery] Guid empresaId,
+        [FromBody] CertificadoUploadRequest request)
     {
         var command = new UploadCertificadoA1Command(
-            Guid.Empty, // EmpresaId virá do tenant context
+            empresaId,
             request.ArquivoPfx,
             request.Senha);
 
@@ -113,9 +115,11 @@ public class CertificadoController : ControllerBase
     }
 
     [HttpPost("certificados/a3/testar")]
-    public async Task<ActionResult<Result<CertificadoDto>>> TestarCertificadoA3([FromBody] CertificadoA3TestRequest request)
+    public async Task<ActionResult<Result<CertificadoDto>>> TestarCertificadoA3(
+        [FromQuery] Guid empresaId,
+        [FromBody] CertificadoA3TestRequest request)
     {
-        var command = new TestarCertificadoA3Command(Guid.Empty, request.Pin);
+        var command = new TestarCertificadoA3Command(empresaId, request.Pin);
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }

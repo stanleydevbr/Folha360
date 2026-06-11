@@ -32,16 +32,38 @@ public class ConsultarReciboJob : IJob
 
         try
         {
-            // Buscar lotes enviados que ainda não foram processados
-            // Nota: em produção, isso seria filtrado por status = Enviado e DataEnvio há mais de 5 min
-            _logger.LogInformation("ConsultarReciboJob concluído.");
+            var lotesParaConsultar = await _loteRepo.ObterLotesEnviadosPendentesAsync(context.CancellationToken);
+
+            foreach (var lote in lotesParaConsultar)
+            {
+                if (string.IsNullOrWhiteSpace(lote.ProtocoloEnvio))
+                    continue;
+
+                try
+                {
+                    var resposta = await _envioService.ConsultarReciboAsync(
+                        lote.ProtocoloEnvio,
+                        lote.TipoAmbiente,
+                        context.CancellationToken);
+
+                    lote.Processar(resposta);
+                    await _loteRepo.AtualizarAsync(lote, context.CancellationToken);
+
+                    _logger.LogInformation("Lote {LoteId} processado com sucesso. Protocolo: {Protocolo}",
+                        lote.Id, lote.ProtocoloEnvio);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Erro ao consultar recibo do lote {LoteId}", lote.Id);
+                }
+            }
+
+            _logger.LogInformation("ConsultarReciboJob concluído. {Count} lotes consultados.", lotesParaConsultar.Count);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro no ConsultarReciboJob.");
         }
-
-        await Task.CompletedTask;
     }
 }
 

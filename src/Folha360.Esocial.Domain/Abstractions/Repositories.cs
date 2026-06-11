@@ -16,6 +16,7 @@ public interface ILoteEsocialRepository
 {
     Task<LoteEsocial?> ObterPorIdAsync(Guid id, CancellationToken ct = default);
     Task<List<LoteEsocial>> ObterPorEmpresaAsync(Guid empresaId, DateTime? inicio = null, DateTime? fim = null, CancellationToken ct = default);
+    Task<List<LoteEsocial>> ObterLotesEnviadosPendentesAsync(CancellationToken ct = default);
     Task AdicionarAsync(LoteEsocial lote, CancellationToken ct = default);
     Task AtualizarAsync(LoteEsocial lote, CancellationToken ct = default);
     Task<LoteEsocial?> ObterPorProtocoloAsync(string protocolo, CancellationToken ct = default);

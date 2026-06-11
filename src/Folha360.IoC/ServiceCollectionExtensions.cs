@@ -518,6 +518,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Folha360.Esocial.Application.Services.ICertificadoService,
             Folha360.Esocial.Infrastructure.Services.CertificadoService>();
 
+        // Domain Services
+        services.AddScoped<Folha360.Esocial.Application.Services.ILoteEnvioOrchestrator,
+            Folha360.Esocial.Infrastructure.Services.LoteEnvioOrchestrator>();
+
         // HttpClient para SOAP e-Social
         services.AddHttpClient<Folha360.Esocial.Application.Services.IEsocialEnvioService, Folha360.Esocial.Infrastructure.Services.EsocialSoapClient>(client =>
         {

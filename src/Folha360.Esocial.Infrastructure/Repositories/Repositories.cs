@@ -71,6 +71,12 @@ public class LoteEsocialRepository : ILoteEsocialRepository
         return await query.OrderByDescending(l => l.CreatedAt).ToListAsync(ct);
     }
 
+    public async Task<List<LoteEsocial>> ObterLotesEnviadosPendentesAsync(CancellationToken ct = default)
+        => await _context.LotesEsocial
+            .Where(l => l.Status == StatusLote.Enviado && l.DataEnvio != null)
+            .OrderBy(l => l.DataEnvio)
+            .ToListAsync(ct);
+
     public async Task AdicionarAsync(LoteEsocial lote, CancellationToken ct = default)
     {
         await _context.LotesEsocial.AddAsync(lote, ct);

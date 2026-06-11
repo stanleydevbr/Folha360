@@ -11,10 +11,12 @@ namespace Folha360.Esocial.Infrastructure.Services;
 
 public class XmlAssinaturaService : IXmlAssinaturaService
 {
+    private readonly ICertificadoService _certificadoService;
     private readonly ILogger<XmlAssinaturaService> _logger;
 
-    public XmlAssinaturaService(ILogger<XmlAssinaturaService> logger)
+    public XmlAssinaturaService(ICertificadoService certificadoService, ILogger<XmlAssinaturaService> logger)
     {
+        _certificadoService = certificadoService;
         _logger = logger;
     }
 
@@ -22,7 +24,7 @@ public class XmlAssinaturaService : IXmlAssinaturaService
     {
         try
         {
-            X509Certificate2? cert = await CarregarCertificadoAsync(certificado, senhaPin);
+            var cert = await _certificadoService.CarregarCertificadoAsync(certificado, senhaPin, ct);
 
             var xmlDoc = new XmlDocument();
             xmlDoc.PreserveWhitespace = true;
@@ -52,35 +54,5 @@ public class XmlAssinaturaService : IXmlAssinaturaService
             _logger.LogError(ex, "Erro ao assinar XML. Certificado: {Cnpj}", certificado.Cnpj);
             throw;
         }
-    }
-
-    private async Task<X509Certificate2> CarregarCertificadoAsync(CertificadoDigital certificado, string? senhaPin)
-    {
-        if (certificado.Tipo == TipoCertificado.A1)
-        {
-            if (certificado.ArquivoPfx == null || certificado.ArquivoPfx.Length == 0)
-                throw new InvalidOperationException("Arquivo PFX não encontrado para certificado A1.");
-
-            if (string.IsNullOrWhiteSpace(senhaPin))
-                throw new InvalidOperationException("Senha do certificado A1 é obrigatória.");
-
-            return await Task.FromResult(new X509Certificate2(certificado.ArquivoPfx, senhaPin));
-        }
-        else if (certificado.Tipo == TipoCertificado.A3)
-        {
-            if (string.IsNullOrWhiteSpace(senhaPin))
-                throw new InvalidOperationException("PIN do token A3 é obrigatório.");
-
-            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly);
-
-            var certs = store.Certificates.Find(X509FindType.FindBySubjectName, certificado.Emitente, true);
-            if (certs.Count == 0)
-                throw new InvalidOperationException($"Certificado A3 não encontrado no store: {certificado.Emitente}");
-
-            return await Task.FromResult(certs[0]);
-        }
-
-        throw new NotSupportedException($"Tipo de certificado não suportado: {certificado.Tipo}");
     }
 }

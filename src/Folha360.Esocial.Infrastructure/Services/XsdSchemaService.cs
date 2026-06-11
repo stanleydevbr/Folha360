@@ -155,9 +155,8 @@ public class XsdSchemaService : IXsdSchemaService
 
     private Task<XmlSchemaSet> CarregarSchemaEmbeddedAsync(TipoEventoEsocial tipoEvento)
     {
-        // Embedded fallback: usa schemas básicos embutidos
-        var schemaSet = new XmlSchemaSet();
-        _logger.LogInformation("Usando schema embedded para {Tipo}", tipoEvento);
-        return Task.FromResult(schemaSet);
+        throw new InvalidOperationException(
+            $"Schema XSD não encontrado para o evento {tipoEvento}. " +
+            "Verifique se os schemas foram baixados do portal e-Social e armazenados no MinIO.");
     }
 }

@@ -27,6 +27,17 @@ public interface ICertificadoService
     Task<CertificadoInfo> ObterInfoAsync(CertificadoDigital certificado, CancellationToken ct);
 }
 
+public interface ILoteEnvioOrchestrator
+{
+    Task<List<EventoEsocial>> ObterEventosPendentesAsync(Guid empresaId, int limite, CancellationToken ct);
+    Task<LoteEsocial> CriarLoteAsync(Guid empresaId, TipoAmbiente ambiente, int quantidadeEventos, CancellationToken ct);
+    Task RegistrarEventoAssinadoAsync(EventoEsocial evento, Guid certificadoId, string hash, Guid loteId, CancellationToken ct);
+    Task RegistrarEventoComErroAsync(EventoEsocial evento, Exception ex, CancellationToken ct);
+    Task ConcluirLoteAsync(LoteEsocial lote, CancellationToken ct);
+    Task RegistrarEnvioLoteAsync(LoteEsocial lote, string protocolo, CancellationToken ct);
+    Task RegistrarErroLoteAsync(LoteEsocial lote, CancellationToken ct);
+}
+
 public record CertificadoInfo(
     string Tipo,
     string Cnpj,
