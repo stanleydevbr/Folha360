@@ -2,6 +2,8 @@
 
 Este documento define a ordem de implementação do software Folha360, organizada em **features incrementais** que entregam valor de negócio a cada iteração. Cada feature possui seu próprio PRD (Product Requirements Document).
 
+> **Atualização (Junho 2026) — Cadastros Expandidos**: Com base no [levantamento completo de cadastros do Departamento Pessoal](../inputs/cadastros-folha360v1.md), as features F01 e F02 foram significativamente ampliadas. O escopo de cadastros passou de ~10 entidades para **30+ entidades**, cobrindo todo o ecossistema de dados necessário para operadores de DP e contadores. Isso impacta o cronograma e as dependências das features subsequentes.
+
 A ordenação segue os princípios:
 1. **Fundação primeiro** — infraestrutura e módulos sem dependências
 2. **Cadeia de valor** — features que geram valor de negócio o mais cedo possível
@@ -14,8 +16,8 @@ A ordenação segue os princípios:
 
 | # | Feature | Módulo(s) | Depende de | Complexidade | Prazo Estimado |
 |---|---|---|---|---|---|
-| F01 | Fundação & Infraestrutura | Infra | — | 🔴 Alta | 3-4 semanas |
-| F02 | Gestão de Cadastros | Cadastros | F01 | 🟡 Média | 4-5 semanas |
+| F01 | Fundação & Infraestrutura | Infra | — | 🔴 Alta | 4-5 semanas |
+| F02 | Gestão de Cadastros | Cadastros | F01 | 🔴 Alta | 6-8 semanas |
 | F03 | Gestão de Eventos Trabalhistas | Eventos Trab. | F01, F02 | 🟡 Média | 3-4 semanas |
 | F04 | Processamento da Folha | Cálculo Folha | F01, F02, F03 | 🔴 Alta | 5-6 semanas |
 | F05 | Obrigações Fiscais | Fiscais | F01, F02, F04 | 🔴 Alta | 4-5 semanas |
@@ -68,6 +70,8 @@ flowchart TD
 
 **Objetivo**: Estabelecer toda a infraestrutura base sobre a qual os módulos serão construídos. Sem esta feature, nenhum outro módulo pode ser iniciado.
 
+> ⚠️ **Atualização (Junho 2026)**: O escopo de seed data foi expandido para incluir tabelas de domínio compartilhado (CBO, Natureza Jurídica, Municípios IBGE, Bancos Febraban) que são pré-requisito para o F02. O prazo foi ajustado de 3-4 para 4-5 semanas.
+
 **Escopo**:
 - Estrutura do monólito modular (.NET 10 solution com 6 projetos)
 - Docker Compose com todos os serviços de infra:
@@ -79,7 +83,17 @@ flowchart TD
   - Seq (logging)
   - Prometheus + Grafana
 - Pipeline CI/CD (GitHub Actions)
-- Scripts de migração inicial (schema `public` + tenant template)
+- Scripts de migração inicial:
+  - Schema `public` com tabelas compartilhadas e **tabelas de domínio compartilhado** (`cbo`, `natureza_juridica`, `municipio_ibge`, `banco_febraban`)
+  - Tenant template com 30+ tabelas de negócio
+- Seed data:
+  - CBOs oficiais (MTb) — ~2.500 registros
+  - Naturezas jurídicas (Tabela 21 e-Social)
+  - Municípios IBGE — 5.570 registros
+  - Bancos Febraban — ~150 registros
+  - Perfis de usuário padrão
+  - Rubricas padrão (Tabela 03 e-Social)
+  - Tabelas progressivas IRRF/INSS vigentes
 - Configuração de multi-tenancy (schema por tenant)
 - Autenticação JWT (auth gateway, perfis: admin, operador, contador, consulta)
 - Middleware cross-cutting (logging, correlation ID, error handling)
@@ -88,7 +102,7 @@ flowchart TD
 **Entregáveis**:
 - Solução .NET compilando com 6 projetos vazios
 - `docker-compose.yml` funcional com todos os serviços
-- Migrations iniciais aplicadas
+- Migrations iniciais aplicadas com tabelas de domínio compartilhado populadas
 - Endpoint `GET /health` em cada API retornando 200
 - JWT auth funcional com login mock
 - CI/CD pipeline executando build + testes
@@ -96,6 +110,7 @@ flowchart TD
 **Riscos Mitigados**:
 - Single point of failure no PostgreSQL (ADR: Patroni + etcd — configurado, não ativado ainda)
 - Inconsistência de ambiente entre dev/prod
+- Seed de 5.570 municípios pode ser lento — usar bulk insert (PostgreSQL COPY)
 
 ---
 
@@ -105,33 +120,85 @@ flowchart TD
 
 **Objetivo**: Implementar o módulo raiz de cadastros — a fonte da verdade para todos os dados mestres do sistema. Nenhum outro módulo de negócio funciona sem este.
 
-> ⚠️ **Impacto da atualização de rubricas (Junho 2026)**: O subsistema de rubricas foi significativamente expandido. A implementação original do F02 cobria apenas o CRUD básico da tabela `rubrica`. O [plano de ação de rubricas](../outputs/rubricas/plano-acao-rubricas.md) introduz 7 tabelas, 13 sprints de trabalho e 11 tipos de cálculo. **É necessária uma tarefa de refatoração/expansão do F02** para implementar as Fases 1-2 do plano (Fundação + Composição e Fórmulas). Ver tarefa `refactor-f02-rubricas-expandido`.
+> ⚠️ **Atualização (Junho 2026) — Cadastros Expandidos**: Com base no [levantamento completo de cadastros do DP](../../inputs/cadastros-folha360v1.md), o escopo do F02 foi ampliado de ~10 para **30+ entidades**. O subsistema de rubricas também foi expandido (ver ADR-006). O prazo foi ajustado de 4-5 para 6-8 semanas e a complexidade elevada para 🔴 Alta.
 
 **Escopo**:
-- CRUD completo de:
-  - Empresas (com configurações de tenant)
-  - Funcionários (com dados sensíveis criptografados AES-256)
-  - Cargos e salários
-  - Rubricas (conforme Tabela 03 e-Social) — **expandido**: incluir `grupo_rubrica`, `rubrica_composicao`, `rubrica_formula`, `rubrica_incidencia`, `rubrica_tabela_progressiva`, `rubrica_historico`
-  - Lotações/departamentos
-  - Dependentes
-  - Documentos (CTPS, PIS/PASEP, RG, CPF)
-- Validação com FluentValidation (incluindo validador de unicidade `(empresa_id, codigo)` e validador de `tipo_esocial`)
-- Criptografia de dados sensíveis (CPF, CTPS, PIS/PASEP)
-- Soft delete + auditoria (`audit_log` imutável)
-- Eventos de domínio via RabbitMQ: `FuncionarioCadastrado`, `EmpresaCadastrada`, `RubricaAlterada`, `RubricaCriada`, `TabelaProgressivaAtualizada`
-- API RESTful documentada (Swagger/OpenAPI)
-- Testes unitários + integração
-- Seed data com rubricas padrão (Tabela 03 e-Social) e tabelas progressivas oficiais (IRRF 2026, INSS 2026)
+
+#### F02.1 — Tabelas de Domínio Compartilhado (Lookups)
+CRUD e seed data para tabelas de referência no schema `public`:
+- **CBO** (Classificação Brasileira de Ocupações) — código 6 dígitos, título, ativo
+- **Natureza Jurídica** — código, descrição (Tabela 21 e-Social)
+- **Municípios IBGE** — código 7 dígitos, nome, UF, código UF
+- **Bancos Febraban** — código, nome
+
+#### F02.2 — Cadastros Básicos de Apoio
+CRUD completo de entidades de apoio ao DP (por tenant):
+- **Sindicatos** — código, nome, CNPJ, tipo (Patronal/Laboral), % contribuição sindical, % contribuição assistencial
+- **Convênios** — nome, tipo (Plano de Saúde, Odontológico, VR, VA, VT, Seguro de Vida, Previdência Privada, Outros), operadora, valor mensal, % empresa, % funcionário
+- **Horários de Trabalho** — código, descrição, tipo (Fixo, Flexível, Turno, Escala), carga horária diária/semanal, horários início/fim jornada e intervalo, tolerância de atraso
+- **Grupos de Rúbricas** — código, descrição, natureza (Vencimento/Desconto/Informativa), ordem de exibição
+- **Processos Administrativos/Judiciais** — número, tipo (Administrativo/Judicial), órgão, data início/fim, observações, rubricas vinculadas
+
+#### F02.3 — CRUD de Empresas (Expandido)
+- **Identificação**: CNPJ, Razão Social, Nome Fantasia, CNAE Principal, Indicador Matriz/Filial, CNPJ Matriz, Inscrição Estadual, Inscrição Municipal, Código EFD-Reinf, Natureza Jurídica, Porte (MEI/ME/EPP/Demais/Grande Empresa), Telefone, E-mail
+- **Configurações Fiscais e Tributárias**: Regime Tributário (Simples Nacional/Lucro Presumido/Lucro Real), Classificação Tributária, FPAS, Código de Terceiros (S-1000), Alíquota RAT (1%/2%/3%), Fator FAP, Optante Simples Nacional, Anexo Simples (I-VI), Optante CPRB, Vigência CPRB, Inscrição CEI
+- **Lotações**: código, descrição, tipo (Matriz/Filial/Obra/Estabelecimento/Unidade/Gerencial), CNPJ próprio, CEI, endereço completo, FPAS/CNAE/RAT específicos
+- **Configurações Bancárias**: múltiplas contas (banco, agência, conta, tipo, PIX, finalidade: Folha/Tributos/Fornecedor/Geral)
+- **Endereços**: múltiplos por tipo (Principal/Fiscal/Cobrança/Entrega/Obra), com código IBGE
+- **Contatos**: múltiplos por tipo (Diretor/Gerente/Sócio/Presidente/Procurador/Contador/RH/TI/Preposto), CPF, cargo, vigência
+- **Configurações Gerais**: chave-valor (dia pagamento, % adiantamento, % VT, abono pecuniário, tolerância ponto)
+- **Configurações e-Social**: ambiente (Produção/Produção Restrita), certificado digital (A1/A3), vencimento, versão layout, transmissor, grupo (1-4), data início obrigatoriedade
+
+#### F02.4 — CRUD de Funcionários (Expandido)
+- **Identificação Pessoal**: nome, CPF, data nascimento, sexo, estado civil, nacionalidade, naturalidade (município IBGE), nome pai/mãe, raça/cor, grau de instrução
+- **Documentos**: múltiplos (CPF, RG, CNH, CTPS, PIS/PASEP, NIS/NIT, Título Eleitor, Certidão, RNE/CIE), com número, emissão, validade, órgão emissor, arquivo anexo
+- **Contatos**: telefone fixo, celular principal/secundário, e-mail pessoal/corporativo
+- **Endereço Residencial**: logradouro, número, complemento, bairro, CEP, município IBGE, estrangeiro, comprovante anexo
+- **Dados Bancários**: múltiplas contas (banco, agência, conta, tipo, PIX, conta principal)
+- **Contrato de Trabalho**: empresa, lotação, admissão, desligamento, tipo admissão, cargo (CBO), função, salário base, tipo salário (Mensalista/Horista/Diarista/Semanalista/Tarefa), carga horária semanal, tipo contrato (CLT Indeterminado/Determinado/Experiência/Aprendiz/Estágio/Intermitente/Temporário/PJ/Cooperado/Autônomo), término contrato, horário trabalho, sindicato, categoria trabalhador, indicativo admissão, status
+- **Remuneração e Benefícios**: salário base, valor hora, adicional insalubridade, periculosidade, noturno, transferência, vale-transporte, vale-refeição/alimentação, plano saúde, plano odontológico, seguro vida, previdência privada
+- **Dependentes**: nome, CPF, data nascimento, tipo (Filho/Enteado/Cônjuge/Pais/Irmão/Curatela/Pensão), grau parentesco, dependente IRRF, salário-família, plano saúde, pensão (valor fixo/percentual, início/fim)
+- **Afastamentos**: tipo (Doença/Acidente Trabalho/Maternidade/Paternidade/Serviço Militar/Mandato Sindical/Suspensão/Férias/Licença/Outros), data início, data fim prevista/efetiva, atestado/CID, observações
+- **Informações e-Social**: indicador deficiência, tipo deficiência, data laudo, reservista, primeiro emprego, aposentado, registro profissional
+- **Movimentação Fixa**: rubricas fixas mensais (código rubrica, descrição, quantidade, valor)
+- **Movimentação Mensal**: rubricas específicas do mês (código rubrica, descrição, mês/ano, quantidade, valor)
+
+#### F02.5 — CRUD de Cargos (Expandido)
+- Nome, CBO vinculado, descrição da função, salário base mínimo/máximo, ativo
+
+#### F02.6 — Subsistema de Rubricas (Expandido — ADR-006)
+- CRUD de rubricas com 9 naturezas e 11 tipos de cálculo
+- Composição hierárquica com detecção de ciclos (DFS)
+- Fórmulas NCalc com sandbox (timeout 100ms)
+- Tabelas progressivas (IRRF, INSS) com versionamento anual
+- Incidências múltiplas (INSS, IRRF, FGTS, Sindical, 13º, Férias, etc.)
+- Versionamento e histórico de alterações
+- Validação de conformidade e-Social (Tabela 03)
+- Cache Redis com invalidação pub/sub
+
+**Requisitos Transversais**:
+- Validação com FluentValidation em todas as entidades
+- Criptografia AES-256-GCM para dados sensíveis (CPF, salário, PIX)
+- Soft delete + auditoria (`audit_log` imutável) em todas as tabelas
+- Eventos de domínio via RabbitMQ: `FuncionarioCadastrado`, `EmpresaCadastrada`, `RubricaAlterada`, `RubricaCriada`, `TabelaProgressivaAtualizada`, `ProcessoAdministrativoCriado`, `SindicatoCadastrado`, `ConvenioCadastrado`, `HorarioTrabalhoCadastrado`
+- API RESTful documentada (Swagger/OpenAPI) com paginação, ordenação e filtros
+- Testes unitários + integração com cobertura > 80%
+- Seed data: rubricas padrão (Tabela 03 e-Social), tabelas progressivas oficiais (IRRF 2026, INSS 2026)
 
 **Entregáveis**:
-- CRUD completo de todas as entidades de cadastro
+- CRUD completo de 30+ entidades de cadastro
 - Dados sensíveis criptografados em repouso
 - Eventos de domínio publicados no RabbitMQ
 - Swagger documentando todos os endpoints
 - Cobertura de testes > 80%
+- Seed data de tabelas de lookup (CBO, natureza jurídica, municípios, bancos)
 
 **Dependências**: F01 (Infraestrutura)
+
+**Riscos**:
+- Volume de entidades (30+) pode estourar o prazo → priorizar entidades core primeiro (Empresa, Funcionário, Rubricas) e deixar apoio (Sindicatos, Convênios, Horários) para iteração seguinte
+- Complexidade do subsistema de rubricas → fases bem definidas no plano de ação (ADR-006)
+- Seed de 5.570 municípios → bulk insert com PostgreSQL COPY
 
 ---
 
@@ -415,25 +482,26 @@ flowchart TD
 ## 🗓️ Cronograma Sugerido
 
 ```
-Semanas 1-4:   F01 — Fundação & Infraestrutura
-Semanas 5-9:   F02 — Gestão de Cadastros
-Semanas 10-13: F03 — Gestão de Eventos Trabalhistas
-Semanas 14-19: F04 — Processamento da Folha (crítico)
-Semanas 20-24: F05 — Obrigações Fiscais
-Semanas 25-28: F06 — Relatórios & Exportações
-Semanas 29-34: F07 — Integração e-Social (crítico)
-Semanas 35-38: F08 — Portal do Funcionário
-Semanas 39-41: F09 — Observabilidade & Resiliência
-Semanas 42-44: F10 — Segurança & Conformidade LGPD
+Semanas 1-5:   F01 — Fundação & Infraestrutura (inclui seed de tabelas de lookup)
+Semanas 6-13:  F02 — Gestão de Cadastros (30+ entidades, subsistema de rubricas)
+Semanas 14-17: F03 — Gestão de Eventos Trabalhistas
+Semanas 18-23: F04 — Processamento da Folha (crítico)
+Semanas 24-28: F05 — Obrigações Fiscais
+Semanas 29-32: F06 — Relatórios & Exportações
+Semanas 33-38: F07 — Integração e-Social (crítico)
+Semanas 39-42: F08 — Portal do Funcionário
+Semanas 43-45: F09 — Observabilidade & Resiliência
+Semanas 46-48: F10 — Segurança & Conformidade LGPD
 ```
 
-**Total estimado**: 44 semanas (~11 meses) para MVP completo.
+**Total estimado**: 48 semanas (~12 meses) para MVP completo.
 
 **Marcos críticos**:
-- 🎯 **Semana 9**: Primeiro deploy funcional (Cadastros)
-- 🎯 **Semana 19**: Core do sistema funcional (Folha calculando)
-- 🎯 **Semana 34**: Conformidade e-Social (obrigação legal)
-- 🎯 **Semana 44**: MVP completo com segurança e observabilidade
+- 🎯 **Semana 5**: Infraestrutura pronta, tabelas de lookup populadas
+- 🎯 **Semana 13**: Primeiro deploy funcional (Cadastros completos — DP e contadores podem usar)
+- 🎯 **Semana 23**: Core do sistema funcional (Folha calculando)
+- 🎯 **Semana 38**: Conformidade e-Social (obrigação legal)
+- 🎯 **Semana 48**: MVP completo com segurança e observabilidade
 
 ---
 
@@ -442,7 +510,10 @@ Semanas 42-44: F10 — Segurança & Conformidade LGPD
 | Feature | Risco Principal | Mitigação |
 |---|---|---|
 | F01 | Infra complexa demora para estabilizar | Começar com Docker Compose simples, evoluir para K8s depois |
-| F02 | Modelo de dados incompleto | Validar com contador/DP antes de codificar |
+| F01 | Seed de 5.570 municípios lento | PostgreSQL COPY (bulk insert); script paralelizado |
+| F02 | **30+ entidades podem estourar o prazo** | Priorizar entidades core (Empresa, Funcionário, Rubricas, Cargos, Lotações) na primeira iteração; apoio (Sindicatos, Convênios, Horários) na segunda |
+| F02 | Modelo de dados incompleto ou incorreto | Validar com contador/DP antes de codificar; usar [cadastros-folha360v1.md](../../inputs/cadastros-folha360v1.md) como checklist |
+| F02 | Complexidade do subsistema de rubricas | Seguir fases do ADR-006; não tentar implementar todos os 11 tipos de cálculo de uma vez |
 | F04 | Performance < 2h para 100K func. | Prova de conceito de performance na semana 1 da feature |
 | F05 | Regras fiscais erradas = multas | Validar com contador; testes com casos reais |
 | F07 | Indisponibilidade do ambiente gov.br | Mock server para testes; dead-letter queue |

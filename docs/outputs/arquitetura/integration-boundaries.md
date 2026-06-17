@@ -4,6 +4,8 @@
 Mapeamento das fronteiras de integração entre os módulos internos do Folha360 e com sistemas externos (e-Social gov.br, sistemas de contabilidade). Cada fronteira define produtor, consumidor, contrato (schema/API), modo de comunicação (síncrono/assíncrono) e riscos associados.
 
 > **Atualização (Junho 2026)**: Adicionadas fronteiras do subsistema de rubricas: Cadastros → Cálculo Folha (composições, fórmulas, tabelas progressivas), Cadastros → e-Social (S-1010, S-1070), e cache Redis com invalidação pub/sub. Ver [runtime-view-calculo-rubricas](../rubricas/runtime-view-calculo-rubricas.md).
+>
+> **Atualização (Junho 2026) — Cadastros Expandidos**: Adicionadas fronteiras para as novas entidades de cadastro: Cadastros → Cálculo Folha (sindicatos, convênios, horários de trabalho, movimentação fixa/mensal), Cadastros → Eventos Trabalhistas (contrato de trabalho, afastamentos), e Cadastros → e-Social (configurações e-Social da empresa, informações e-Social do funcionário).
 
 ## Mapa de Integrações
 
@@ -62,6 +64,9 @@ graph LR
 | 15 | **Cadastros → Cálculo Folha (Rubricas)** | Cadastros API | Cálculo da Folha | REST API: `GET /api/rubricas?vigencia=`, `GET /api/rubricas/{id}/composicao`, `GET /api/rubricas/{id}/formula`, `GET /api/tabelas-progressivas?ano=` | Síncrono (leitura com cache Redis) | Cadastros | Alto — rubricas, composições e fórmulas são a base de todo o cálculo |
 | 16 | **Cadastros → Redis (Cache)** | Cadastros API | Redis | Evento: `RubricaAlterada`, `RubricaCriada`, `TabelaProgressivaAtualizada` → invalidação de cache | Assíncrono (Redis pub/sub) | Cadastros | Médio — cache inconsistente gera cálculos errados |
 | 17 | **Cadastros → e-Social (S-1010/S-1070)** | Cadastros API | Integração e-Social | Evento: `TabelaRubricaAtualizada { empresaId, rubricas[] }`, `ProcessoAdministrativoCriado { empresaId, processo }` | Assíncrono (RabbitMQ) | Cadastros | Alto — obrigação legal de envio da Tabela de Rubricas |
+| 18 | **Cadastros → Cálculo Folha (Sindicatos/Convênios)** | Cadastros API | Cálculo da Folha | REST API: `GET /api/sindicatos?empresa=`, `GET /api/convenios?empresa=`, `GET /api/funcionarios/{id}/movimentacao-fixa`, `GET /api/funcionarios/{id}/movimentacao-mensal?mes=` | Síncrono (leitura com cache Redis) | Cadastros | Médio — sindicatos e convênios afetam descontos; movimentação fixa/mensal afeta o cálculo |
+| 19 | **Cadastros → Eventos Trab. (Contrato/Afastamentos)** | Cadastros API | Eventos Trabalhistas | REST API: `GET /api/funcionarios/{id}/contrato`, `GET /api/funcionarios/{id}/afastamentos` | Síncrono (leitura) | Cadastros | Baixo — dados necessários para validação de eventos trabalhistas |
+| 20 | **Cadastros → e-Social (Configs Empresa/Funcionário)** | Cadastros API | Integração e-Social | REST API: `GET /api/empresas/{id}/config-esocial`, `GET /api/funcionarios/{id}/info-esocial` | Síncrono (leitura) | Cadastros | Médio — dados obrigatórios para envio de eventos e-Social |
 
 ## Riscos de Contrato
 
