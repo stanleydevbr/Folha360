@@ -230,3 +230,40 @@ public sealed record RubricaIncidenciaDto
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
 }
+
+// ============================
+// Lookups (T11)
+// ============================
+public sealed record CboDto
+{
+    public Guid Id { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Titulo { get; init; } = string.Empty;
+    public bool Ativo { get; init; }
+}
+
+public sealed record NaturezaJuridicaDto
+{
+    public Guid Id { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Descricao { get; init; } = string.Empty;
+    public bool Ativo { get; init; }
+}
+
+public sealed record MunicipioIBGEDto
+{
+    public Guid Id { get; init; }
+    public string CodigoIbge { get; init; } = string.Empty;
+    public string Nome { get; init; } = string.Empty;
+    public string Uf { get; init; } = string.Empty;
+    public string CodigoUf { get; init; } = string.Empty;
+    public bool Ativo { get; init; }
+}
+
+public sealed record BancoFebrabanDto
+{
+    public Guid Id { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Nome { get; init; } = string.Empty;
+    public bool Ativo { get; init; }
+}

@@ -165,6 +165,42 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IRubricaIncidenciaRepository,
             Folha360.Cadastros.Infrastructure.Repositories.RubricaIncidenciaRepository>();
 
+        // Lookup Repositories (T11)
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.ICboRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.CboRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.INaturezaJuridicaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.NaturezaJuridicaRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IMunicipioIBGERepository,
+            Folha360.Cadastros.Infrastructure.Repositories.MunicipioIBGERepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IBancoFebrabanRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.BancoFebrabanRepository>();
+
+        // Expanded Repositories (T12-T13)
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IConfiguracaoBancariaEmpresaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.ConfiguracaoBancariaEmpresaRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IEnderecoEmpresaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.EnderecoEmpresaRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IContatoEmpresaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.ContatoEmpresaRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IConfiguracaoGeralRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.ConfiguracaoGeralRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IConfiguracaoESocialRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.ConfiguracaoESocialRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IDadosBancariosFuncionarioRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.DadosBancariosFuncionarioRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IContratoTrabalhoRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.ContratoTrabalhoRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IRemuneracaoBeneficioRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.RemuneracaoBeneficioRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IAfastamentoFuncionarioRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.AfastamentoRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IInfoESocialFuncionarioRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.InfoESocialFuncionarioRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IMovimentacaoFixaRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.MovimentacaoFixaRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IMovimentacaoMensalRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.MovimentacaoMensalRepository>();
+
         // MediatR — registra handlers, behaviors do módulo de Cadastros
         services.AddMediatR(cfg =>
         {

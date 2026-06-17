@@ -568,3 +568,90 @@ public class RubricaIncidenciaRepository : IRubricaIncidenciaRepository
         }
     }
 }
+
+// ============================
+// Lookup Repositories (T11)
+// ============================
+public class CboRepository : ICboRepository
+{
+    private readonly CadastrosDbContext _db;
+    public CboRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<CboOcupacao?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.Cbos.FirstOrDefaultAsync(c => c.Id == id, ct);
+
+    public async Task<IEnumerable<CboOcupacao>> ListarAsync(string? filtro = null, bool apenasAtivos = true, CancellationToken ct = default)
+    {
+        var query = _db.Cbos.AsQueryable();
+        if (apenasAtivos)
+            query = query.Where(c => c.Ativo);
+        if (!string.IsNullOrWhiteSpace(filtro))
+            query = query.Where(c => c.Codigo.Contains(filtro) || c.Titulo.Contains(filtro));
+        return await query.OrderBy(c => c.Codigo).ToListAsync(ct);
+    }
+}
+
+public class NaturezaJuridicaRepository : INaturezaJuridicaRepository
+{
+    private readonly CadastrosDbContext _db;
+    public NaturezaJuridicaRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<NaturezaJuridica?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.NaturezasJuridicas.FirstOrDefaultAsync(n => n.Id == id, ct);
+
+    public async Task<IEnumerable<NaturezaJuridica>> ListarAsync(bool apenasAtivos = true, CancellationToken ct = default)
+    {
+        var query = _db.NaturezasJuridicas.AsQueryable();
+        if (apenasAtivos)
+            query = query.Where(n => n.Ativo);
+        return await query.OrderBy(n => n.Codigo).ToListAsync(ct);
+    }
+}
+
+public class MunicipioIBGERepository : IMunicipioIBGERepository
+{
+    private readonly CadastrosDbContext _db;
+    public MunicipioIBGERepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<MunicipioIBGE?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.Municipios.FirstOrDefaultAsync(m => m.Id == id, ct);
+
+    public async Task<MunicipioIBGE?> ObterPorCodigoAsync(string codigoIbge, CancellationToken ct = default)
+        => await _db.Municipios.FirstOrDefaultAsync(m => m.CodigoIbge == codigoIbge, ct);
+
+    public async Task<(IEnumerable<MunicipioIBGE> Items, int TotalCount)> ListarAsync(
+        string? uf = null, string? nome = null, int page = 1, int pageSize = 50,
+        bool apenasAtivos = true, CancellationToken ct = default)
+    {
+        var query = _db.Municipios.AsQueryable();
+        if (apenasAtivos)
+            query = query.Where(m => m.Ativo);
+        if (!string.IsNullOrWhiteSpace(uf))
+            query = query.Where(m => m.Uf == uf);
+        if (!string.IsNullOrWhiteSpace(nome))
+            query = query.Where(m => m.Nome.Contains(nome));
+
+        var total = await query.CountAsync(ct);
+        var items = await query.OrderBy(m => m.Nome).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+        return (items, total);
+    }
+}
+
+public class BancoFebrabanRepository : IBancoFebrabanRepository
+{
+    private readonly CadastrosDbContext _db;
+    public BancoFebrabanRepository(CadastrosDbContext db) => _db = db;
+
+    public async Task<BancoFebraban?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _db.Bancos.FirstOrDefaultAsync(b => b.Id == id, ct);
+
+    public async Task<IEnumerable<BancoFebraban>> ListarAsync(string? filtro = null, bool apenasAtivos = true, CancellationToken ct = default)
+    {
+        var query = _db.Bancos.AsQueryable();
+        if (apenasAtivos)
+            query = query.Where(b => b.Ativo);
+        if (!string.IsNullOrWhiteSpace(filtro))
+            query = query.Where(b => b.Codigo.Contains(filtro) || b.Nome.Contains(filtro));
+        return await query.OrderBy(b => b.Codigo).ToListAsync(ct);
+    }
+}

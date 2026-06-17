@@ -29,6 +29,28 @@ public class CadastrosDbContext : Folha360DbContext
     public new DbSet<Convenio> Convenios => Set<Convenio>();
     public new DbSet<HorarioTrabalho> HorariosTrabalho => Set<HorarioTrabalho>();
 
+    // Lookups (T11) — schema public
+    public DbSet<CboOcupacao> Cbos => Set<CboOcupacao>();
+    public DbSet<NaturezaJuridica> NaturezasJuridicas => Set<NaturezaJuridica>();
+    public DbSet<MunicipioIBGE> Municipios => Set<MunicipioIBGE>();
+    public DbSet<BancoFebraban> Bancos => Set<BancoFebraban>();
+
+    // Expansão Empresa (T12)
+    public DbSet<ConfiguracaoBancariaEmpresa> ConfiguracoesBancariasEmpresa => Set<ConfiguracaoBancariaEmpresa>();
+    public DbSet<EnderecoEmpresa> EnderecosEmpresa => Set<EnderecoEmpresa>();
+    public DbSet<ContatoEmpresa> ContatosEmpresa => Set<ContatoEmpresa>();
+    public DbSet<ConfiguracaoGeral> ConfiguracoesGerais => Set<ConfiguracaoGeral>();
+    public DbSet<ConfiguracaoESocial> ConfiguracoesESocial => Set<ConfiguracaoESocial>();
+
+    // Expansão Funcionário (T13)
+    public DbSet<DadosBancariosFuncionario> DadosBancariosFuncionarios => Set<DadosBancariosFuncionario>();
+    public DbSet<ContratoTrabalho> ContratosTrabalho => Set<ContratoTrabalho>();
+    public DbSet<RemuneracaoBeneficio> RemuneracoesBeneficios => Set<RemuneracaoBeneficio>();
+    public new DbSet<AfastamentoFuncionario> Afastamentos => Set<AfastamentoFuncionario>();
+    public DbSet<InfoESocialFuncionario> InfosESocialFuncionario => Set<InfoESocialFuncionario>();
+    public DbSet<MovimentacaoFixa> MovimentacoesFixas => Set<MovimentacaoFixa>();
+    public DbSet<MovimentacaoMensal> MovimentacoesMensais => Set<MovimentacaoMensal>();
+
     // Subsistema de Rubricas (ADR-006)
     public new DbSet<GrupoRubrica> GruposRubrica => Set<GrupoRubrica>();
     public new DbSet<RubricaComposicao> RubricasComposicao => Set<RubricaComposicao>();

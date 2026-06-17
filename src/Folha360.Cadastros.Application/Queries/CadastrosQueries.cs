@@ -114,3 +114,32 @@ public sealed record ListarHistoricoRubricaQuery : IRequest<PaginatedResult<Rubr
 
 // --- RubricaIncidencia ---
 public sealed record ListarIncidenciasQuery(Guid RubricaId) : IRequest<Result<List<RubricaIncidenciaDto>>>;
+
+// ============================
+// Lookups (T11)
+// ============================
+public sealed record ListarCbosQuery : IRequest<Result<List<CboDto>>>
+{
+    public string? Filtro { get; init; }
+    public bool ApenasAtivos { get; init; } = true;
+}
+
+public sealed record ListarNaturezasJuridicasQuery : IRequest<Result<List<NaturezaJuridicaDto>>>
+{
+    public bool ApenasAtivos { get; init; } = true;
+}
+
+public sealed record ListarMunicipiosQuery : IRequest<PaginatedResult<MunicipioIBGEDto>>
+{
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 50;
+    public string? Uf { get; init; }
+    public string? Nome { get; init; }
+    public bool ApenasAtivos { get; init; } = true;
+}
+
+public sealed record ListarBancosQuery : IRequest<Result<List<BancoFebrabanDto>>>
+{
+    public string? Filtro { get; init; }
+    public bool ApenasAtivos { get; init; } = true;
+}
