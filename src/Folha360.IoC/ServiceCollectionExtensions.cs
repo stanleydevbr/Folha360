@@ -201,6 +201,18 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IMovimentacaoMensalRepository,
             Folha360.Cadastros.Infrastructure.Repositories.MovimentacaoMensalRepository>();
 
+        // Support Repositories (Sindicatos, Convênios, Horários, Dependentes, Documentos)
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.ISindicatoRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.SindicatoRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IConvenioRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.ConvenioRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IHorarioTrabalhoRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.HorarioTrabalhoRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IDependenteRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.DependenteRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IDocumentoRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.DocumentoRepository>();
+
         // MediatR — registra handlers, behaviors do módulo de Cadastros
         services.AddMediatR(cfg =>
         {
