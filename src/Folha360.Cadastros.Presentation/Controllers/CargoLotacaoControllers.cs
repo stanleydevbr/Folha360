@@ -64,9 +64,6 @@ public class CargosController : ControllerBase
     }
 }
 
-[Route("api/[controller]")]
-[Authorize(Policy = "Operador")]
-
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = "Operador")]
