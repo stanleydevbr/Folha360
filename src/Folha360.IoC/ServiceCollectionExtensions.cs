@@ -213,6 +213,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IDocumentoRepository,
             Folha360.Cadastros.Infrastructure.Repositories.DocumentoRepository>();
 
+        // Processo Administrativo (S-1070) and Rubrica-Processo (N:N)
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IProcessoAdministrativoRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.ProcessoAdministrativoRepository>();
+        services.AddScoped<Folha360.Cadastros.Domain.Abstractions.IRubricaProcessoRepository,
+            Folha360.Cadastros.Infrastructure.Repositories.RubricaProcessoRepository>();
+
         // MediatR — registra handlers, behaviors do módulo de Cadastros
         services.AddMediatR(cfg =>
         {
