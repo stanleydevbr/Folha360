@@ -27,12 +27,20 @@ public class EmpresasConfiguracoesBancariasController : ControllerBase
         return Ok(items);
     }
 
+    [HttpGet("{id:guid}")]
+    [Authorize(Policy = "Consulta")]
+    public async Task<ActionResult<ConfiguracaoBancariaEmpresa>> Obter(Guid empresaId, Guid id, CancellationToken ct)
+    {
+        var entity = await _repo.GetByIdAsync(id, ct);
+        return entity is not null ? Ok(entity) : NotFound();
+    }
+
     [HttpPost]
     public async Task<ActionResult<ConfiguracaoBancariaEmpresa>> Criar(
         Guid empresaId, [FromBody] ConfiguracaoBancariaEmpresa entity, CancellationToken ct)
     {
         await _repo.AddAsync(entity, ct);
-        return CreatedAtAction(nameof(Listar), new { empresaId }, entity);
+        return CreatedAtAction(nameof(Obter), new { empresaId, id = entity.Id }, entity);
     }
 
     [HttpDelete("{id:guid}")]
@@ -60,12 +68,20 @@ public class EmpresasEnderecosController : ControllerBase
         return Ok(items);
     }
 
+    [HttpGet("{id:guid}")]
+    [Authorize(Policy = "Consulta")]
+    public async Task<ActionResult<EnderecoEmpresa>> Obter(Guid empresaId, Guid id, CancellationToken ct)
+    {
+        var entity = await _repo.GetByIdAsync(id, ct);
+        return entity is not null ? Ok(entity) : NotFound();
+    }
+
     [HttpPost]
     public async Task<ActionResult<EnderecoEmpresa>> Criar(
         Guid empresaId, [FromBody] EnderecoEmpresa entity, CancellationToken ct)
     {
         await _repo.AddAsync(entity, ct);
-        return CreatedAtAction(nameof(Listar), new { empresaId }, entity);
+        return CreatedAtAction(nameof(Obter), new { empresaId, id = entity.Id }, entity);
     }
 
     [HttpDelete("{id:guid}")]
@@ -93,12 +109,20 @@ public class EmpresasContatosController : ControllerBase
         return Ok(items);
     }
 
+    [HttpGet("{id:guid}")]
+    [Authorize(Policy = "Consulta")]
+    public async Task<ActionResult<ContatoEmpresa>> Obter(Guid empresaId, Guid id, CancellationToken ct)
+    {
+        var entity = await _repo.GetByIdAsync(id, ct);
+        return entity is not null ? Ok(entity) : NotFound();
+    }
+
     [HttpPost]
     public async Task<ActionResult<ContatoEmpresa>> Criar(
         Guid empresaId, [FromBody] ContatoEmpresa entity, CancellationToken ct)
     {
         await _repo.AddAsync(entity, ct);
-        return CreatedAtAction(nameof(Listar), new { empresaId }, entity);
+        return CreatedAtAction(nameof(Obter), new { empresaId, id = entity.Id }, entity);
     }
 
     [HttpDelete("{id:guid}")]

@@ -27,12 +27,20 @@ public class FuncionariosDadosBancariosController : ControllerBase
         return Ok(items);
     }
 
+    [HttpGet("{id:guid}")]
+    [Authorize(Policy = "Consulta")]
+    public async Task<ActionResult<DadosBancariosFuncionario>> Obter(Guid funcionarioId, Guid id, CancellationToken ct)
+    {
+        var entity = await _repo.GetByIdAsync(id, ct);
+        return entity is not null ? Ok(entity) : NotFound();
+    }
+
     [HttpPost]
     public async Task<ActionResult<DadosBancariosFuncionario>> Criar(
         Guid funcionarioId, [FromBody] DadosBancariosFuncionario entity, CancellationToken ct)
     {
         await _repo.AddAsync(entity, ct);
-        return CreatedAtAction(nameof(Listar), new { funcionarioId }, entity);
+        return CreatedAtAction(nameof(Obter), new { funcionarioId, id = entity.Id }, entity);
     }
 
     [HttpDelete("{id:guid}")]
@@ -132,12 +140,20 @@ public class FuncionariosAfastamentosController : ControllerBase
         return Ok(items);
     }
 
+    [HttpGet("{id:guid}")]
+    [Authorize(Policy = "Consulta")]
+    public async Task<ActionResult<AfastamentoFuncionario>> Obter(Guid funcionarioId, Guid id, CancellationToken ct)
+    {
+        var entity = await _repo.GetByIdAsync(id, ct);
+        return entity is not null ? Ok(entity) : NotFound();
+    }
+
     [HttpPost]
     public async Task<ActionResult<AfastamentoFuncionario>> Criar(
         Guid funcionarioId, [FromBody] AfastamentoFuncionario entity, CancellationToken ct)
     {
         await _repo.AddAsync(entity, ct);
-        return CreatedAtAction(nameof(Listar), new { funcionarioId }, entity);
+        return CreatedAtAction(nameof(Obter), new { funcionarioId, id = entity.Id }, entity);
     }
 
     [HttpDelete("{id:guid}")]
@@ -199,12 +215,20 @@ public class FuncionariosMovimentacaoFixaController : ControllerBase
         return Ok(items);
     }
 
+    [HttpGet("{id:guid}")]
+    [Authorize(Policy = "Consulta")]
+    public async Task<ActionResult<MovimentacaoFixa>> Obter(Guid funcionarioId, Guid id, CancellationToken ct)
+    {
+        var entity = await _repo.GetByIdAsync(id, ct);
+        return entity is not null ? Ok(entity) : NotFound();
+    }
+
     [HttpPost]
     public async Task<ActionResult<MovimentacaoFixa>> Criar(
         Guid funcionarioId, [FromBody] MovimentacaoFixa entity, CancellationToken ct)
     {
         await _repo.AddAsync(entity, ct);
-        return CreatedAtAction(nameof(Listar), new { funcionarioId }, entity);
+        return CreatedAtAction(nameof(Obter), new { funcionarioId, id = entity.Id }, entity);
     }
 
     [HttpDelete("{id:guid}")]
@@ -236,6 +260,11 @@ public class FuncionariosMovimentacaoMensalController : ControllerBase
     public async Task<ActionResult<MovimentacaoMensal>> Criar(
         Guid funcionarioId, [FromBody] MovimentacaoMensal entity, CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(entity.MesAno))
+        {
+            return BadRequest("MesAno is required.");
+        }
+
         await _repo.AddAsync(entity, ct);
         return CreatedAtAction(nameof(Listar), new { funcionarioId, mes = entity.MesAno }, entity);
     }

@@ -51,6 +51,11 @@ public class SindicatosController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult> Atualizar(Guid id, [FromBody] Sindicato entity, CancellationToken ct)
     {
+        if (entity.Id != id)
+        {
+            return BadRequest("Entity ID does not match route ID.");
+        }
+
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing is null)
         {
@@ -109,6 +114,11 @@ public class ConveniosController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult> Atualizar(Guid id, [FromBody] Convenio entity, CancellationToken ct)
     {
+        if (entity.Id != id)
+        {
+            return BadRequest("Entity ID does not match route ID.");
+        }
+
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing is null)
         {
@@ -167,6 +177,11 @@ public class HorariosTrabalhoController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult> Atualizar(Guid id, [FromBody] HorarioTrabalho entity, CancellationToken ct)
     {
+        if (entity.Id != id)
+        {
+            return BadRequest("Entity ID does not match route ID.");
+        }
+
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing is null)
         {
@@ -219,6 +234,11 @@ public class DependentesController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult> Atualizar(Guid id, [FromBody] Dependente entity, CancellationToken ct)
     {
+        if (entity.Id != id)
+        {
+            return BadRequest("Entity ID does not match route ID.");
+        }
+
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing is null)
         {
@@ -271,6 +291,11 @@ public class DocumentosController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult> Atualizar(Guid id, [FromBody] Documento entity, CancellationToken ct)
     {
+        if (entity.Id != id)
+        {
+            return BadRequest("Entity ID does not match route ID.");
+        }
+
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing is null)
         {
@@ -288,4 +313,6 @@ public class DocumentosController : ControllerBase
     }
 }
 
+// ============================
+// Support Registries (Sindicatos, Convênios, Horários, Dependentes, Documentos)
 // ============================

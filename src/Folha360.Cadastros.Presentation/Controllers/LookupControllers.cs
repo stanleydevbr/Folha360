@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Folha360.Cadastros.Presentation.Controllers;
 
+[ApiController]
 [Route("api/[controller]")]
 public class CbosController : ControllerBase
 {
@@ -79,5 +80,5 @@ public class BancosController : ControllerBase
 }
 
 // ============================
-// Cadastros de Apoio (Sindicatos, Convênios, Horários, Dependentes, Documentos, Processos)
+// Support Registries (Sindicatos, Convênios, Horários, Dependentes, Documentos, Processos)
 // ============================
