@@ -1,9 +1,5 @@
-using Folha360.Cadastros.Application;
-using Folha360.Cadastros.Application.Commands;
 using Folha360.Cadastros.Application.DTOs;
 using Folha360.Cadastros.Application.Queries;
-using Folha360.Cadastros.Domain.Abstractions;
-using Folha360.Cadastros.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -78,7 +74,3 @@ public class BancosController : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : UnprocessableEntity(new { result.Errors });
     }
 }
-
-// ============================
-// Support Registries (Sindicatos, Convênios, Horários, Dependentes, Documentos, Processos)
-// ============================
