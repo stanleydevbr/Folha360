@@ -34,6 +34,14 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Cadastros.Domain.Entities.Empresa> Empresas => Set<Folha360.Cadastros.Domain.Entities.Empresa>();
 
     // ============================
+    // Módulo F02 — Cadastros — Lookups (T11) — schema public (compartilhado)
+    // ============================
+    public DbSet<Folha360.Cadastros.Domain.Entities.CboOcupacao> Cbos => Set<Folha360.Cadastros.Domain.Entities.CboOcupacao>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.NaturezaJuridica> NaturezasJuridicas => Set<Folha360.Cadastros.Domain.Entities.NaturezaJuridica>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.MunicipioIBGE> MunicipiosIbge => Set<Folha360.Cadastros.Domain.Entities.MunicipioIBGE>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.BancoFebraban> BancosFebraban => Set<Folha360.Cadastros.Domain.Entities.BancoFebraban>();
+
+    // ============================
     // Módulo F02 — Cadastros (schema tenant)
     // ============================
     public DbSet<Folha360.Cadastros.Domain.Entities.Funcionario> Funcionarios => Set<Folha360.Cadastros.Domain.Entities.Funcionario>();
@@ -47,7 +55,27 @@ public class Folha360DbContext : DbContext
     public DbSet<Folha360.Cadastros.Domain.Entities.HorarioTrabalho> HorariosTrabalho => Set<Folha360.Cadastros.Domain.Entities.HorarioTrabalho>();
 
     // ============================
-    // Módulo F02 — Cadastros (schema tenant) — Subsistema de Rubricas (ADR-006)
+    // Módulo F02 — Cadastros — Expansão Empresa (T12) — schema tenant
+    // ============================
+    public DbSet<Folha360.Cadastros.Domain.Entities.ConfiguracaoBancariaEmpresa> ConfiguracoesBancariasEmpresa => Set<Folha360.Cadastros.Domain.Entities.ConfiguracaoBancariaEmpresa>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.EnderecoEmpresa> EnderecosEmpresa => Set<Folha360.Cadastros.Domain.Entities.EnderecoEmpresa>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.ContatoEmpresa> ContatosEmpresa => Set<Folha360.Cadastros.Domain.Entities.ContatoEmpresa>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.ConfiguracaoGeral> ConfiguracoesGerais => Set<Folha360.Cadastros.Domain.Entities.ConfiguracaoGeral>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.ConfiguracaoESocial> ConfiguracoesESocial => Set<Folha360.Cadastros.Domain.Entities.ConfiguracaoESocial>();
+
+    // ============================
+    // Módulo F02 — Cadastros — Expansão Funcionário (T13) — schema tenant
+    // ============================
+    public DbSet<Folha360.Cadastros.Domain.Entities.DadosBancariosFuncionario> DadosBancariosFuncionarios => Set<Folha360.Cadastros.Domain.Entities.DadosBancariosFuncionario>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.ContratoTrabalho> ContratosTrabalho => Set<Folha360.Cadastros.Domain.Entities.ContratoTrabalho>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.RemuneracaoBeneficio> RemuneracoesBeneficios => Set<Folha360.Cadastros.Domain.Entities.RemuneracaoBeneficio>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.AfastamentoFuncionario> AfastamentosFuncionario => Set<Folha360.Cadastros.Domain.Entities.AfastamentoFuncionario>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.InfoESocialFuncionario> InfosESocialFuncionario => Set<Folha360.Cadastros.Domain.Entities.InfoESocialFuncionario>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.MovimentacaoFixa> MovimentacoesFixas => Set<Folha360.Cadastros.Domain.Entities.MovimentacaoFixa>();
+    public DbSet<Folha360.Cadastros.Domain.Entities.MovimentacaoMensal> MovimentacoesMensais => Set<Folha360.Cadastros.Domain.Entities.MovimentacaoMensal>();
+
+    // ============================
+    // Módulo F02 — Cadastros — Subsistema de Rubricas (ADR-006)
     // ============================
     public DbSet<Folha360.Cadastros.Domain.Entities.GrupoRubrica> GruposRubrica => Set<Folha360.Cadastros.Domain.Entities.GrupoRubrica>();
     public DbSet<Folha360.Cadastros.Domain.Entities.RubricaComposicao> RubricasComposicao => Set<Folha360.Cadastros.Domain.Entities.RubricaComposicao>();
@@ -125,6 +153,34 @@ public class Folha360DbContext : DbContext
         modelBuilder.ApplyConfiguration(new SindicatoConfiguration());
         modelBuilder.ApplyConfiguration(new ConvenioConfiguration());
         modelBuilder.ApplyConfiguration(new HorarioTrabalhoConfiguration());
+
+        // ============================
+        // Módulo F02 — Cadastros — Lookups (T11) — schema public
+        // ============================
+        modelBuilder.ApplyConfiguration(new CboOcupacaoConfiguration());
+        modelBuilder.ApplyConfiguration(new NaturezaJuridicaConfiguration());
+        modelBuilder.ApplyConfiguration(new MunicipioIBGEConfiguration());
+        modelBuilder.ApplyConfiguration(new BancoFebrabanConfiguration());
+
+        // ============================
+        // Módulo F02 — Cadastros — Expansão Empresa (T12)
+        // ============================
+        modelBuilder.ApplyConfiguration(new ConfiguracaoBancariaEmpresaConfiguration());
+        modelBuilder.ApplyConfiguration(new EnderecoEmpresaConfiguration());
+        modelBuilder.ApplyConfiguration(new ContatoEmpresaConfiguration());
+        modelBuilder.ApplyConfiguration(new ConfiguracaoGeralConfiguration());
+        modelBuilder.ApplyConfiguration(new ConfiguracaoESocialConfiguration());
+
+        // ============================
+        // Módulo F02 — Cadastros — Expansão Funcionário (T13)
+        // ============================
+        modelBuilder.ApplyConfiguration(new DadosBancariosFuncionarioConfiguration());
+        modelBuilder.ApplyConfiguration(new ContratoTrabalhoConfiguration());
+        modelBuilder.ApplyConfiguration(new RemuneracaoBeneficioConfiguration());
+        modelBuilder.ApplyConfiguration(new AfastamentoFuncionarioConfiguration());
+        modelBuilder.ApplyConfiguration(new InfoESocialFuncionarioConfiguration());
+        modelBuilder.ApplyConfiguration(new MovimentacaoFixaConfiguration());
+        modelBuilder.ApplyConfiguration(new MovimentacaoMensalConfiguration());
 
         // ============================
         // Módulo F02 — Cadastros — Subsistema de Rubricas (ADR-006)
