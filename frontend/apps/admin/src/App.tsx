@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./providers/AuthProvider";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { PrivateRoute, PublicRoute } from "./lib/PrivateRoute";
@@ -11,9 +10,7 @@ import { DashboardPage } from "./routes/dashboard/DashboardPage";
 
 export function App() {
     return (
-        <BrowserRouter>
         <ThemeProvider>
-        <AuthProvider>
         <Routes>
         <Route path="/login" element={<PublicRoute > <LoginPage /></PublicRoute >} />
             <Route path="/select-tenant" element={<PrivateRoute > <SelectTenantPage /></PrivateRoute >} />
@@ -30,9 +27,7 @@ export function App() {
                                                         </Route>
                                                         <Route path="*" element={<Navigate to="/dashboard" replace />} />
                                                             </Routes>
-                                                            </AuthProvider>
                                                             </ThemeProvider>
-                                                            </BrowserRouter>
     );
 }
 
