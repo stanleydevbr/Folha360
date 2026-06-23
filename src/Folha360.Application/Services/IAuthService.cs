@@ -6,4 +6,5 @@ namespace Folha360.Application.Services;
 public interface IAuthService
 {
     Task<LoginResponse> LoginAsync(LoginCommand command, CancellationToken ct = default);
+    Task<SessionResponse> RefreshSessionAsync(Guid userId, CancellationToken ct = default);
 }

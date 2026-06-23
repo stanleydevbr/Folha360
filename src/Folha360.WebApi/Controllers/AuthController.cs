@@ -66,11 +66,37 @@ public class AuthController : ControllerBase
 
     [HttpPost("refresh")]
     [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult Refresh()
+    public async Task<IActionResult> Refresh(CancellationToken ct)
     {
-        // Stub: Refresh token com rotação será implementado na F10 — Segurança & Conformidade LGPD
-        return Ok(new { message = "Refresh token endpoint - will be implemented in F10 (Security)" });
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized(new ProblemDetailsResponse(
+                Type: "https://tools.ietf.org/html/rfc7807",
+                Title: "Unauthorized",
+                Status: 401,
+                Detail: "Token inválido",
+                Instance: Request.Path,
+                Errors: null));
+        }
+
+        try
+        {
+            var response = await _authService.RefreshSessionAsync(userId, ct);
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new ProblemDetailsResponse(
+                Type: "https://tools.ietf.org/html/rfc7807",
+                Title: "Unauthorized",
+                Status: 401,
+                Detail: "Sessão expirada ou usuário inativo",
+                Instance: Request.Path,
+                Errors: null));
+        }
     }
 }

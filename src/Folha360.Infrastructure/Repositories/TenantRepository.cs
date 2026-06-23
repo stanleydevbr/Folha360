@@ -1,3 +1,4 @@
+using Folha360.Domain;
 using Folha360.Domain.Abstractions;
 using Folha360.Domain.Entities;
 using Folha360.Infrastructure.Data;
@@ -20,6 +21,13 @@ public class TenantRepository : ITenantRepository
     {
         return await _context.Tenants
             .FirstOrDefaultAsync(t => t.TenantId == tenantId, ct);
+    }
+
+    public async Task<List<Tenant>> GetAllActiveAsync(CancellationToken ct = default)
+    {
+        return await _context.Tenants
+            .Where(t => t.Status == TenantStatus.Ativo)
+            .ToListAsync(ct);
     }
 
     public async Task<string> CreateTenantSchemaAsync(string tenantId, CancellationToken ct = default)
