@@ -1,0 +1,29 @@
+{
+    "name": "folha360",
+    "private": true,
+    "scripts": {
+        "dev": "turbo dev",
+        "build": "turbo build",
+        "lint": "turbo lint",
+        "test": "turbo test",
+        "clean": "turbo clean",
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+        "lint:fix": "eslint . --ext .ts,.tsx --fix",
+        "test:e2e": "playwright test --config=e2e/playwright.config.ts",
+        "test:e2e:ui": "playwright test --config=e2e/playwright.config.ts --headed"
+    },
+    "devDependencies": {
+        "@axe-core/playwright": "^4.11.3",
+        "@playwright/test": "^1.61.0",
+        "msw": "^2.14.6",
+        "playwright": "^1.61.0",
+        "prettier": "^3.5.0",
+        "turbo": "^2.5.0",
+        "typescript": "^5.8.0"
+    },
+    "packageManager": "pnpm@10.33.2",
+    "engines": {
+        "node": ">=22.0.0",
+        "pnpm": ">=9.0.0"
+    }
+}
