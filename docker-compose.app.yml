@@ -75,6 +75,25 @@ services:
       - folha360-webapi
     restart: unless-stopped
 
+  nginx-frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/nginx/frontend.Dockerfile
+    container_name: folha360-nginx-frontend
+    ports:
+      - "3000:80"
+    networks:
+      - folha360-net
+    depends_on:
+      - folha360-webapi
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
   # ===========================================================================
   # MONITORAMENTO (profile: monitoring)
   # ===========================================================================
