@@ -1,87 +1,88 @@
-import {createContext, useContext, useState, useCallback, useEffect, type ReactNode} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useLogin, useLogout, restoreSession, configureAuth, setActiveTenantId, getActiveTenantId, getAccessToken} from '@folha360/api';
-import type {LoginCommand, UserDto, TenantDto} from '@folha360/api';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createApiClient, type ApiClient, type UserDto, type TenantDto } from '@folha360/api'
 
-interface AuthContextValue {user: UserDto | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    activeTenant: TenantDto | null;
-    availableTenants: TenantDto[];
-    login: (credentials: LoginCommand) =>Promise<UserDto | null>;
-    logout: () =>void;
-    switchTenant: (tenant: TenantDto) =>void;
+interface AuthState {
+  user: UserDto | null
+  token: string | null
+  tenant: TenantDto | null
+  isAuthenticated: boolean
+  isLoading: boolean
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
-
-export function useAuth() {const ctx = useContext(AuthContext);
-    if (!ctx) throw new Error('useAuth must be within AuthProvider');
-    return ctx;
+interface AuthContextValue extends AuthState {
+  login: (token: string, user: UserDto, tenants: TenantDto[]) => void
+  logout: () => void
+  setTenant: (tenant: TenantDto) => void
+  apiClient: ApiClient
 }
 
-export function AuthProvider({children}: {children: ReactNode}) {const [user, setUser] = useState<UserDto | null>(null);
-    const [availableTenants, setAvailableTenants] = useState<TenantDto[]>([]);
-    const [activeTenant, setActiveTenant] = useState<TenantDto | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const navigate = useNavigate();
-    const loginMutation = useLogin();
-    const performLogout = useLogout();
+const AuthContext = createContext<AuthContextValue | null>(null)
 
-    // Configure auth callbacks for apiClient
-    useEffect(() =>{configureAuth(() =>{performLogout();
-            setUser(null);
-            setActiveTenant(null);
-            navigate('/login');
-        });
-    }, [performLogout, navigate]);
+function loadAuth(): { token: string | null; user: UserDto | null; tenant: TenantDto | null } {
+  try {
+    const token = localStorage.getItem('folha360-token')
+    const user = JSON.parse(localStorage.getItem('folha360-user') || 'null')
+    const tenant = JSON.parse(localStorage.getItem('folha360-tenant') || 'null')
+    return { token, user, tenant }
+  } catch {
+    return { token: null, user: null, tenant: null }
+  }
+}
 
-    // Restore session on mount
-    useEffect(() =>{const token = getAccessToken();
-        if (!token) {setIsLoading(false);
-            return;
-        }
-        restoreSession()
-            .then((data) =>{setUser(data.user);
-                setAvailableTenants(data.tenants);
-                const lastId = getActiveTenantId();
-                const tenant = data.tenants.find((t: TenantDto) =>t.id === lastId) || data.tenants[0];
-                if (tenant) {setActiveTenant(tenant);
-                    setActiveTenantId(tenant.id);
-                }
-            })
-            .catch(() =>{performLogout();
-            })
-            .finally(() =>setIsLoading(false));
-    }, [performLogout]);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<AuthState>(() => {
+    const { token, user, tenant } = loadAuth()
+    return {
+      user,
+      token,
+      tenant,
+      isAuthenticated: !!token && !!user,
+      isLoading: false,
+    }
+  })
 
-    const login = useCallback(async (credentials: LoginCommand): Promise<UserDto | null>=>{try {const result = await loginMutation.mutateAsync(credentials);
-            setUser(result.user);
-            setAvailableTenants(result.tenants);
-            if (result.tenants.length === 1) {const tenant = result.tenants[0]!;
-                setActiveTenant(tenant);
-                setActiveTenantId(tenant.id);
-                navigate('/dashboard');
-            } else {navigate('/select-tenant', {state: {tenants: result.tenants} });
-            }
-            return result.user;
-        } catch {return null;
-        }
-    }, [loginMutation, navigate]);
+  const apiClient = createApiClient({
+    baseURL: import.meta.env.VITE_API_URL || '',
+    getToken: () => state.token,
+    onUnauthorized: () => {
+      setState((s) => ({ ...s, token: null, user: null, tenant: null, isAuthenticated: false }))
+      localStorage.removeItem('folha360-token')
+      localStorage.removeItem('folha360-user')
+      localStorage.removeItem('folha360-tenant')
+    },
+  })
 
-    const logout = useCallback(() =>{performLogout();
-        setUser(null);
-        setActiveTenant(null);
-        setAvailableTenants([]);
-        navigate('/login');
-    }, [performLogout, navigate]);
+  const login = useCallback((token: string, user: UserDto, tenants: TenantDto[]) => {
+    localStorage.setItem('folha360-token', token)
+    localStorage.setItem('folha360-user', JSON.stringify(user))
+    const defaultTenant = tenants[0] || null
+    if (defaultTenant) {
+      localStorage.setItem('folha360-tenant', JSON.stringify(defaultTenant))
+    }
+    setState({ token, user, tenant: defaultTenant, isAuthenticated: true, isLoading: false })
+  }, [])
 
-    const switchTenant = useCallback((tenant: TenantDto) =>{setActiveTenant(tenant);
-        setActiveTenantId(tenant.id);
-        navigate('/dashboard');
-    }, [navigate]);
+  const logout = useCallback(() => {
+    localStorage.removeItem('folha360-token')
+    localStorage.removeItem('folha360-user')
+    localStorage.removeItem('folha360-tenant')
+    setState({ token: null, user: null, tenant: null, isAuthenticated: false, isLoading: false })
+  }, [])
 
-    return (
-        <AuthContext.Provider value={{user, isAuthenticated: !!user, isLoading, activeTenant, availableTenants, login, logout, switchTenant}
-}>{children}</AuthContext.Provider>);
+  const setTenant = useCallback((tenant: TenantDto) => {
+    localStorage.setItem('folha360-tenant', JSON.stringify(tenant))
+    setState((s) => ({ ...s, tenant }))
+  }, [])
+
+  return (
+    <AuthContext.Provider value={{ ...state, login, logout, setTenant, apiClient }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
 }

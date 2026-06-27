@@ -1,45 +1,32 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
+// https://vite.dev/config/
 export default defineConfig({
-    plugins: [react()],
-    resolve: {
-        alias: {
-            '@': path.resolve(__dirname, './src'),
-        },
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
     },
-    server: {
-        port: 5173,
-        hmr: { overlay: false },
-        proxy: {
-            '/api': {
-                target: process.env['VITE_API_URL'] || 'http://localhost:5000',
-                changeOrigin: true,
-                secure: false,
-            },
-            '/health': {
-                target: process.env['VITE_API_URL'] || 'http://localhost:5000',
-                changeOrigin: true,
-            },
-            '/hubs': {
-                target: process.env['VITE_API_URL'] || 'http://localhost:5000',
-                changeOrigin: true,
-                ws: true,
-            },
-        },
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/hubs': {
+        target: 'http://localhost:5000',
+        ws: true,
+      },
     },
-    build: {
-        outDir: 'dist',
-        sourcemap: false,
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    vendor: ['react', 'react-dom', 'react-router-dom'],
-                    ui: ['@folha360/ui'],
-                    api: ['@folha360/api'],
-                },
-            },
-        },
-    },
-});
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+  },
+})

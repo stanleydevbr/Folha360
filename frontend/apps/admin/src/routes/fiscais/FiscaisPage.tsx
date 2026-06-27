@@ -1,7 +1,7 @@
-export default function FuncionariosPage() {
+export default function FiscaisPage() {
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold">Funcionários</h1>
+      <h1 className="mb-4 text-2xl font-bold">Obrigações Fiscais</h1>
       <p className="text-muted-foreground">Módulo em desenvolvimento.</p>
     </div>
   )
