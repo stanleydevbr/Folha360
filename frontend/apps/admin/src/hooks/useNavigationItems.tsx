@@ -2,11 +2,20 @@ import { useMemo } from 'react'
 import {
   LayoutDashboard,
   Building2,
-  CalendarClock,
+  Users,
+  Briefcase,
+  MapPin,
+  Clock,
+  HeartHandshake,
+  ShieldCheck,
   Calculator,
   FileText,
   BarChart3,
   FileSpreadsheet,
+  CalendarClock,
+  DollarSign,
+  Settings,
+  ChevronRight,
 } from 'lucide-react'
 import type { NavItem } from '@folha360/ui'
 
@@ -28,7 +37,19 @@ export function useNavigationItems(): NavItem[] {
         children: [
           { id: 'empresas', type: 'item', title: 'Empresas', route: '/cadastros/empresas' },
           { id: 'funcionarios', type: 'item', title: 'Funcionários', route: '/cadastros/funcionarios' },
+          { id: 'cargos', type: 'item', title: 'Cargos', route: '/cadastros/cargos' },
+          { id: 'lotacoes', type: 'item', title: 'Lotações', route: '/cadastros/lotacoes' },
+          { id: 'sindicatos', type: 'item', title: 'Sindicatos', route: '/cadastros/sindicatos' },
+          { id: 'convenios', type: 'item', title: 'Convênios', route: '/cadastros/convenios' },
+          { id: 'horarios', type: 'item', title: 'Horários', route: '/cadastros/horarios' },
         ],
+      },
+      {
+        id: 'rubricas',
+        type: 'item',
+        title: 'Rubricas',
+        route: '/cadastros/rubricas',
+        icon: <DollarSign className="h-5 w-5" />,
       },
       {
         id: 'eventos',
