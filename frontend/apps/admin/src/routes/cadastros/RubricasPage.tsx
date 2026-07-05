@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router'
 import { useAuth } from '@/providers/AuthProvider'
 import { useRubricas, useCreateRubrica, useUpdateRubrica, useDeleteRubrica, useGruposRubrica } from '@folha360/api'
 import type { RubricaDto, CriarRubricaCommand } from '@folha360/api'
@@ -17,7 +18,7 @@ import {
   Badge,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 
 type FormData = {
@@ -52,15 +53,53 @@ const COLUMNS: Column<RubricaDto>[] = [
   { key: 'ativo', header: 'Ativo', render: (item) => item.ativo ? <Badge>Sim</Badge> : <Badge variant="secondary">Não</Badge> },
 ]
 
+// ---- Conversão DTO ↔ FormData ----
+
+function dtoToForm(item: RubricaDto): FormData {
+  return {
+    empresaId: item.empresaId, grupoRubricaId: item.grupoRubricaId ?? '', codigo: item.codigo,
+    descricao: item.descricao, descricaoAbreviada: item.descricaoAbreviada ?? '',
+    natureza: item.natureza, tipoEsocial: item.tipoEsocial ?? '', enviarEsocial: item.enviarEsocial,
+    tipoCalculo: item.tipoCalculo, formulaCalculo: item.formulaCalculo ?? '',
+    valorFixo: item.valorFixo ? String(item.valorFixo) : '', percentual: item.percentual ? String(item.percentual) : '',
+    rubricaBaseId: item.rubricaBaseId ?? '',
+    ordemCalculo: String(item.ordemCalculo), ordemExibicao: String(item.ordemExibicao),
+    prioridadeDesconto: item.prioridadeDesconto ? String(item.prioridadeDesconto) : '',
+    tetoMaximo: item.tetoMaximo ? String(item.tetoMaximo) : '', pisoMinimo: item.pisoMinimo ? String(item.pisoMinimo) : '',
+    ativo: item.ativo, dataInicioVigencia: item.dataInicioVigencia ?? '', dataFimVigencia: item.dataFimVigencia ?? '',
+    observacao: item.observacao ?? '',
+    incideInss: item.incideInss, incideIrrf: item.incideIrrf, incideFgts: item.incideFgts,
+    incideContribuicaoSindical: item.incideContribuicaoSindical, incideDecimoTerceiro: item.incideDecimoTerceiro,
+    incideFerias: item.incideFerias, incideAvisoPrevio: item.incideAvisoPrevio,
+    incideRescisao: item.incideRescisao, incideDissidio: item.incideDissidio,
+    incideSalarioMaternidade: item.incideSalarioMaternidade, incideAuxilioDoenca: item.incideAuxilioDoenca,
+    incideAdiantamento: item.incideAdiantamento,
+  }
+}
+
+function formToDto(form: FormData): CriarRubricaCommand {
+  return {
+    ...form,
+    valorFixo: form.valorFixo ? Number(form.valorFixo) : undefined,
+    percentual: form.percentual ? Number(form.percentual) : undefined,
+    tetoMaximo: form.tetoMaximo ? Number(form.tetoMaximo) : undefined,
+    pisoMinimo: form.pisoMinimo ? Number(form.pisoMinimo) : undefined,
+    ordemCalculo: Number(form.ordemCalculo),
+    ordemExibicao: Number(form.ordemExibicao),
+    prioridadeDesconto: form.prioridadeDesconto ? Number(form.prioridadeDesconto) : undefined,
+  }
+}
+
 export default function RubricasPage() {
   const { apiClient } = useAuth()
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM)
 
-  const { data, isLoading } = useRubricas(apiClient, { page, pageSize: 20 })
+  const { data, isLoading } = useRubricas(apiClient, { page, pageSize: 20, descricao: search || undefined })
   const { data: gruposData } = useGruposRubrica(apiClient)
   const { data: rubricasData } = useRubricas(apiClient, { pageSize: 200 })
 
@@ -74,41 +113,14 @@ export default function RubricasPage() {
   const openCreate = useCallback(() => { setEditId(null); setFormData(EMPTY_FORM); setSheetOpen(true) }, [])
   const openEdit = useCallback((item: RubricaDto) => {
     setEditId(item.id)
-    setFormData({
-      empresaId: item.empresaId, grupoRubricaId: item.grupoRubricaId ?? '', codigo: item.codigo,
-      descricao: item.descricao, descricaoAbreviada: item.descricaoAbreviada ?? '',
-      natureza: item.natureza, tipoEsocial: item.tipoEsocial ?? '', enviarEsocial: item.enviarEsocial,
-      tipoCalculo: item.tipoCalculo, formulaCalculo: item.formulaCalculo ?? '',
-      valorFixo: item.valorFixo ? String(item.valorFixo) : '', percentual: item.percentual ? String(item.percentual) : '',
-      rubricaBaseId: item.rubricaBaseId ?? '',
-      ordemCalculo: String(item.ordemCalculo), ordemExibicao: String(item.ordemExibicao),
-      prioridadeDesconto: item.prioridadeDesconto ? String(item.prioridadeDesconto) : '',
-      tetoMaximo: item.tetoMaximo ? String(item.tetoMaximo) : '', pisoMinimo: item.pisoMinimo ? String(item.pisoMinimo) : '',
-      ativo: item.ativo, dataInicioVigencia: item.dataInicioVigencia ?? '', dataFimVigencia: item.dataFimVigencia ?? '',
-      observacao: item.observacao ?? '',
-      incideInss: item.incideInss, incideIrrf: item.incideIrrf, incideFgts: item.incideFgts,
-      incideContribuicaoSindical: item.incideContribuicaoSindical, incideDecimoTerceiro: item.incideDecimoTerceiro,
-      incideFerias: item.incideFerias, incideAvisoPrevio: item.incideAvisoPrevio,
-      incideRescisao: item.incideRescisao, incideDissidio: item.incideDissidio,
-      incideSalarioMaternidade: item.incideSalarioMaternidade, incideAuxilioDoenca: item.incideAuxilioDoenca,
-      incideAdiantamento: item.incideAdiantamento,
-    })
+    setFormData(dtoToForm(item))
     setSheetOpen(true)
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const payload: CriarRubricaCommand = {
-        ...formData,
-        valorFixo: formData.valorFixo ? Number(formData.valorFixo) : undefined,
-        percentual: formData.percentual ? Number(formData.percentual) : undefined,
-        tetoMaximo: formData.tetoMaximo ? Number(formData.tetoMaximo) : undefined,
-        pisoMinimo: formData.pisoMinimo ? Number(formData.pisoMinimo) : undefined,
-        ordemCalculo: Number(formData.ordemCalculo),
-        ordemExibicao: Number(formData.ordemExibicao),
-        prioridadeDesconto: formData.prioridadeDesconto ? Number(formData.prioridadeDesconto) : undefined,
-      }
+      const payload = formToDto(formData)
       if (editId) { await updateMutation.mutateAsync({ id: editId, data: payload }); toast.success('Rubrica atualizada!') }
       else { await createMutation.mutateAsync(payload); toast.success('Rubrica criada!') }
       setSheetOpen(false)
@@ -123,15 +135,20 @@ export default function RubricasPage() {
       </div>
       <Card><CardContent className="pt-6">
         <DataTable columns={COLUMNS} rows={data?.items ?? []} isLoading={isLoading} totalCount={data?.totalCount ?? 0} page={page} pageSize={20} onPageChange={setPage}
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por descrição..."
+          onRowClick={(item) => navigate(`/cadastros/rubricas/${item.id}`)}
           actions={(item) => (
             <div className="flex gap-1">
-              <Button variant="ghost" size="sm" onClick={() => openEdit(item)}><Pencil className="h-4 w-4" /></Button>
-              <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutateAsync(item.id).then(() => toast.success('Excluída!')).catch(() => toast.error('Erro!'))}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/cadastros/rubricas/${item.id}`) }}><ExternalLink className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); openEdit(item) }}><Pencil className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); deleteMutation.mutateAsync(item.id).then(() => toast.success('Excluída!')).catch(() => toast.error('Erro!')) }}><Trash2 className="h-4 w-4 text-destructive" /></Button>
             </div>
           )} />
       </CardContent></Card>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetContent side="right" className="w-full sm:max-w-3xl lg:max-w-4xl overflow-y-auto">
           <SheetHeader><SheetTitle>{editId ? 'Editar Rubrica' : 'Nova Rubrica'}</SheetTitle><SheetDescription>Configure a rubrica para cálculo da folha.</SheetDescription></SheetHeader>
           <div className="mt-6"><FormContainer mode={editId ? 'edit' : 'create'} onSubmit={handleSubmit} onCancel={() => setSheetOpen(false)} isSubmitting={createMutation.isPending || updateMutation.isPending}><RubricaFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} grupos={grupoOptions} rubricasBase={rubricaBaseOptions} /></FormContainer></div>
         </SheetContent>

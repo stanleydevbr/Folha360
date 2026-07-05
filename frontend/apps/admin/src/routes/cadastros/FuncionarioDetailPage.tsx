@@ -23,6 +23,7 @@ import {
   useDeleteMovimentacaoFixa,
   useMovimentacaoMensal,
   useCreateMovimentacaoMensal,
+  useDeleteMovimentacaoMensal,
   useAfastamentosFuncionario,
   useCreateAfastamentoFuncionario,
   useInfoESocialFuncionario,
@@ -87,10 +88,11 @@ import {
   Heart,
   Shield,
   DollarSign,
+  Calendar,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-type Tab = 'dados' | 'documentos' | 'contrato' | 'dependentes' | 'remuneracao' | 'bancarios' | 'movfixa' | 'afastamentos' | 'esocial'
+type Tab = 'dados' | 'documentos' | 'contrato' | 'dependentes' | 'remuneracao' | 'bancarios' | 'movfixa' | 'movmensal' | 'afastamentos' | 'esocial'
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'dados', label: 'Dados Pessoais', icon: <User className="h-4 w-4" /> },
@@ -100,6 +102,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'remuneracao', label: 'Remuneração', icon: <Wallet className="h-4 w-4" /> },
   { id: 'bancarios', label: 'Bancário', icon: <Landmark className="h-4 w-4" /> },
   { id: 'movfixa', label: 'Mov. Fixa', icon: <DollarSign className="h-4 w-4" /> },
+  { id: 'movmensal', label: 'Mov. Mensal', icon: <Calendar className="h-4 w-4" /> },
   { id: 'afastamentos', label: 'Afastamentos', icon: <Heart className="h-4 w-4" /> },
   { id: 'esocial', label: 'e-Social', icon: <Shield className="h-4 w-4" /> },
 ]
@@ -166,6 +169,7 @@ export default function FuncionarioDetailPage() {
         {tab === 'remuneracao' && <RemuneracaoTab funcionarioId={funcionario.id} />}
         {tab === 'bancarios' && <BancariosTab funcionarioId={funcionario.id} />}
         {tab === 'movfixa' && <MovFixaTab funcionarioId={funcionario.id} />}
+        {tab === 'movmensal' && <MovMensalTab funcionarioId={funcionario.id} />}
         {tab === 'afastamentos' && <AfastamentosTab funcionarioId={funcionario.id} />}
         {tab === 'esocial' && <ESocialTab funcionarioId={funcionario.id} />}
       </div>
@@ -521,6 +525,60 @@ function MovFixaTab({ funcionarioId }: { funcionarioId: string }) {
           </div>
         )}
         <DataTable columns={columns} rows={data ?? []} isLoading={isLoading} emptyMessage="Nenhuma movimentação fixa."
+          actions={(item) => (
+            <Button variant="ghost" size="sm" onClick={() => { if (confirm('Remover?')) deleteMutation.mutateAsync({ funcionarioId, id: item.id }).then(() => toast.success('Removida!')).catch(() => toast.error('Erro.')) }}>
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          )} />
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---- Movimentação Mensal Tab ----
+
+function MovMensalTab({ funcionarioId }: { funcionarioId: string }) {
+  const { apiClient } = useAuth()
+  const { data, isLoading } = useMovimentacaoMensal(apiClient, funcionarioId)
+  const { data: rubricasData } = useRubricas(apiClient, { pageSize: 200 })
+  const createMutation = useCreateMovimentacaoMensal(apiClient)
+  const deleteMutation = useDeleteMovimentacaoMensal(apiClient)
+  const [adding, setAdding] = useState(false)
+  const [form, setForm] = useState<MovimentacaoMensal>({
+    id: '', funcionarioId, rubricaId: '', mesAno: '', valor: 0,
+  })
+
+  const rubricaOptions = [{ value: '', label: 'Selecione...' }, ...(rubricasData?.items ?? []).map((r) => ({ value: r.id, label: `${r.codigo} - ${r.descricao}` }))]
+
+  const columns: Column<MovimentacaoMensal>[] = [
+    { key: 'rubricaId', header: 'Rubrica' },
+    { key: 'descricao', header: 'Descrição', render: (item) => item.descricao || '—' },
+    { key: 'mesAno', header: 'Mês/Ano' },
+    { key: 'quantidade', header: 'Qtd', render: (item) => item.quantidade ? String(item.quantidade) : '—' },
+    { key: 'valor', header: 'Valor', render: (item) => formatCurrency(item.valor) },
+  ]
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-base">Movimentação Mensal</CardTitle>
+        <Button size="sm" onClick={() => setAdding(!adding)}><Plus className="mr-1 h-4 w-4" />Nova</Button>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {adding && (
+          <div className="rounded-lg border p-4">
+            <FormContainer mode="create" onSubmit={(e) => { e.preventDefault(); createMutation.mutateAsync({ funcionarioId, data: form }).then(() => { toast.success('Adicionada!'); setAdding(false) }).catch(() => toast.error('Erro.')) }} onCancel={() => setAdding(false)} isSubmitting={createMutation.isPending} submitLabel="Adicionar">
+              <FormGrid cols={2}>
+                <FormSelect id="rubricaId" label="Rubrica" value={form.rubricaId} onChange={(e) => setForm({ ...form, rubricaId: e.target.value })} options={rubricaOptions} required />
+                <FormInput id="mesAno" label="Mês/Ano" value={form.mesAno} onChange={(e) => setForm({ ...form, mesAno: e.target.value })} placeholder="MM/AAAA" maxLength={7} required />
+                <FormInput id="valor" label="Valor (R$)" type="number" value={String(form.valor)} onChange={(e) => setForm({ ...form, valor: Number(e.target.value) || 0 })} min="0" step="0.01" required />
+                <FormInput id="quantidade" label="Quantidade" type="number" value={form.quantidade ? String(form.quantidade) : ''} onChange={(e) => setForm({ ...form, quantidade: e.target.value ? Number(e.target.value) : undefined })} min="0" step="0.01" />
+                <FormInput id="descricao" label="Descrição" value={form.descricao ?? ''} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className="sm:col-span-2" />
+              </FormGrid>
+            </FormContainer>
+          </div>
+        )}
+        <DataTable columns={columns} rows={data ?? []} isLoading={isLoading} emptyMessage="Nenhuma movimentação mensal."
           actions={(item) => (
             <Button variant="ghost" size="sm" onClick={() => { if (confirm('Remover?')) deleteMutation.mutateAsync({ funcionarioId, id: item.id }).then(() => toast.success('Removida!')).catch(() => toast.error('Erro.')) }}>
               <Trash2 className="h-4 w-4 text-destructive" />

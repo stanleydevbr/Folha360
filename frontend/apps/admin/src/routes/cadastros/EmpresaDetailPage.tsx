@@ -47,6 +47,13 @@ import {
   Button,
   Badge,
   Skeleton,
+  TIPO_ENDERECO_OPTIONS,
+  TIPO_CONTATO_OPTIONS,
+  AMBIENTE_ESOCIAL_OPTIONS,
+  CERTIFICADO_TIPO_OPTIONS,
+  TIPO_CONTA_OPTIONS,
+  FINALIDADE_CONTA_OPTIONS,
+  TIPO_PROCESSO_OPTIONS,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
 import { formatCnpj, formatDate, formatCurrency } from '@folha360/utils'
@@ -267,7 +274,7 @@ function EnderecosTab({ empresaId }: { empresaId: string }) {
           <div className="rounded-lg border p-4">
             <FormContainer mode="create" onSubmit={(e) => { e.preventDefault(); createMutation.mutateAsync({ empresaId, data: form }).then(() => { toast.success('Endereço adicionado!'); setAdding(false); setForm({ id: '', empresaId, tipo: '', logradouro: '', numero: '', complemento: '', bairro: '', cep: '', uf: '', estrangeiro: false }) }).catch(() => toast.error('Erro.')) }} onCancel={() => setAdding(false)} isSubmitting={createMutation.isPending} submitLabel="Adicionar">
               <FormGrid cols={2}>
-                <FormSelect id="tipo" label="Tipo" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} options={[{ value: '', label: 'Selecione...' }, { value: 'Principal', label: 'Principal' }, { value: 'Fiscal', label: 'Fiscal' }, { value: 'Cobranca', label: 'Cobrança' }, { value: 'Entrega', label: 'Entrega' }, { value: 'Obra', label: 'Obra' }]} required />
+                <FormSelect id="tipo" label="Tipo" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} options={TIPO_ENDERECO_OPTIONS} required />
                 <FormInput id="logradouro" label="Logradouro" value={form.logradouro} onChange={(e) => setForm({ ...form, logradouro: e.target.value })} required />
                 <FormInput id="numero" label="Número" value={form.numero ?? ''} onChange={(e) => setForm({ ...form, numero: e.target.value })} />
                 <FormInput id="complemento" label="Complemento" value={form.complemento ?? ''} onChange={(e) => setForm({ ...form, complemento: e.target.value })} />
@@ -326,7 +333,7 @@ function ContatosTab({ empresaId }: { empresaId: string }) {
           <div className="rounded-lg border p-4">
             <FormContainer mode="create" onSubmit={(e) => { e.preventDefault(); createMutation.mutateAsync({ empresaId, data: form }).then(() => { toast.success('Contato adicionado!'); setAdding(false) }).catch(() => toast.error('Erro.')) }} onCancel={() => setAdding(false)} isSubmitting={createMutation.isPending} submitLabel="Adicionar">
               <FormGrid cols={2}>
-                <FormSelect id="tipo" label="Tipo" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} options={[{ value: '', label: 'Selecione...' }, { value: 'Diretor', label: 'Diretor' }, { value: 'Gerente', label: 'Gerente' }, { value: 'Socio', label: 'Sócio' }, { value: 'Contador', label: 'Contador' }, { value: 'RH', label: 'RH' }, { value: 'TI', label: 'TI' }, { value: 'Preposto', label: 'Preposto' }]} required />
+                <FormSelect id="tipo" label="Tipo" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} options={TIPO_CONTATO_OPTIONS} required />
                 <FormInput id="nome" label="Nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
                 <FormInput id="cpf" label="CPF" value={form.cpf ?? ''} onChange={(e) => setForm({ ...form, cpf: e.target.value })} placeholder="000.000.000-00" maxLength={14} />
                 <FormInput id="cargo" label="Cargo" value={form.cargo ?? ''} onChange={(e) => setForm({ ...form, cargo: e.target.value })} />
@@ -370,8 +377,8 @@ function ESocialTab({ empresaId }: { empresaId: string }) {
       <CardContent>
         <FormContainer mode="edit" onSubmit={(e) => { e.preventDefault(); updateMutation.mutateAsync({ empresaId, data: form }).then(() => toast.success('Configuração salva!')).catch(() => toast.error('Erro.')) }} isSubmitting={updateMutation.isPending} submitLabel="Salvar">
           <FormGrid cols={2}>
-            <FormSelect id="ambiente" label="Ambiente" value={form.ambiente} onChange={(e) => setForm({ ...form, ambiente: e.target.value })} options={[{ value: '', label: 'Selecione...' }, { value: 'Producao', label: 'Produção' }, { value: 'ProducaoRestrita', label: 'Produção Restrita' }]} required />
-            <FormSelect id="certificadoDigitalTipo" label="Tipo Certificado" value={form.certificadoDigitalTipo ?? ''} onChange={(e) => setForm({ ...form, certificadoDigitalTipo: e.target.value })} options={[{ value: '', label: 'Selecione...' }, { value: 'A1', label: 'A1 (Arquivo)' }, { value: 'A3', label: 'A3 (Token)' }]} />
+            <FormSelect id="ambiente" label="Ambiente" value={form.ambiente} onChange={(e) => setForm({ ...form, ambiente: e.target.value })} options={AMBIENTE_ESOCIAL_OPTIONS} required />
+            <FormSelect id="certificadoDigitalTipo" label="Tipo Certificado" value={form.certificadoDigitalTipo ?? ''} onChange={(e) => setForm({ ...form, certificadoDigitalTipo: e.target.value })} options={CERTIFICADO_TIPO_OPTIONS} />
             <FormInput id="versaoLayout" label="Versão Layout" value={form.versaoLayout ?? ''} onChange={(e) => setForm({ ...form, versaoLayout: e.target.value })} />
             <FormInput id="codigoTransmissor" label="Código Transmissor" value={form.codigoTransmissor ?? ''} onChange={(e) => setForm({ ...form, codigoTransmissor: e.target.value })} />
             <FormInput id="grupoEsocial" label="Grupo e-Social" value={form.grupoEsocial ?? ''} onChange={(e) => setForm({ ...form, grupoEsocial: e.target.value })} />
@@ -418,12 +425,12 @@ function BancariosTab({ empresaId }: { empresaId: string }) {
             <FormContainer mode="create" onSubmit={(e) => { e.preventDefault(); createMutation.mutateAsync({ empresaId, data: form }).then(() => { toast.success('Conta adicionada!'); setAdding(false) }).catch(() => toast.error('Erro.')) }} onCancel={() => setAdding(false)} isSubmitting={createMutation.isPending} submitLabel="Adicionar">
               <FormGrid cols={2}>
                 <FormSelect id="bancoId" label="Banco" value={form.bancoId} onChange={(e) => setForm({ ...form, bancoId: e.target.value })} options={bancoOptions} required />
-                <FormSelect id="tipoConta" label="Tipo Conta" value={form.tipoConta} onChange={(e) => setForm({ ...form, tipoConta: e.target.value })} options={[{ value: '', label: 'Selecione...' }, { value: 'Corrente', label: 'Corrente' }, { value: 'Poupanca', label: 'Poupança' }]} required />
+                <FormSelect id="tipoConta" label="Tipo Conta" value={form.tipoConta} onChange={(e) => setForm({ ...form, tipoConta: e.target.value })} options={TIPO_CONTA_OPTIONS} required />
                 <FormInput id="agencia" label="Agência" value={form.agencia} onChange={(e) => setForm({ ...form, agencia: e.target.value })} required />
                 <FormInput id="agenciaDv" label="DV Agência" value={form.agenciaDv ?? ''} onChange={(e) => setForm({ ...form, agenciaDv: e.target.value })} maxLength={1} />
                 <FormInput id="conta" label="Conta" value={form.conta} onChange={(e) => setForm({ ...form, conta: e.target.value })} required />
                 <FormInput id="contaDv" label="DV Conta" value={form.contaDv ?? ''} onChange={(e) => setForm({ ...form, contaDv: e.target.value })} maxLength={1} />
-                <FormSelect id="finalidade" label="Finalidade" value={form.finalidade} onChange={(e) => setForm({ ...form, finalidade: e.target.value })} options={[{ value: '', label: 'Selecione...' }, { value: 'Folha', label: 'Folha' }, { value: 'Tributos', label: 'Tributos' }, { value: 'Fornecedor', label: 'Fornecedor' }, { value: 'Geral', label: 'Geral' }]} required />
+                <FormSelect id="finalidade" label="Finalidade" value={form.finalidade} onChange={(e) => setForm({ ...form, finalidade: e.target.value })} options={FINALIDADE_CONTA_OPTIONS} required />
                 <FormInput id="chavePix" label="Chave PIX" value={form.chavePix ?? ''} onChange={(e) => setForm({ ...form, chavePix: e.target.value })} />
                 <FormCheckbox id="ativa" label="Ativa" checked={form.ativa} onChange={(v) => setForm({ ...form, ativa: v })} />
               </FormGrid>
@@ -511,7 +518,7 @@ function ProcessosTab({ empresaId }: { empresaId: string }) {
             <FormContainer mode="create" onSubmit={(e) => { e.preventDefault(); createMutation.mutateAsync(form).then(() => { toast.success('Processo adicionado!'); setAdding(false) }).catch(() => toast.error('Erro.')) }} onCancel={() => setAdding(false)} isSubmitting={createMutation.isPending} submitLabel="Adicionar">
               <FormGrid cols={2}>
                 <FormInput id="numeroProcesso" label="Número do Processo" value={form.numeroProcesso} onChange={(e) => setForm({ ...form, numeroProcesso: e.target.value })} required />
-                <FormSelect id="tipo" label="Tipo" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} options={[{ value: '', label: 'Selecione...' }, { value: 'Administrativo', label: 'Administrativo' }, { value: 'Judicial', label: 'Judicial' }]} required />
+                <FormSelect id="tipo" label="Tipo" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} options={TIPO_PROCESSO_OPTIONS} required />
                 <FormInput id="orgao" label="Órgão" value={form.orgao ?? ''} onChange={(e) => setForm({ ...form, orgao: e.target.value })} />
                 <FormTextarea id="observacao" label="Observações" value={form.observacao ?? ''} onChange={(e) => setForm({ ...form, observacao: e.target.value })} className="sm:col-span-2" />
               </FormGrid>

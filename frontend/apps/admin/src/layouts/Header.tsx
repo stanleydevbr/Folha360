@@ -92,13 +92,13 @@ export function Header() {
         {/* User dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <button className="flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-muted/50">
+            <span className="flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-muted/50">
               <UserAvatar nome={user?.nome ?? 'U'} />
               <div className="hidden text-left md:block">
                 <p className="text-sm font-medium leading-tight">{user?.nome}</p>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
-            </button>
+            </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuGroup>

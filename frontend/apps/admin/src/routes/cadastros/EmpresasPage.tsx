@@ -65,7 +65,11 @@ export default function EmpresasPage() {
   const [formData, setFormData] = useState<CriarEmpresaCommand>(EMPTY_FORM)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-  const { data, isLoading } = useEmpresas(apiClient) // Remove unused params for simplicity
+  const { data, isLoading } = useEmpresas(apiClient, {
+    page,
+    pageSize: 20,
+    razaoSocial: search || undefined,
+  })
   const createMutation = useCreateEmpresa(apiClient)
   const deleteMutation = useDeleteEmpresa(apiClient)
 

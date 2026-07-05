@@ -17,6 +17,7 @@ const ConveniosPage = lazy(() => import('./routes/cadastros/ConveniosPage'))
 const HorariosPage = lazy(() => import('./routes/cadastros/HorariosPage'))
 const LotacoesPage = lazy(() => import('./routes/cadastros/LotacoesPage'))
 const RubricasPage = lazy(() => import('./routes/cadastros/RubricasPage'))
+const RubricaDetailPage = lazy(() => import('./routes/cadastros/RubricaDetailPage'))
 const EventosPage = lazy(() => import('./routes/eventos/EventosPage'))
 const ProcessamentoPage = lazy(() => import('./routes/processamento/ProcessamentoPage'))
 const FiscaisPage = lazy(() => import('./routes/fiscais/FiscaisPage'))
@@ -54,6 +55,7 @@ export function App() {
               <Route path="/cadastros/horarios" element={<HorariosPage />} />
               <Route path="/cadastros/lotacoes" element={<LotacoesPage />} />
               <Route path="/cadastros/rubricas" element={<RubricasPage />} />
+              <Route path="/cadastros/rubricas/:id" element={<RubricaDetailPage />} />
               <Route path="/eventos" element={<EventosPage />} />
               <Route path="/processamento" element={<ProcessamentoPage />} />
               <Route path="/fiscais" element={<FiscaisPage />} />

@@ -65,7 +65,11 @@ export default function FuncionariosPage() {
   const [formData, setFormData] = useState<CriarFuncionarioCommand>(EMPTY_FORM)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-  const { data, isLoading } = useFuncionarios(apiClient)
+  const { data, isLoading } = useFuncionarios(apiClient, {
+    page,
+    pageSize: 20,
+    nome: search || undefined,
+  })
   const { data: cargosData } = useCargos(apiClient)
   const { data: lotacoesData } = useLotacoes(apiClient)
   const createMutation = useCreateFuncionario(apiClient)
