@@ -77,8 +77,8 @@ services:
 
   nginx-frontend:
     build:
-      context: ./frontend
-      dockerfile: ../docker/nginx/frontend.Dockerfile
+      context: .
+      dockerfile: docker/nginx/frontend.Dockerfile
     container_name: folha360-nginx-frontend
     ports:
       - "3000:80"

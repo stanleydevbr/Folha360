@@ -39,17 +39,6 @@ public class Dependente : BaseEntity
         decimal? pensaoAlimenticiaValor = null,
         decimal? pensaoAlimenticiaPercentual = null)
     {
-        if (dependenteSalarioFamilia)
-        {
-            var hoje = DateOnly.FromDateTime(DateTime.UtcNow);
-            var idade = hoje.Year - dataNascimento.Year;
-            if (dataNascimento > hoje.AddYears(-idade))
-                idade--;
-
-            if (idade > 14)
-                throw new ArgumentException("Dependentes para salário-família devem ter idade ≤ 14 anos.");
-        }
-
         Id = Guid.NewGuid();
         FuncionarioId = funcionarioId;
         Nome = nome;
@@ -63,6 +52,8 @@ public class Dependente : BaseEntity
         PensaoAlimenticiaPercentual = pensaoAlimenticiaPercentual;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
     }
 
     public void Atualizar(
@@ -75,17 +66,6 @@ public class Dependente : BaseEntity
         decimal? pensaoAlimenticiaValor = null,
         decimal? pensaoAlimenticiaPercentual = null)
     {
-        if (dependenteSalarioFamilia ?? DependenteSalarioFamilia)
-        {
-            var hoje = DateOnly.FromDateTime(DateTime.UtcNow);
-            var idade = hoje.Year - dataNascimento.Year;
-            if (dataNascimento > hoje.AddYears(-idade))
-                idade--;
-
-            if (idade > 14)
-                throw new ArgumentException("Dependentes para salário-família devem ter idade ≤ 14 anos.");
-        }
-
         Nome = nome;
         DataNascimento = dataNascimento;
         Tipo = tipo;
@@ -95,5 +75,24 @@ public class Dependente : BaseEntity
         PensaoAlimenticiaValor = pensaoAlimenticiaValor;
         PensaoAlimenticiaPercentual = pensaoAlimenticiaPercentual;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
+    }
+
+    public override void Validate()
+    {
+        if (DependenteSalarioFamilia)
+        {
+            var hoje = DateOnly.FromDateTime(DateTime.UtcNow);
+            var idade = hoje.Year - DataNascimento.Year;
+            if (DataNascimento > hoje.AddYears(-idade))
+                idade--;
+
+            if (idade > 14)
+            {
+                Notification.AddError("DEPENDENTE_IDADE_INVALIDA",
+                    "Dependentes para salário-família devem ter idade ≤ 14 anos.");
+            }
+        }
     }
 }

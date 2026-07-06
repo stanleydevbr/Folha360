@@ -37,19 +37,6 @@ public class HorarioTrabalho : BaseEntity
         TimeOnly? fimIntervalo = null,
         int toleranciaAtrasoMinutos = 0)
     {
-        if (cargaHorariaDiaria > 600)
-            throw new ArgumentException("Carga horária diária não pode exceder 10 horas (600 minutos).");
-
-        if (cargaHorariaDiaria > 360)
-        {
-            if (!inicioIntervalo.HasValue || !fimIntervalo.HasValue)
-                throw new ArgumentException("Jornadas acima de 6 horas exigem intervalo definido.");
-
-            var duracaoIntervalo = (int)(fimIntervalo.Value - inicioIntervalo.Value).TotalMinutes;
-            if (duracaoIntervalo < 60)
-                throw new ArgumentException("Intervalo deve ter no mínimo 60 minutos para jornadas acima de 6 horas.");
-        }
-
         Id = Guid.NewGuid();
         EmpresaId = empresaId;
         Codigo = codigo;
@@ -64,6 +51,8 @@ public class HorarioTrabalho : BaseEntity
         ToleranciaAtrasoMinutos = toleranciaAtrasoMinutos;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
     }
 
     public void Atualizar(
@@ -77,19 +66,6 @@ public class HorarioTrabalho : BaseEntity
         TimeOnly? fimIntervalo = null,
         int? toleranciaAtrasoMinutos = null)
     {
-        if (cargaHorariaDiaria > 600)
-            throw new ArgumentException("Carga horária diária não pode exceder 10 horas (600 minutos).");
-
-        if (cargaHorariaDiaria > 360)
-        {
-            if (!inicioIntervalo.HasValue || !fimIntervalo.HasValue)
-                throw new ArgumentException("Jornadas acima de 6 horas exigem intervalo definido.");
-
-            var duracaoIntervalo = (int)(fimIntervalo.Value - inicioIntervalo.Value).TotalMinutes;
-            if (duracaoIntervalo < 60)
-                throw new ArgumentException("Intervalo deve ter no mínimo 60 minutos para jornadas acima de 6 horas.");
-        }
-
         Descricao = descricao;
         Tipo = tipo;
         CargaHorariaDiaria = cargaHorariaDiaria;
@@ -100,5 +76,35 @@ public class HorarioTrabalho : BaseEntity
         FimIntervalo = fimIntervalo;
         ToleranciaAtrasoMinutos = toleranciaAtrasoMinutos ?? ToleranciaAtrasoMinutos;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
+    }
+
+    public override void Validate()
+    {
+        if (CargaHorariaDiaria > 600)
+        {
+            Notification.AddError("CARGA_HORARIA_EXCEDIDA",
+                "Carga horária diária não pode exceder 10 horas (600 minutos).",
+                nameof(CargaHorariaDiaria));
+        }
+
+        if (CargaHorariaDiaria > 360)
+        {
+            if (!InicioIntervalo.HasValue || !FimIntervalo.HasValue)
+            {
+                Notification.AddError("INTERVALO_OBRIGATORIO",
+                    "Jornadas acima de 6 horas exigem intervalo definido.");
+            }
+            else
+            {
+                var duracaoIntervalo = (int)(FimIntervalo.Value - InicioIntervalo.Value).TotalMinutes;
+                if (duracaoIntervalo < 60)
+                {
+                    Notification.AddError("INTERVALO_MINIMO",
+                        "Intervalo deve ter no mínimo 60 minutos para jornadas acima de 6 horas.");
+                }
+            }
+        }
     }
 }

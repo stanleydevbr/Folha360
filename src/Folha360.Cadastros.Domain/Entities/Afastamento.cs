@@ -30,11 +30,6 @@ public class AfastamentoFuncionario : BaseEntity
         string? numeroAtestadoCid = null,
         string? observacoes = null)
     {
-        if (dataFimPrevista.HasValue && dataFimPrevista.Value < dataInicio)
-        {
-            throw new ArgumentException("Data fim prevista não pode ser anterior à data de início.");
-        }
-
         Id = Guid.NewGuid();
         FuncionarioId = funcionarioId;
         Tipo = tipo;
@@ -45,6 +40,8 @@ public class AfastamentoFuncionario : BaseEntity
         Observacoes = observacoes;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
     }
 
     public void RegistrarRetorno(DateOnly dataFimEfetiva)
@@ -58,14 +55,21 @@ public class AfastamentoFuncionario : BaseEntity
         string? numeroAtestadoCid = null,
         string? observacoes = null)
     {
-        if (dataFimPrevista.HasValue && dataFimPrevista.Value < DataInicio)
-        {
-            throw new ArgumentException("Data fim prevista não pode ser anterior à data de início.");
-        }
-
         DataFimPrevista = dataFimPrevista;
         NumeroAtestadoCid = numeroAtestadoCid;
         Observacoes = observacoes;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
+    }
+
+    public override void Validate()
+    {
+        if (DataFimPrevista.HasValue && DataFimPrevista.Value < DataInicio)
+        {
+            Notification.AddError("DATA_FIM_PREVISTA_INVALIDA",
+                "Data fim prevista não pode ser anterior à data de início.",
+                nameof(DataFimPrevista));
+        }
     }
 }

@@ -42,7 +42,11 @@ public class LoteEsocial : BaseEntity
     public void Enviar(string protocoloEnvio)
     {
         if (string.IsNullOrWhiteSpace(protocoloEnvio))
-            throw new ArgumentException("Protocolo de envio não pode ser vazio.", nameof(protocoloEnvio));
+        {
+            Notification.AddError("PROTOCOLO_VAZIO", "Protocolo de envio não pode ser vazio.", nameof(protocoloEnvio));
+            return;
+        }
+
         Status = StatusLote.Enviado;
         ProtocoloEnvio = protocoloEnvio;
         DataEnvio = DateTime.UtcNow;

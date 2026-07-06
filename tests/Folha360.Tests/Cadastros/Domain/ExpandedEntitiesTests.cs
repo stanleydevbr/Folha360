@@ -74,12 +74,12 @@ public class ExpandedEntitiesTests
     }
 
     [Fact]
-    public void InfoESocialFuncionario_DeficienciaSemTipo_DeveLancarExcecao()
+    public void InfoESocialFuncionario_DeficienciaSemTipo_DeveRetornarNotificacao()
     {
-        var ex = Assert.Throws<ArgumentException>(() => new InfoESocialFuncionario(
-            Guid.NewGuid(), indicadorDeficiencia: true));
-
-        Assert.Contains("deficiência", ex.Message.ToLower());
+        var info = new InfoESocialFuncionario(
+            Guid.NewGuid(), indicadorDeficiencia: true);
+        Assert.False(info.IsValid);
+        Assert.True(info.Notification.HasErrors);
     }
 
     [Fact]
@@ -132,13 +132,13 @@ public class ExpandedEntitiesTests
     }
 
     [Fact]
-    public void AfastamentoFuncionario_DataFimAnteriorAInicio_DeveLancarExcecao()
+    public void AfastamentoFuncionario_DataFimAnteriorAInicio_DeveRetornarNotificacao()
     {
-        var ex = Assert.Throws<ArgumentException>(() => new AfastamentoFuncionario(
+        var afastamento = new AfastamentoFuncionario(
             Guid.NewGuid(), "DOENCA", new DateOnly(2026, 6, 15),
-            dataFimPrevista: new DateOnly(2026, 6, 10)));
-
-        Assert.Contains("não pode ser anterior", ex.Message);
+            dataFimPrevista: new DateOnly(2026, 6, 10));
+        Assert.False(afastamento.IsValid);
+        Assert.True(afastamento.Notification.HasErrors);
     }
 
     [Fact]

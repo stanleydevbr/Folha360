@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Folha360.Domain.Validation;
 
 namespace Folha360.Cadastros.Domain.ValueObjects;
 
@@ -10,21 +11,49 @@ public sealed record Cbo
 {
     public string Codigo { get; }
 
-    public Cbo(string codigo)
+    private Cbo(string codigo)
     {
-        if (string.IsNullOrWhiteSpace(codigo))
-            throw new ArgumentException("CBO não pode ser vazio.", nameof(codigo));
-
-        var apenasDigitos = Regex.Replace(codigo, @"[^\d]", string.Empty);
-
-        if (apenasDigitos.Length != 6)
-            throw new ArgumentException("CBO deve ter exatamente 6 dígitos numéricos.", nameof(codigo));
-
-        Codigo = apenasDigitos;
+        Codigo = codigo;
     }
+
+    /// <summary>
+    /// Cria um builder para construir um <see cref="Cbo"/> validado.
+    /// </summary>
+    public static CboBuilder Create(string codigo) => new(codigo);
 
     public override string ToString() => Codigo;
 
     public static implicit operator string(Cbo cbo) => cbo.Codigo;
-    public static explicit operator Cbo(string codigo) => new(codigo);
+
+    /// <summary>
+    /// Builder para construção validada de <see cref="Cbo"/>.
+    /// </summary>
+    public sealed class CboBuilder : NotifiableValueObject<Cbo>
+    {
+        private readonly string _codigoOriginal;
+
+        internal CboBuilder(string codigo)
+        {
+            _codigoOriginal = codigo;
+        }
+
+        public override Cbo? Build()
+        {
+            if (string.IsNullOrWhiteSpace(_codigoOriginal))
+            {
+                Notification.AddError("CBO_VAZIO", "CBO não pode ser vazio.");
+                return null;
+            }
+
+            var apenasDigitos = Regex.Replace(_codigoOriginal, @"[^\d]", string.Empty);
+
+            if (apenasDigitos.Length != 6)
+            {
+                Notification.AddError("CBO_TAMANHO", "CBO deve ter exatamente 6 dígitos numéricos.", nameof(Codigo));
+                return null;
+            }
+
+            return new Cbo(apenasDigitos);
+        }
+    }
 }

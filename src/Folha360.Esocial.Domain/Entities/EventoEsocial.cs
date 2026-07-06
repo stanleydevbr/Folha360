@@ -41,7 +41,11 @@ public class EventoEsocial : BaseEntity
     public void Validar()
     {
         if (Status != StatusEvento.Pendente)
-            throw new InvalidOperationException($"Evento com status {Status} não pode ser validado.");
+        {
+            Notification.AddError("TRANSICAO_INVALIDA", $"Evento com status {Status} não pode ser validado.", nameof(Status));
+            return;
+        }
+
         Status = StatusEvento.Validado;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -49,7 +53,11 @@ public class EventoEsocial : BaseEntity
     public void Assinar(Guid certificadoId, string hashAssinatura)
     {
         if (Status != StatusEvento.Validado)
-            throw new InvalidOperationException($"Evento com status {Status} não pode ser assinado.");
+        {
+            Notification.AddError("TRANSICAO_INVALIDA", $"Evento com status {Status} não pode ser assinado.", nameof(Status));
+            return;
+        }
+
         CertificadoId = certificadoId;
         HashAssinatura = hashAssinatura;
         Status = StatusEvento.Assinado;
@@ -59,7 +67,11 @@ public class EventoEsocial : BaseEntity
     public void Enviar(Guid loteId)
     {
         if (Status != StatusEvento.Assinado)
-            throw new InvalidOperationException($"Evento com status {Status} não pode ser enviado.");
+        {
+            Notification.AddError("TRANSICAO_INVALIDA", $"Evento com status {Status} não pode ser enviado.", nameof(Status));
+            return;
+        }
+
         LoteId = loteId;
         Status = StatusEvento.Enviado;
         UpdatedAt = DateTime.UtcNow;
@@ -68,7 +80,11 @@ public class EventoEsocial : BaseEntity
     public void Processar()
     {
         if (Status != StatusEvento.Enviado)
-            throw new InvalidOperationException($"Evento com status {Status} não pode ser processado.");
+        {
+            Notification.AddError("TRANSICAO_INVALIDA", $"Evento com status {Status} não pode ser processado.", nameof(Status));
+            return;
+        }
+
         Status = StatusEvento.Processado;
         ProcessadoEm = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;

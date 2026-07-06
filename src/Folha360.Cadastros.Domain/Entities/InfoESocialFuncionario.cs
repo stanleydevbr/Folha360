@@ -32,11 +32,6 @@ public class InfoESocialFuncionario : BaseEntity
         bool trabalhadorAposentado = false,
         string? registroProfissional = null)
     {
-        if (indicadorDeficiencia && string.IsNullOrWhiteSpace(tipoDeficiencia))
-        {
-            throw new ArgumentException("Tipo de deficiência é obrigatório quando indicador é true.");
-        }
-
         Id = Guid.NewGuid();
         FuncionarioId = funcionarioId;
         IndicadorDeficiencia = indicadorDeficiencia;
@@ -48,6 +43,8 @@ public class InfoESocialFuncionario : BaseEntity
         RegistroProfissional = registroProfissional;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
     }
 
     public void Atualizar(
@@ -62,11 +59,6 @@ public class InfoESocialFuncionario : BaseEntity
         if (indicadorDeficiencia.HasValue)
         {
             IndicadorDeficiencia = indicadorDeficiencia.Value;
-        }
-
-        if (IndicadorDeficiencia && string.IsNullOrWhiteSpace(tipoDeficiencia))
-        {
-            throw new ArgumentException("Tipo de deficiência é obrigatório quando indicador é true.");
         }
 
         TipoDeficiencia = tipoDeficiencia;
@@ -89,5 +81,17 @@ public class InfoESocialFuncionario : BaseEntity
 
         RegistroProfissional = registroProfissional;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
+    }
+
+    public override void Validate()
+    {
+        if (IndicadorDeficiencia && string.IsNullOrWhiteSpace(TipoDeficiencia))
+        {
+            Notification.AddError("DEFICIENCIA_TIPO_OBRIGATORIO",
+                "Tipo de deficiência é obrigatório quando indicador é true.",
+                nameof(TipoDeficiencia));
+        }
     }
 }

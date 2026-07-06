@@ -31,39 +31,37 @@ public class CriarEmpresaHandler : IRequestHandler<CriarEmpresaCommand, Result<E
         if (tenantId == Guid.Empty)
             return Result<EmpresaDto>.Failure("VALIDACAO", "TenantId inválido.");
 
-        try
-        {
-            var cnpj = new Cnpj(cmd.Cnpj);
-            var existente = await _repo.GetByCnpjAsync(cnpj.Numero, ct);
-            if (existente is not null)
-                return Result<EmpresaDto>.Failure("CNPJ_DUPLICADO", "Já existe uma empresa com este CNPJ.");
+        var cnpjBuilder = Cnpj.Create(cmd.Cnpj);
+        var cnpj = cnpjBuilder.Build();
 
-            var empresa = new Empresa(
-                tenantId, cnpj.Numero, cmd.RazaoSocial, cmd.RegimeTributario,
-                cmd.NomeFantasia, cmd.Cnae, cmd.Fpas, cmd.CodigoTerceiros,
-                cmd.ClassificacaoTributaria, cmd.MatrizFilial, cmd.CnpjMatriz);
+        if (cnpj is null)
+            return Result<EmpresaDto>.FromNotification(cnpjBuilder.Notification);
 
-            empresa.EnderecoLogradouro = cmd.EnderecoLogradouro;
-            empresa.EnderecoNumero = cmd.EnderecoNumero;
-            empresa.EnderecoComplemento = cmd.EnderecoComplemento;
-            empresa.EnderecoBairro = cmd.EnderecoBairro;
-            empresa.EnderecoCep = cmd.EnderecoCep;
-            empresa.EnderecoMunicipio = cmd.EnderecoMunicipio;
-            empresa.EnderecoUf = cmd.EnderecoUf;
-            empresa.Telefone = cmd.Telefone;
-            empresa.Email = cmd.Email;
+        var existente = await _repo.GetByCnpjAsync(cnpj.Numero, ct);
+        if (existente is not null)
+            return Result<EmpresaDto>.Failure("CNPJ_DUPLICADO", "Já existe uma empresa com este CNPJ.");
 
-            await _repo.AddAsync(empresa, ct);
-            await _messageBus.PublishAsync(new EmpresaCadastradaEvent(
-                empresa.Id, empresa.Cnpj, empresa.RazaoSocial, empresa.RegimeTributario),
-                "folha360.cadastros", "EmpresaCadastrada", ct);
+        var empresa = new Empresa(
+            tenantId, cnpj.Numero, cmd.RazaoSocial, cmd.RegimeTributario,
+            cmd.NomeFantasia, cmd.Cnae, cmd.Fpas, cmd.CodigoTerceiros,
+            cmd.ClassificacaoTributaria, cmd.MatrizFilial, cmd.CnpjMatriz);
 
-            return Result<EmpresaDto>.Success(MapEmpresa(empresa));
-        }
-        catch (ArgumentException ex)
-        {
-            return Result<EmpresaDto>.Failure("VALIDACAO", ex.Message);
-        }
+        empresa.EnderecoLogradouro = cmd.EnderecoLogradouro;
+        empresa.EnderecoNumero = cmd.EnderecoNumero;
+        empresa.EnderecoComplemento = cmd.EnderecoComplemento;
+        empresa.EnderecoBairro = cmd.EnderecoBairro;
+        empresa.EnderecoCep = cmd.EnderecoCep;
+        empresa.EnderecoMunicipio = cmd.EnderecoMunicipio;
+        empresa.EnderecoUf = cmd.EnderecoUf;
+        empresa.Telefone = cmd.Telefone;
+        empresa.Email = cmd.Email;
+
+        await _repo.AddAsync(empresa, ct);
+        await _messageBus.PublishAsync(new EmpresaCadastradaEvent(
+            empresa.Id, empresa.Cnpj, empresa.RazaoSocial, empresa.RegimeTributario),
+            "folha360.cadastros", "EmpresaCadastrada", ct);
+
+        return Result<EmpresaDto>.Success(MapEmpresa(empresa));
     }
 
     private static EmpresaDto MapEmpresa(Empresa e) => new()

@@ -27,9 +27,6 @@ public class Cargo : BaseEntity
         decimal? salarioBaseMinimo = null,
         decimal? salarioBaseMaximo = null)
     {
-        if (salarioBaseMinimo.HasValue && salarioBaseMaximo.HasValue && salarioBaseMinimo > salarioBaseMaximo)
-            throw new ArgumentException("Salário base mínimo não pode ser superior ao salário base máximo.");
-
         Id = Guid.NewGuid();
         EmpresaId = empresaId;
         Nome = nome;
@@ -39,6 +36,8 @@ public class Cargo : BaseEntity
         SalarioBaseMaximo = salarioBaseMaximo;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
     }
 
     public void Atualizar(
@@ -48,14 +47,22 @@ public class Cargo : BaseEntity
         decimal? salarioBaseMinimo = null,
         decimal? salarioBaseMaximo = null)
     {
-        if (salarioBaseMinimo.HasValue && salarioBaseMaximo.HasValue && salarioBaseMinimo > salarioBaseMaximo)
-            throw new ArgumentException("Salário base mínimo não pode ser superior ao salário base máximo.");
-
         Nome = nome;
         Cbo = cbo;
         Descricao = descricao;
         SalarioBaseMinimo = salarioBaseMinimo;
         SalarioBaseMaximo = salarioBaseMaximo;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
+    }
+
+    public override void Validate()
+    {
+        if (SalarioBaseMinimo.HasValue && SalarioBaseMaximo.HasValue && SalarioBaseMinimo > SalarioBaseMaximo)
+        {
+            Notification.AddError("SALARIO_MIN_MAX_INVALIDO",
+                "Salário base mínimo não pode ser superior ao salário base máximo.");
+        }
     }
 }

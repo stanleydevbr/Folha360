@@ -1,3 +1,5 @@
+using Folha360.Domain.Validation;
+
 namespace Folha360.Application;
 
 public class Result<T>
@@ -20,6 +22,27 @@ public class Result<T>
     public static Result<T> Failure(string code, string message)
         => new(new List<Error> { new(code, message) });
     public static Result<T> Failure(List<Error> errors) => new(errors);
+
+    /// <summary>
+    /// Cria um <see cref="Result{T}"/> de falha a partir de uma <see cref="Notification"/>
+    /// com erros. Cada <see cref="NotificationError"/> é convertido em <see cref="Error"/>.
+    /// </summary>
+    public static Result<T> FromNotification(Notification notification)
+        => new(notification.Errors
+            .Select(e => new Error(e.Code, e.Message))
+            .ToList());
+
+    /// <summary>
+    /// Cria um <see cref="Result{T}"/> de sucesso com <paramref name="value"/> se a
+    /// notificação estiver válida, ou de falha com os erros da notificação caso contrário.
+    /// </summary>
+    public static Result<T> FromNotification(T value, Notification notification)
+    {
+        if (notification.IsValid)
+            return Success(value);
+
+        return FromNotification(notification);
+    }
 }
 
 public record Error(string Code, string Message);

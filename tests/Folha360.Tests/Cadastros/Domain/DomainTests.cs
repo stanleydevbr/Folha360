@@ -10,61 +10,75 @@ public class ValueObjectsTests
     [Fact]
     public void Cnpj_Valido_DeveCriar()
     {
-        var cnpj = new Cnpj("11222333000181");
-        Assert.Equal("11222333000181", cnpj.Numero);
+        var cnpj = Cnpj.Create("11222333000181").Build();
+        Assert.NotNull(cnpj);
+        Assert.Equal("11222333000181", cnpj!.Numero);
         Assert.Equal("11.222.333/0001-81", cnpj.Formatado);
     }
 
     [Fact]
-    public void Cnpj_Invalido_DigitosErrados_DeveLancarExcecao()
+    public void Cnpj_Invalido_DigitosErrados_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() => new Cnpj("11222333000182"));
+        var builder = Cnpj.Create("11222333000182");
+        Assert.Null(builder.Build());
+        Assert.True(builder.Notification.HasErrors);
     }
 
     [Fact]
-    public void Cnpj_TamanhoInvalido_DeveLancarExcecao()
+    public void Cnpj_TamanhoInvalido_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() => new Cnpj("123"));
+        var builder = Cnpj.Create("123");
+        Assert.Null(builder.Build());
+        Assert.True(builder.Notification.HasErrors);
     }
 
     [Fact]
-    public void Cnpj_TodosDigitosIguais_DeveLancarExcecao()
+    public void Cnpj_TodosDigitosIguais_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() => new Cnpj("11111111111111"));
+        var builder = Cnpj.Create("11111111111111");
+        Assert.Null(builder.Build());
+        Assert.True(builder.Notification.HasErrors);
     }
 
     [Fact]
     public void Cnpj_ComFormatacao_DeveRemoverCaracteres()
     {
-        var cnpj = new Cnpj("11.222.333/0001-81");
-        Assert.Equal("11222333000181", cnpj.Numero);
+        var cnpj = Cnpj.Create("11.222.333/0001-81").Build();
+        Assert.NotNull(cnpj);
+        Assert.Equal("11222333000181", cnpj!.Numero);
     }
 
     [Fact]
     public void Cpf_Valido_DeveCriar()
     {
-        var cpf = new Cpf("52998224725");
-        Assert.Equal("52998224725", cpf.Numero);
+        var cpf = Cpf.Create("52998224725").Build();
+        Assert.NotNull(cpf);
+        Assert.Equal("52998224725", cpf!.Numero);
         Assert.Equal("529.982.247-25", cpf.Formatado);
     }
 
     [Fact]
-    public void Cpf_Invalido_DigitosErrados_DeveLancarExcecao()
+    public void Cpf_Invalido_DigitosErrados_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() => new Cpf("52998224726"));
+        var builder = Cpf.Create("52998224726");
+        Assert.Null(builder.Build());
+        Assert.True(builder.Notification.HasErrors);
     }
 
     [Fact]
-    public void Cpf_TodosDigitosIguais_DeveLancarExcecao()
+    public void Cpf_TodosDigitosIguais_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() => new Cpf("11111111111"));
+        var builder = Cpf.Create("11111111111");
+        Assert.Null(builder.Build());
+        Assert.True(builder.Notification.HasErrors);
     }
 
     [Fact]
     public void Cpf_ComputeHash_DeveSerDeterministico()
     {
-        var cpf = new Cpf("52998224725");
-        var hash1 = cpf.ComputeHash();
+        var cpf = Cpf.Create("52998224725").Build();
+        Assert.NotNull(cpf);
+        var hash1 = cpf!.ComputeHash();
         var hash2 = cpf.ComputeHash();
         Assert.Equal(hash1, hash2);
         Assert.Equal(64, hash1.Length); // SHA-256 hex = 64 chars
@@ -73,43 +87,51 @@ public class ValueObjectsTests
     [Fact]
     public void Cbo_Valido_DeveCriar()
     {
-        var cbo = new Cbo("123456");
-        Assert.Equal("123456", cbo.Codigo);
+        var cbo = Cbo.Create("123456").Build();
+        Assert.NotNull(cbo);
+        Assert.Equal("123456", cbo!.Codigo);
     }
 
     [Fact]
-    public void Cbo_MenosDe6Digitos_DeveLancarExcecao()
+    public void Cbo_MenosDe6Digitos_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() => new Cbo("12345"));
+        var builder = Cbo.Create("12345");
+        Assert.Null(builder.Build());
+        Assert.True(builder.Notification.HasErrors);
     }
 
     [Fact]
-    public void Cbo_MaisDe6Digitos_DeveLancarExcecao()
+    public void Cbo_MaisDe6Digitos_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() => new Cbo("1234567"));
+        var builder = Cbo.Create("1234567");
+        Assert.Null(builder.Build());
+        Assert.True(builder.Notification.HasErrors);
     }
 
     [Fact]
     public void Endereco_Valido_DeveCriar()
     {
-        var endereco = new Endereco("Rua A", "100", "Centro", "01001000", "São Paulo", "SP", "Apto 1");
-        Assert.Equal("Rua A", endereco.Logradouro);
+        var endereco = Endereco.Create("Rua A", "100", "Centro", "01001000", "São Paulo", "SP", "Apto 1").Build();
+        Assert.NotNull(endereco);
+        Assert.Equal("Rua A", endereco!.Logradouro);
         Assert.Equal("100", endereco.Numero);
         Assert.Equal("SP", endereco.Uf);
     }
 
     [Fact]
-    public void Endereco_UfInvalida_DeveLancarExcecao()
+    public void Endereco_UfInvalida_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() =>
-            new Endereco("Rua A", "100", "Centro", "01001000", "São Paulo", "S"));
+        var builder = Endereco.Create("Rua A", "100", "Centro", "01001000", "São Paulo", "S");
+        Assert.Null(builder.Build());
+        Assert.True(builder.Notification.HasErrors);
     }
 
     [Fact]
     public void Endereco_SemComplemento_DeveCriar()
     {
-        var endereco = new Endereco("Rua A", "100", "Centro", "01001000", "São Paulo", "SP");
-        Assert.Null(endereco.Complemento);
+        var endereco = Endereco.Create("Rua A", "100", "Centro", "01001000", "São Paulo", "SP").Build();
+        Assert.NotNull(endereco);
+        Assert.Null(endereco!.Complemento);
     }
 }
 
@@ -156,10 +178,11 @@ public class EntidadesTests
     }
 
     [Fact]
-    public void Cargo_SalarioMinimoMaiorQueMaximo_DeveLancarExcecao()
+    public void Cargo_SalarioMinimoMaiorQueMaximo_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() =>
-            new Cargo(Guid.NewGuid(), "Dev", "123456", salarioBaseMinimo: 5000, salarioBaseMaximo: 3000));
+        var cargo = new Cargo(Guid.NewGuid(), "Dev", "123456", salarioBaseMinimo: 5000, salarioBaseMaximo: 3000);
+        Assert.False(cargo.IsValid);
+        Assert.True(cargo.Notification.HasErrors);
     }
 
     [Fact]
@@ -194,13 +217,14 @@ public class EntidadesTests
     }
 
     [Fact]
-    public void Dependente_SalarioFamilia_IdadeMaior14_DeveLancarExcecao()
+    public void Dependente_SalarioFamilia_IdadeMaior14_DeveRetornarNotificacao()
     {
         var dataNascimento = DateOnly.FromDateTime(DateTime.Today.AddYears(-15));
 
-        Assert.Throws<ArgumentException>(() =>
-            new Dependente(Guid.NewGuid(), "Filho", "52998224725",
-                dataNascimento, "Filho", dependenteSalarioFamilia: true));
+        var dependente = new Dependente(Guid.NewGuid(), "Filho", "52998224725",
+            dataNascimento, "Filho", dependenteSalarioFamilia: true);
+        Assert.False(dependente.IsValid);
+        Assert.True(dependente.Notification.HasErrors);
     }
 
     [Fact]
@@ -227,10 +251,11 @@ public class EntidadesTests
     }
 
     [Fact]
-    public void Sindicato_ContribuicaoAcima10_DeveLancarExcecao()
+    public void Sindicato_ContribuicaoAcima10_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() =>
-            new Sindicato(Guid.NewGuid(), "S01", "Sindicato X", contribuicaoSindicalPercentual: 15));
+        var sindicato = new Sindicato(Guid.NewGuid(), "S01", "Sindicato X", contribuicaoSindicalPercentual: 15);
+        Assert.False(sindicato.IsValid);
+        Assert.True(sindicato.Notification.HasErrors);
     }
 
     [Fact]
@@ -261,19 +286,21 @@ public class EntidadesTests
     }
 
     [Fact]
-    public void HorarioTrabalho_CargaAcima600_DeveLancarExcecao()
+    public void HorarioTrabalho_CargaAcima600_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() =>
-            new HorarioTrabalho(Guid.NewGuid(), "H01", "Turno A", "Fixo",
-                700, 40, new TimeOnly(8, 0), new TimeOnly(18, 0)));
+        var horario = new HorarioTrabalho(Guid.NewGuid(), "H01", "Turno A", "Fixo",
+            700, 40, new TimeOnly(8, 0), new TimeOnly(18, 0));
+        Assert.False(horario.IsValid);
+        Assert.True(horario.Notification.HasErrors);
     }
 
     [Fact]
-    public void HorarioTrabalho_JornadaAcima6h_SemIntervalo_DeveLancarExcecao()
+    public void HorarioTrabalho_JornadaAcima6h_SemIntervalo_DeveRetornarNotificacao()
     {
-        Assert.Throws<ArgumentException>(() =>
-            new HorarioTrabalho(Guid.NewGuid(), "H01", "Turno A", "Fixo",
-                480, 40, new TimeOnly(8, 0), new TimeOnly(17, 0)));
+        var horario = new HorarioTrabalho(Guid.NewGuid(), "H01", "Turno A", "Fixo",
+            480, 40, new TimeOnly(8, 0), new TimeOnly(17, 0));
+        Assert.False(horario.IsValid);
+        Assert.True(horario.Notification.HasErrors);
     }
 
     [Fact]

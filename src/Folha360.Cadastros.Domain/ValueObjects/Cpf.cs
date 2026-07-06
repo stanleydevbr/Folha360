@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Folha360.Domain.Validation;
 
 namespace Folha360.Cadastros.Domain.ValueObjects;
 
@@ -17,21 +18,15 @@ public sealed record Cpf
     public string Formatado => Convert.ToUInt64(Numero).ToString(@"000\.000\.000\-00");
     public string Hash => ComputeHash();
 
-    public Cpf(string numero)
+    private Cpf(string numero)
     {
-        if (string.IsNullOrWhiteSpace(numero))
-            throw new ArgumentException("CPF não pode ser vazio.", nameof(numero));
-
-        var apenasDigitos = Regex.Replace(numero, @"[^\d]", string.Empty);
-
-        if (apenasDigitos.Length != 11)
-            throw new ArgumentException("CPF deve ter 11 dígitos.", nameof(numero));
-
-        if (!ValidarDigitosVerificadores(apenasDigitos))
-            throw new ArgumentException("CPF inválido — dígitos verificadores não conferem.", nameof(numero));
-
-        Numero = apenasDigitos;
+        Numero = numero;
     }
+
+    /// <summary>
+    /// Cria um builder para construir um <see cref="Cpf"/> validado.
+    /// </summary>
+    public static CpfBuilder Create(string numero) => new(numero);
 
     /// <summary>
     /// Calcula o hash SHA-256 do CPF para busca exata indexada.
@@ -66,5 +61,42 @@ public sealed record Cpf
     public override string ToString() => Formatado;
 
     public static implicit operator string(Cpf cpf) => cpf.Numero;
-    public static explicit operator Cpf(string numero) => new(numero);
+
+    /// <summary>
+    /// Builder para construção validada de <see cref="Cpf"/>.
+    /// </summary>
+    public sealed class CpfBuilder : NotifiableValueObject<Cpf>
+    {
+        private readonly string _numeroOriginal;
+
+        internal CpfBuilder(string numero)
+        {
+            _numeroOriginal = numero;
+        }
+
+        public override Cpf? Build()
+        {
+            if (string.IsNullOrWhiteSpace(_numeroOriginal))
+            {
+                Notification.AddError("CPF_VAZIO", "CPF não pode ser vazio.");
+                return null;
+            }
+
+            var apenasDigitos = Regex.Replace(_numeroOriginal, @"[^\d]", string.Empty);
+
+            if (apenasDigitos.Length != 11)
+            {
+                Notification.AddError("CPF_TAMANHO", "CPF deve ter 11 dígitos.", nameof(Numero));
+                return null;
+            }
+
+            if (!ValidarDigitosVerificadores(apenasDigitos))
+            {
+                Notification.AddError("CPF_INVALIDO", "CPF inválido — dígitos verificadores não conferem.", nameof(Numero));
+                return null;
+            }
+
+            return new Cpf(apenasDigitos);
+        }
+    }
 }

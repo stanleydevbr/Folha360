@@ -38,7 +38,7 @@ public class EventoEsocialTests
     }
 
     [Fact]
-    public void Validar_EventoJaValidado_DeveLancarExcecao()
+    public void Validar_EventoJaValidado_DeveRetornarNotificacao()
     {
         // Arrange
         var evento = new EventoEsocial(
@@ -48,8 +48,12 @@ public class EventoEsocialTests
             "ID1234567890");
         evento.Validar();
 
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => evento.Validar());
+        // Act
+        evento.Validar();
+
+        // Assert
+        Assert.False(evento.IsValid);
+        Assert.True(evento.Notification.HasErrors);
     }
 
     [Fact]

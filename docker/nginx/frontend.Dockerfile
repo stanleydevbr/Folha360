@@ -3,15 +3,15 @@ FROM node:22-alpine AS build
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10 --activate
 
-COPY pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY apps/admin/package.json apps/admin/
-COPY packages/ui/package.json packages/ui/
-COPY packages/api/package.json packages/api/
-COPY packages/utils/package.json packages/utils/
+COPY frontend/pnpm-workspace.yaml frontend/pnpm-lock.yaml ./
+COPY frontend/apps/admin/package.json apps/admin/
+COPY frontend/packages/ui/package.json packages/ui/
+COPY frontend/packages/api/package.json packages/api/
+COPY frontend/packages/utils/package.json packages/utils/
 
 RUN pnpm install --frozen-lockfile
 
-COPY . .
+COPY frontend/ .
 RUN pnpm --filter admin build
 
 # Stage 2: Serve via nginx

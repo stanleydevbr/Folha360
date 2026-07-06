@@ -30,41 +30,39 @@ public class CriarFuncionarioHandler : IRequestHandler<CriarFuncionarioCommand, 
         if (cmd.LotacaoId == Guid.Empty)
             return Result<FuncionarioDto>.Failure("VALIDACAO", "LotacaoId é obrigatório.");
 
-        try
-        {
-            var cpf = new Cpf(cmd.Cpf);
-            var existente = await _repo.GetByCpfHashAsync(cpf.Hash, ct);
-            if (existente is not null)
-                return Result<FuncionarioDto>.Failure("CPF_DUPLICADO", "Já existe um funcionário com este CPF.");
+        var cpfBuilder = Cpf.Create(cmd.Cpf);
+        var cpf = cpfBuilder.Build();
 
-            var funcionario = new Funcionario(
-                cmd.EmpresaId, cmd.Nome, cpf.Numero, cpf.Hash,
-                cmd.DataAdmissao, cmd.CargoId, cmd.LotacaoId, cmd.SalarioBase,
-                cmd.DataNascimento, cmd.Sexo, cmd.EstadoCivil, cmd.Nacionalidade,
-                cmd.NomeMae, cmd.NomePai, cmd.TipoContrato, cmd.JornadaHorasSemanais);
+        if (cpf is null)
+            return Result<FuncionarioDto>.FromNotification(cpfBuilder.Notification);
 
-            funcionario.EnderecoLogradouro = cmd.EnderecoLogradouro;
-            funcionario.EnderecoNumero = cmd.EnderecoNumero;
-            funcionario.EnderecoComplemento = cmd.EnderecoComplemento;
-            funcionario.EnderecoBairro = cmd.EnderecoBairro;
-            funcionario.EnderecoCep = cmd.EnderecoCep;
-            funcionario.EnderecoMunicipio = cmd.EnderecoMunicipio;
-            funcionario.EnderecoUf = cmd.EnderecoUf;
-            funcionario.Telefone = cmd.Telefone;
-            funcionario.Email = cmd.Email;
+        var existente = await _repo.GetByCpfHashAsync(cpf.Hash, ct);
+        if (existente is not null)
+            return Result<FuncionarioDto>.Failure("CPF_DUPLICADO", "Já existe um funcionário com este CPF.");
 
-            await _repo.AddAsync(funcionario, ct);
-            await _messageBus.PublishAsync(new FuncionarioCadastradoEvent(
-                funcionario.Id, funcionario.EmpresaId, funcionario.CargoId,
-                funcionario.SalarioBase, funcionario.DataAdmissao),
-                "folha360.cadastros", "FuncionarioCadastrado", ct);
+        var funcionario = new Funcionario(
+            cmd.EmpresaId, cmd.Nome, cpf.Numero, cpf.Hash,
+            cmd.DataAdmissao, cmd.CargoId, cmd.LotacaoId, cmd.SalarioBase,
+            cmd.DataNascimento, cmd.Sexo, cmd.EstadoCivil, cmd.Nacionalidade,
+            cmd.NomeMae, cmd.NomePai, cmd.TipoContrato, cmd.JornadaHorasSemanais);
 
-            return Result<FuncionarioDto>.Success(MapFuncionario(funcionario));
-        }
-        catch (ArgumentException ex)
-        {
-            return Result<FuncionarioDto>.Failure("VALIDACAO", ex.Message);
-        }
+        funcionario.EnderecoLogradouro = cmd.EnderecoLogradouro;
+        funcionario.EnderecoNumero = cmd.EnderecoNumero;
+        funcionario.EnderecoComplemento = cmd.EnderecoComplemento;
+        funcionario.EnderecoBairro = cmd.EnderecoBairro;
+        funcionario.EnderecoCep = cmd.EnderecoCep;
+        funcionario.EnderecoMunicipio = cmd.EnderecoMunicipio;
+        funcionario.EnderecoUf = cmd.EnderecoUf;
+        funcionario.Telefone = cmd.Telefone;
+        funcionario.Email = cmd.Email;
+
+        await _repo.AddAsync(funcionario, ct);
+        await _messageBus.PublishAsync(new FuncionarioCadastradoEvent(
+            funcionario.Id, funcionario.EmpresaId, funcionario.CargoId,
+            funcionario.SalarioBase, funcionario.DataAdmissao),
+            "folha360.cadastros", "FuncionarioCadastrado", ct);
+
+        return Result<FuncionarioDto>.Success(MapFuncionario(funcionario));
     }
 
     private static FuncionarioDto MapFuncionario(Funcionario f) => new()
