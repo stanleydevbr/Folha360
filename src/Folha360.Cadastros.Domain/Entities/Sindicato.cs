@@ -36,7 +36,7 @@ public class Sindicato : BaseEntity
         EmpresaId = empresaId;
         Codigo = codigo;
         Nome = nome;
-        Cnpj = cnpj;
+        Cnpj = StripNonDigits(cnpj);
         Tipo = tipo;
         ContribuicaoSindicalPercentual = contribuicaoSindicalPercentual;
         ContribuicaoAssistencialPercentual = contribuicaoAssistencialPercentual;
@@ -56,7 +56,7 @@ public class Sindicato : BaseEntity
             throw new ArgumentException("Contribuição sindical deve estar entre 0% e 10%.");
 
         Nome = nome;
-        Cnpj = cnpj;
+        Cnpj = StripNonDigits(cnpj);
         Tipo = tipo;
         ContribuicaoSindicalPercentual = contribuicaoSindicalPercentual ?? ContribuicaoSindicalPercentual;
         ContribuicaoAssistencialPercentual = contribuicaoAssistencialPercentual ?? ContribuicaoAssistencialPercentual;

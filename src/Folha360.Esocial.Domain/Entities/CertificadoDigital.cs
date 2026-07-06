@@ -34,7 +34,7 @@ public class CertificadoDigital : BaseEntity
         EmpresaId = empresaId;
         Tipo = tipo;
         Emitente = emitente;
-        Cnpj = cnpj;
+        Cnpj = StripNonDigits(cnpj) ?? string.Empty;
         DataExpiracao = dataExpiracao;
         ArquivoPfx = arquivoPfx;
         CaminhoToken = caminhoToken;

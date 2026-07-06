@@ -19,4 +19,11 @@ public abstract class BaseEntity : ISoftDeletable
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
     }
+
+    /// <summary>
+    /// Remove caracteres não-dígito de uma string (ex.: formatação de CNPJ/CPF).
+    /// Retorna null se a entrada for null.
+    /// </summary>
+    protected static string? StripNonDigits(string? value)
+        => value is null ? null : new string(value.Where(char.IsDigit).ToArray());
 }
