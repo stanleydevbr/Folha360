@@ -4,6 +4,8 @@
 Proposta de arquitetura em 4 camadas lógicas (Presentation, Application, Domain, Infrastructure) com dependência unidirecional em direção ao Domain, adaptada para o domínio de folha de pagamento compatível com e-Social v. S-1.3. A separação em camadas permite isolar regras de negócio fiscal/trabalhista das preocupações de infraestrutura (mensageria e-Social, persistência) e da interface com o usuário.
 
 > **Atualização (Junho 2026)**: O subsistema de rubricas foi expandido com base na [pesquisa de mercado](../rubricas/pesquisa-mercado-rubricas.md) e [plano de ação](../rubricas/plano-acao-rubricas.md), introduzindo motor de cálculo com 4 fases, composição hierárquica de rubricas, editor visual drag-and-drop, e suporte a 11 tipos de cálculo de DP. Ver [ADR-006](./adr-006-subsistema-rubricas.md) para detalhes.
+>
+> **Atualização (Junho 2026) — Cadastros Expandidos**: O módulo de Cadastros foi significativamente ampliado com base no [levantamento completo de cadastros do DP](../../inputs/cadastros-folha360v1.md). Foram adicionadas **9 novas entidades de apoio** (CBO, Natureza Jurídica, Municípios IBGE, Bancos Febraban, Sindicatos, Convênios, Horários de Trabalho, Grupos de Rúbricas, Processos Administrativos/Judiciais) e **expansão profunda** das entidades Empresa (lotações com endereço e config fiscal, contas bancárias, endereços múltiplos, contatos, configs gerais e e-Social) e Funcionário (dados bancários, contrato de trabalho detalhado, remuneração e benefícios, dependentes expandidos, afastamentos, informações e-Social, movimentação fixa e mensal).
 
 ## Camadas
 
@@ -25,7 +27,7 @@ Proposta de arquitetura em 4 camadas lógicas (Presentation, Application, Domain
 
 | Serviço | Casos de Uso |
 |---|---|
-| `CadastrosService` | CRUD funcionários, cargos, rubricas, empresas; validação de dados obrigatórios e-Social |
+| `CadastrosService` | CRUD funcionários, cargos, rubricas, empresas, lotações, sindicatos, convênios, horários de trabalho, CBO, natureza jurídica, municípios, bancos, processos administrativos; validação de dados obrigatórios e-Social |
 | `RubricasService` | CRUD de rubricas, grupos, composições, fórmulas, incidências, tabelas progressivas; validação de unicidade `(empresa_id, codigo)`; validação de `tipo_esocial` contra catálogo Tabela 03; versionamento e histórico de alterações |
 | `FolhaService` | Iniciar cálculo da folha, orquestrar `MotorCalculo`, aplicar rubricas em 4 fases (vencimentos, bases, descontos, totais), gerar holerites, fechar período |
 | `EventosTrabalhistasService` | Registrar admissão (S-2200), férias (S-2230), afastamentos (S-2230), desligamentos (S-2299) |
@@ -41,10 +43,20 @@ Proposta de arquitetura em 4 camadas lógicas (Presentation, Application, Domain
 
 | Agregado | Entidades | Regras |
 |---|---|---|
-| **Funcionario** | Dados pessoais, endereço, dependentes, documentos | Validação CPF, CTPS, PIS/PASEP; elegibilidade para eventos e-Social |
-| **Empresa** | CNPJ, razão social, CNAE, regime tributário, FPAS | Classificação tributária; matriz/filiais |
+| **Funcionario** | Dados pessoais, endereço, dependentes, documentos, dados bancários, contrato de trabalho, remuneração e benefícios, afastamentos, informações e-Social, movimentação fixa, movimentação mensal | Validação CPF, CTPS, PIS/PASEP; elegibilidade para eventos e-Social; indicador de deficiência; primeiro emprego; trabalhador aposentado |
+| **Empresa** | CNPJ, razão social, nome fantasia, CNAE principal, natureza jurídica, regime tributário, FPAS, matriz/filial, porte, inscrições, CPRB, lotações, endereços, contatos, configurações bancárias, configurações gerais (chave-valor), configurações e-Social | Classificação tributária; matriz/filiais; indicador matriz/filial; alíquota RAT; fator FAP; optante Simples Nacional; anexo Simples; CPRB |
+| **CBO** | Código CBO (6 dígitos), título/descrição da ocupação | Classificação Brasileira de Ocupações (MTb). Tabela de lookup compartilhada. |
+| **NaturezaJuridica** | Código, descrição | Natureza jurídica conforme Tabela 21 e-Social. Tabela de lookup compartilhada. |
+| **MunicipioIBGE** | Código IBGE (7 dígitos), nome, UF, código UF | Municípios brasileiros. Tabela de lookup compartilhada. |
+| **BancoFebraban** | Código Febraban, nome | Bancos brasileiros. Tabela de lookup compartilhada. |
+| **Sindicato** | Código, nome, CNPJ, tipo (Patronal/Laboral), % contribuição sindical, % contribuição assistencial | Vinculado à empresa; percentuais usados no cálculo da folha |
+| **Convenio** | Nome, tipo (Saúde/Odontológico/VR/VA/VT/Seguro/Previdência/Outros), operadora, valor mensal, % empresa, % funcionário | Benefícios oferecidos pela empresa; usados para gerar rubricas de desconto no funcionário |
+| **HorarioTrabalho** | Código, descrição, tipo (Fixo/Flexível/Turno/Escala), carga diária/semanal, horários início/fim jornada e intervalo, tolerância de atraso | Jornadas de trabalho vinculadas ao contrato do funcionário |
+| **Cargo** | Nome, CBO vinculado, descrição da função, salário base mínimo/máximo | Vinculado ao CBO; faixa salarial do cargo |
+| **Lotacao** | Código, descrição, tipo (Matriz/Filial/Obra/Estabelecimento/Unidade/Gerencial), CNPJ próprio, CEI, endereço, FPAS/CNAE/RAT específicos | Configurações fiscais podem ser específicas por lotação |
 | **Rubrica** | Código, natureza (Vencimento/Desconto/Beneficio/Informativo/Provisao/Base/Complemento/Reembolso/Estagio), incidências (INSS, IRRF, FGTS, contribuição sindical, 13º, férias, aviso prévio, rescisão, dissídio, salário-maternidade, auxílio-doença, adiantamento), tipo de cálculo (VALOR_FIXO/PERCENTUAL/HORA/FORMULA/COMPOSICAO/TABELA_PROGRESSIVA/UNIDADE/DIA/MEDIA/TETO/CONDICIONAL), teto/piso, vigência | Compatível com Tabela 03 do e-Social (S-1010); composição hierárquica via `rubrica_composicao`; fórmulas parametrizáveis via `rubrica_formula` com NCalc + sandbox; versionamento via `rubrica_historico` |
-| **GrupoRubrica** | Código, descrição, natureza predominante | Agrupamento categórico para organização e relatórios (ex.: "Vencimentos Fixos", "Descontos Legais") |
+| **GrupoRubrica** | Código, descrição, natureza predominante, ordem de exibição | Agrupamento categórico para organização e relatórios (ex.: "Vencimentos Fixos", "Descontos Legais") |
+| **ProcessoAdministrativo** | Número, tipo (Administrativo/Judicial), órgão, data início/fim, observações, rubricas vinculadas | Processos que impactam rubricas (ex.: ação judicial que altera desconto) |
 | **RubricaComposicao** | Rubrica principal, rubrica componente, operador (+, -, *, /), percentual, obrigatoriedade | Define dependência hierárquica entre rubricas; detecção de ciclos via DFS |
 | **RubricaFormula** | Expressão NCalc, parâmetros JSONB, versão | Fórmulas parametrizáveis com sandbox (timeout 100ms); whitelist de funções |
 | **RubricaIncidencia** | Rubrica, tipo de incidência | Define sobre quais bases/tributos a rubrica incide |

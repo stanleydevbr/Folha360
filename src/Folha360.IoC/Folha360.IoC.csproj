@@ -25,6 +25,9 @@
     <ProjectReference Include="..\Folha360.Relatorios.Application\Folha360.Relatorios.Application.csproj" />
     <ProjectReference Include="..\Folha360.Relatorios.Infrastructure\Folha360.Relatorios.Infrastructure.csproj" />
     <ProjectReference Include="..\Folha360.Relatorios.Presentation\Folha360.Relatorios.Presentation.csproj" />
+    <ProjectReference Include="..\Folha360.Esocial.Application\Folha360.Esocial.Application.csproj" />
+    <ProjectReference Include="..\Folha360.Esocial.Infrastructure\Folha360.Esocial.Infrastructure.csproj" />
+    <ProjectReference Include="..\Folha360.Esocial.Presentation\Folha360.Esocial.Presentation.csproj" />
     <ProjectReference Include="..\Folha360.Infrastructure\Folha360.Infrastructure.csproj" />
   </ItemGroup>
 

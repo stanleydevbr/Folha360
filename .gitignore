@@ -528,3 +528,5 @@ TestResults/
 .github/skills/
 templates/
 tasks/
+
+.vscode

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Folha360.Domain.Validation;
 
 namespace Folha360.Cadastros.Domain.ValueObjects;
 
@@ -14,21 +15,15 @@ public sealed record Cnpj
     public string Numero { get; }
     public string Formatado => Convert.ToUInt64(Numero).ToString(@"00\.000\.000\/0000\-00");
 
-    public Cnpj(string numero)
+    private Cnpj(string numero)
     {
-        if (string.IsNullOrWhiteSpace(numero))
-            throw new ArgumentException("CNPJ não pode ser vazio.", nameof(numero));
-
-        var apenasDigitos = Regex.Replace(numero, @"[^\d]", string.Empty);
-
-        if (apenasDigitos.Length != 14)
-            throw new ArgumentException("CNPJ deve ter 14 dígitos.", nameof(numero));
-
-        if (!ValidarDigitosVerificadores(apenasDigitos))
-            throw new ArgumentException("CNPJ inválido — dígitos verificadores não conferem.", nameof(numero));
-
-        Numero = apenasDigitos;
+        Numero = numero;
     }
+
+    /// <summary>
+    /// Cria um builder para construir um <see cref="Cnpj"/> validado.
+    /// </summary>
+    public static CnpjBuilder Create(string numero) => new(numero);
 
     private static bool ValidarDigitosVerificadores(string cnpj)
     {
@@ -54,5 +49,42 @@ public sealed record Cnpj
     public override string ToString() => Formatado;
 
     public static implicit operator string(Cnpj cnpj) => cnpj.Numero;
-    public static explicit operator Cnpj(string numero) => new(numero);
+
+    /// <summary>
+    /// Builder para construção validada de <see cref="Cnpj"/>.
+    /// </summary>
+    public sealed class CnpjBuilder : NotifiableValueObject<Cnpj>
+    {
+        private readonly string _numeroOriginal;
+
+        internal CnpjBuilder(string numero)
+        {
+            _numeroOriginal = numero;
+        }
+
+        public override Cnpj? Build()
+        {
+            if (string.IsNullOrWhiteSpace(_numeroOriginal))
+            {
+                Notification.AddError("CNPJ_VAZIO", "CNPJ não pode ser vazio.");
+                return null;
+            }
+
+            var apenasDigitos = Regex.Replace(_numeroOriginal, @"[^\d]", string.Empty);
+
+            if (apenasDigitos.Length != 14)
+            {
+                Notification.AddError("CNPJ_TAMANHO", "CNPJ deve ter 14 dígitos.", nameof(Numero));
+                return null;
+            }
+
+            if (!ValidarDigitosVerificadores(apenasDigitos))
+            {
+                Notification.AddError("CNPJ_INVALIDO", "CNPJ inválido — dígitos verificadores não conferem.", nameof(Numero));
+                return null;
+            }
+
+            return new Cnpj(apenasDigitos);
+        }
+    }
 }

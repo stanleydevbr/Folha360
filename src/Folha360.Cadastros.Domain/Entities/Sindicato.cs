@@ -29,19 +29,18 @@ public class Sindicato : BaseEntity
         decimal contribuicaoSindicalPercentual = 0,
         decimal contribuicaoAssistencialPercentual = 0)
     {
-        if (contribuicaoSindicalPercentual < 0 || contribuicaoSindicalPercentual > 10)
-            throw new ArgumentException("Contribuição sindical deve estar entre 0% e 10%.");
-
         Id = Guid.NewGuid();
         EmpresaId = empresaId;
         Codigo = codigo;
         Nome = nome;
-        Cnpj = cnpj;
+        Cnpj = StripNonDigits(cnpj);
         Tipo = tipo;
         ContribuicaoSindicalPercentual = contribuicaoSindicalPercentual;
         ContribuicaoAssistencialPercentual = contribuicaoAssistencialPercentual;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
     }
 
     public void Atualizar(
@@ -51,15 +50,23 @@ public class Sindicato : BaseEntity
         decimal? contribuicaoSindicalPercentual = null,
         decimal? contribuicaoAssistencialPercentual = null)
     {
-        if (contribuicaoSindicalPercentual.HasValue &&
-            (contribuicaoSindicalPercentual < 0 || contribuicaoSindicalPercentual > 10))
-            throw new ArgumentException("Contribuição sindical deve estar entre 0% e 10%.");
-
         Nome = nome;
-        Cnpj = cnpj;
+        Cnpj = StripNonDigits(cnpj);
         Tipo = tipo;
         ContribuicaoSindicalPercentual = contribuicaoSindicalPercentual ?? ContribuicaoSindicalPercentual;
         ContribuicaoAssistencialPercentual = contribuicaoAssistencialPercentual ?? ContribuicaoAssistencialPercentual;
         UpdatedAt = DateTime.UtcNow;
+
+        Validate();
+    }
+
+    public override void Validate()
+    {
+        if (ContribuicaoSindicalPercentual < 0 || ContribuicaoSindicalPercentual > 10)
+        {
+            Notification.AddError("CONTRIBUICAO_INVALIDA",
+                "Contribuição sindical deve estar entre 0% e 10%.",
+                nameof(ContribuicaoSindicalPercentual));
+        }
     }
 }

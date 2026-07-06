@@ -48,7 +48,7 @@ public class Empresa : BaseEntity
     {
         Id = Guid.NewGuid();
         TenantId = tenantId;
-        Cnpj = cnpj;
+        Cnpj = StripNonDigits(cnpj) ?? string.Empty;
         RazaoSocial = razaoSocial;
         RegimeTributario = regimeTributario;
         NomeFantasia = nomeFantasia;
@@ -57,7 +57,7 @@ public class Empresa : BaseEntity
         CodigoTerceiros = codigoTerceiros;
         ClassificacaoTributaria = classificacaoTributaria;
         MatrizFilial = matrizFilial;
-        CnpjMatriz = cnpjMatriz;
+        CnpjMatriz = StripNonDigits(cnpjMatriz);
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -81,7 +81,7 @@ public class Empresa : BaseEntity
         CodigoTerceiros = codigoTerceiros;
         ClassificacaoTributaria = classificacaoTributaria;
         MatrizFilial = matrizFilial;
-        CnpjMatriz = cnpjMatriz;
+        CnpjMatriz = StripNonDigits(cnpjMatriz);
         UpdatedAt = DateTime.UtcNow;
     }
 }

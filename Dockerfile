@@ -31,6 +31,10 @@ COPY src/Folha360.Relatorios.Domain/*.csproj src/Folha360.Relatorios.Domain/
 COPY src/Folha360.Relatorios.Application/*.csproj src/Folha360.Relatorios.Application/
 COPY src/Folha360.Relatorios.Infrastructure/*.csproj src/Folha360.Relatorios.Infrastructure/
 COPY src/Folha360.Relatorios.Presentation/*.csproj src/Folha360.Relatorios.Presentation/
+COPY src/Folha360.Esocial.Domain/*.csproj src/Folha360.Esocial.Domain/
+COPY src/Folha360.Esocial.Application/*.csproj src/Folha360.Esocial.Application/
+COPY src/Folha360.Esocial.Infrastructure/*.csproj src/Folha360.Esocial.Infrastructure/
+COPY src/Folha360.Esocial.Presentation/*.csproj src/Folha360.Esocial.Presentation/
 COPY tests/Folha360.Tests/*.csproj tests/Folha360.Tests/
 
 # Restore

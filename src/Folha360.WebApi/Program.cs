@@ -20,6 +20,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// CORS — allow frontend dev server
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendDev", policy =>
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -35,6 +45,9 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 // 4. Routing
 app.UseRouting();
+
+// 4.1 CORS (before auth)
+app.UseCors("FrontendDev");
 
 // 5. Authentication & Authorization
 app.UseAuthentication();

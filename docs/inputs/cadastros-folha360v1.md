@@ -1,0 +1,292 @@
+- Dashboard de visualização de informações de pagamento
+- Cadastros basicos
+    - Cadastro de CBO (Classificação Brasileira de Ocupações)
+        - Código CBO (6 dígitos)
+        - Título/Descrição da Ocupação
+        - Ativo (Sim/Não)
+    - Cadastro de Natureza Jurídica
+        - Código da Natureza Jurídica
+        - Descrição
+        - Ativo (Sim/Não)
+    - Cadastro de Municípios (IBGE)
+        - Código IBGE (7 dígitos)
+        - Nome do Município
+        - UF
+        - Código da UF
+        - Ativo (Sim/Não)
+    - Cadastro de Bancos (Febraban)
+        - Código do Banco (Febraban)
+        - Nome do Banco
+        - Ativo (Sim/Não)
+    - Cadastro de Sindicatos
+        - Código do Sindicato
+        - Nome do Sindicato
+        - CNPJ do Sindicato
+        - Tipo (Patronal, Laboral)
+        - Contribuição Sindical (%)
+        - Contribuição Assistencial (%)
+        - Ativo (Sim/Não)
+    - Cadastro de Convênios
+        - Nome do Convênio
+        - Tipo (Plano de Saúde, Plano Odontológico, Vale-Refeição, Vale-Alimentação, Vale-Transporte, Seguro de Vida, Previdência Privada, Outros)
+        - Operadora
+        - Valor Mensal (R$)
+        - Percentual Empresa (%)
+        - Percentual Funcionário (%)
+        - Ativo (Sim/Não)
+    - Cadastro de Horários de Trabalho
+        - Código do Horário
+        - Descrição
+        - Tipo (Fixo, Flexível, Turno, Escala)
+        - Carga Horária Diária (minutos)
+        - Carga Horária Semanal (minutos)
+        - Início da Jornada (HH:mm)
+        - Fim da Jornada (HH:mm)
+        - Início do Intervalo (HH:mm)
+        - Fim do Intervalo (HH:mm)
+        - Tolerância de Atraso (minutos)
+        - Ativo (Sim/Não)
+    - Cadastro de Cargos
+        - Nome do Cargo
+        - CBO Vinculado
+        - Descrição da Função
+        - Salário Base Mínimo (R$)
+        - Salário Base Máximo (R$)
+        - Ativo (Sim/Não)
+    - Cadastro de Rúbricas (Vencimentos/Descontos)
+        - Código da Rúbrica
+        - Descrição
+        - Grupo de Rúbrica
+        - Natureza (Vencimento, Desconto, Informativa)
+        - Tipo e-Social
+        - Incidências (INSS, IRRF, FGTS, Sindical, 13º, Férias, Aviso Prévio, Rescisão, Dissídio, Salário Maternidade, Auxílio Doença, Adiantamento)
+        - Tipo de Cálculo (Fixo, Percentual, Fórmula, Tabela Progressiva)
+        - Fórmula de Cálculo
+        - Valor Fixo (R$)
+        - Percentual (%)
+        - Rúbrica Base (para cálculo percentual)
+        - Ordem de Cálculo
+        - Ordem de Exibição
+        - Prioridade de Desconto
+        - Teto Máximo (R$)
+        - Piso Mínimo (R$)
+        - Ativo (Sim/Não)
+        - Data de Início de Vigência
+        - Data de Fim de Vigência
+    - Cadastro de Grupos de Rúbricas
+        - Código do Grupo
+        - Descrição
+        - Natureza (Vencimento, Desconto, Informativa)
+        - Ordem de Exibição
+        - Ativo (Sim/Não)
+    - Cadastro de Processos Administrativos/Judiciais
+        - Número do Processo
+        - Tipo (Administrativo, Judicial)
+        - Órgão
+        - Data de Início
+        - Data de Fim
+        - Observações
+        - Rúbricas Vinculadas
+        - Ativo (Sim/Não)
+- Cadastro de empresa
+    - Identificação da Empresa
+        - CNPJ
+        - Razão Social
+        - Nome Fantasia
+        - CNAE Principal
+        - Indicador Matriz/Filial (Matriz, Filial)
+        - CNPJ da Matriz (se filial)
+        - Inscrição Estadual
+        - Inscrição Municipal
+        - Código EFD-Reinf
+        - Natureza Jurídica
+        - Porte da Empresa (MEI, ME, EPP, Demais, Grande Empresa)
+        - Telefone
+        - E-mail
+    - Configurações Fiscais e Tributárias
+        - Regime Tributário (Simples Nacional, Lucro Presumido, Lucro Real)
+        - Classificação Tributária (Indústria, Comércio, Serviços, etc.)
+        - Código FPAS
+        - Código de Terceiros (S-1000 e-Social)
+        - Alíquota RAT (1%, 2% ou 3%)
+        - Fator FAP
+        - Optante pelo Simples Nacional
+        - Anexo do Simples Nacional (I a VI)
+        - Optante pela CPRB (Desoneração da Folha)
+        - Período de Vigência CPRB (Início/Fim)
+        - Inscrição CEI (obra)
+    - Cadastro de Lotações
+        - Código da Lotação
+        - Descrição
+        - Tipo Lotação (Matriz, Filial, Obra, Estabelecimento, Unidade, Gerencial)
+        - CNPJ Próprio
+        - Inscrição CEI (obra)
+        - Endereço
+            - Tipo (Principal, Fiscal, Cobrança, Entrega, Obra)
+            - Logradouro, Número, Complemento
+            - Bairro, CEP, Município, UF
+            - Código IBGE
+            - Estrangeiro (Sim/Não) e País
+        - Configurações Fiscais
+            - FPAS Específico
+            - CNAE Específico
+            - Alíquota RAT Específica
+        - Ativa (Sim/Não)
+    - Configurações Bancárias
+        - Código do Banco (Febraban)
+        - Agência (com DV)
+        - Conta (com DV)
+        - Tipo de Conta (Corrente, Poupança, Pagamento, Salário)
+        - Chave PIX
+        - Finalidade (Folha de Pagamento, Tributos, Fornecedor, Geral)
+        - Ativa (Sim/Não)
+    - Endereços da Empresa
+        - Tipo (Principal, Fiscal, Cobrança, Entrega, Obra)
+        - Logradouro, Número, Complemento
+        - Bairro, CEP, Município, UF
+        - Código IBGE
+        - Estrangeiro (Sim/Não) e País
+    - Contatos da Empresa
+        - Tipo (Diretor, Gerente, Sócio, Presidente, Procurador, Contador, RH, TI, Preposto)
+        - Nome Completo
+        - CPF
+        - Cargo
+        - E-mail
+        - Telefone (com DDD)
+        - Celular (com DDD)
+        - Contato Principal (Sim/Não)
+        - Ativo (Sim/Não)
+        - Período de Vigência (Início/Fim)
+    - Configurações Gerais (chave-valor)
+        - Folha: dia de pagamento, % adiantamento salarial, % vale-transporte
+        - Férias: abono pecuniário permitido, dias máximos de abono
+        - Ponto: tolerância em minutos
+    - Configurações de e-Social
+        - Ambiente (Produção, Produção Restrita)
+        - Certificado Digital (A1/A3)
+        - Vencimento do Certificado
+        - Versão do Layout (ex: S-1.3)
+        - Código do Transmissor
+        - Grupo e-Social (1, 2, 3 ou 4)
+        - Data de Início da Obrigatoriedade
+- Cadastro de funcionarios
+    - Identificação Pessoal
+        - Nome Completo
+        - CPF
+        - Data de Nascimento
+        - Sexo (Masculino, Feminino, Não Informado)
+        - Estado Civil (Solteiro, Casado, Divorciado, Viúvo, União Estável)
+        - Nacionalidade
+        - Naturalidade (Município/UF)
+        - Nome do Pai
+        - Nome da Mãe
+        - Raça/Cor (Branca, Preta, Parda, Amarela, Indígena)
+        - Grau de Instrução (Fundamental, Médio, Superior, Pós-Graduação, Mestrado, Doutorado)
+    - Documentos
+        - Tipo (CPF, RG, CNH, CTPS, PIS/PASEP, NIS/NIT, Título de Eleitor, Certidão Nascimento/Casamento, RNE/CIE)
+        - Número
+        - Data de Emissão
+        - Data de Validade
+        - Órgão Emissor
+        - UF do Emissor
+        - Arquivo Anexo (cópia digitalizada)
+    - Contatos
+        - Telefone Fixo (com DDD)
+        - Celular Principal (com DDD)
+        - Celular Secundário (com DDD)
+        - E-mail Pessoal
+        - E-mail Corporativo
+    - Endereço Residencial
+        - Logradouro, Número, Complemento
+        - Bairro, CEP, Município, UF
+        - Código IBGE do Município
+        - Estrangeiro (Sim/Não) e País
+        - Comprovante de Endereço Anexo
+    - Dados Bancários do Funcionário
+        - Código do Banco (Febraban)
+        - Agência (com DV)
+        - Conta (com DV)
+        - Tipo de Conta (Corrente, Poupança, Salário)
+        - Chave PIX
+        - Conta Principal para Pagamento (Sim/Não)
+    - Contrato de Trabalho
+        - Empresa Vinculada
+        - Lotação Vinculada
+        - Data de Admissão
+        - Data de Desligamento
+        - Tipo de Admissão (Normal, Transferência, Reintegração, Sucessão)
+        - Cargo Vinculado (CBO)
+        - Função/Descrição da Função
+        - Salário Base (R$)
+        - Tipo de Salário (Mensalista, Horista, Diarista, Semanalista, Tarefa)
+        - Carga Horária Semanal
+        - Tipo de Contrato (CLT - Prazo Indeterminado, CLT - Prazo Determinado, CLT - Experiência, Aprendiz, Estágio, Intermitente, Temporário, PJ, Cooperado, Autônomo)
+        - Data de Término do Contrato (se prazo determinado)
+        - Horário de Trabalho Vinculado
+        - Sindicato Vinculado
+        - Categoria do Trabalhador (Empregado, Empregado Doméstico, Contribuinte Individual, etc.)
+        - Indicativo de Admissão (Normal, Decorrente de Ação Fiscal)
+        - Status (Ativo, Afastado, Desligado, Férias, Licença, Aposentado por Invalidez)
+    - Remuneração e Benefícios
+        - Salário Base
+        - Valor Hora (calculado, se horista)
+        - Adicional de Insalubridade (% ou R$)
+        - Adicional de Periculosidade (% ou R$)
+        - Adicional Noturno (%)
+        - Adicional de Transferência (%)
+        - Vale-Transporte (Sim/Não, Valor Mensal)
+        - Vale-Refeição/Alimentação (Sim/Não, Valor Diário)
+        - Plano de Saúde (Sim/Não, Valor Descontado)
+        - Plano Odontológico (Sim/Não, Valor Descontado)
+        - Seguro de Vida (Sim/Não, Valor Descontado)
+        - Previdência Privada (Sim/Não, Valor Descontado)
+    - Dependentes
+        - Nome Completo
+        - CPF
+        - Data de Nascimento
+        - Tipo (Filho, Enteado, Cônjuge/Companheiro, Pais/Avós, Irmão/Neto/Bisneto, Curatela/Tutela, Pensão Alimentícia)
+        - Grau de Parentesco
+        - Dependente para IRRF (Sim/Não)
+        - Dependente para Salário-Família (Sim/Não)
+        - Dependente para Plano de Saúde (Sim/Não)
+        - Pensão Alimentícia — Valor Fixo (R$)
+        - Pensão Alimentícia — Percentual (%)
+        - Data de Início da Pensão
+        - Data de Fim da Pensão (se aplicável)
+    - Afastamentos
+        - Tipo (Doença, Acidente de Trabalho, Maternidade, Paternidade, Serviço Militar, Mandato Sindical, Suspensão, Férias, Licença Não Remunerada, Outros)
+        - Data de Início
+        - Data de Fim (prevista)
+        - Data de Fim (efetiva/retorno)
+        - Número do Atestado/CID
+        - Observações
+    - Informações para e-Social
+        - Indicador de Deficiência (Sim/Não)
+        - Tipo de Deficiência (Física, Auditiva, Visual, Intelectual, Múltipla, Reabilitado)
+        - Data de Emissão do Laudo de Deficiência
+        - Reservista (Sim/Não)
+        - Primeiro Emprego (Sim/Não)
+        - Trabalhador Aposentado (Sim/Não)
+        - Registro Profissional (CRM, OAB, CREA, etc.)
+    - Arquivos e Documentos Anexos
+        - Foto do Funcionário
+        - Cópia do CPF
+        - Cópia do RG
+        - Cópia da CTPS
+        - Cópia do Comprovante de Residência
+        - Cópia do Diploma/Certificado
+        - Cópia do Atestado de Saúde Ocupacional (ASO)
+        - Cópia do Laudo de Deficiência (se aplicável)
+        - Outros Documentos
+    - Movimentação Fixa
+        - Codigo da rubrica
+        - Descrição
+        - Quantidade
+        - Valor        
+    - Movimentação Mensal
+        - Codigo da rubrica
+        - Descrição
+        - Mes e Ano
+        - Quantidade
+        - Valor
+    

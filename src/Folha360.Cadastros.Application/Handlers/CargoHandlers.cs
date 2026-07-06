@@ -18,30 +18,28 @@ public class CriarCargoHandler : IRequestHandler<CriarCargoCommand, Result<Cargo
         if (cmd.EmpresaId == Guid.Empty)
             return Result<CargoDto>.Failure("VALIDACAO", "EmpresaId é obrigatório.");
 
-        try
-        {
-            var cbo = new Cbo(cmd.Cbo);
-            var cargo = new Cargo(cmd.EmpresaId, cmd.Nome, cbo.Codigo,
-                cmd.Descricao, cmd.SalarioBaseMinimo, cmd.SalarioBaseMaximo);
-            await _repo.AddAsync(cargo, ct);
+        var cboBuilder = Cbo.Create(cmd.Cbo);
+        var cbo = cboBuilder.Build();
 
-            return Result<CargoDto>.Success(new CargoDto
-            {
-                Id = cargo.Id,
-                EmpresaId = cargo.EmpresaId,
-                Nome = cargo.Nome,
-                Cbo = cargo.Cbo,
-                Descricao = cargo.Descricao,
-                SalarioBaseMinimo = cargo.SalarioBaseMinimo,
-                SalarioBaseMaximo = cargo.SalarioBaseMaximo,
-                CreatedAt = cargo.CreatedAt,
-                UpdatedAt = cargo.UpdatedAt,
-            });
-        }
-        catch (ArgumentException ex)
+        if (cbo is null)
+            return Result<CargoDto>.FromNotification(cboBuilder.Notification);
+
+        var cargo = new Cargo(cmd.EmpresaId, cmd.Nome, cbo.Codigo,
+            cmd.Descricao, cmd.SalarioBaseMinimo, cmd.SalarioBaseMaximo);
+        await _repo.AddAsync(cargo, ct);
+
+        return Result<CargoDto>.Success(new CargoDto
         {
-            return Result<CargoDto>.Failure("VALIDACAO", ex.Message);
-        }
+            Id = cargo.Id,
+            EmpresaId = cargo.EmpresaId,
+            Nome = cargo.Nome,
+            Cbo = cargo.Cbo,
+            Descricao = cargo.Descricao,
+            SalarioBaseMinimo = cargo.SalarioBaseMinimo,
+            SalarioBaseMaximo = cargo.SalarioBaseMaximo,
+            CreatedAt = cargo.CreatedAt,
+            UpdatedAt = cargo.UpdatedAt,
+        });
     }
 }
 
@@ -59,28 +57,26 @@ public class AtualizarCargoHandler : IRequestHandler<AtualizarCargoCommand, Resu
         if (cargo is null)
             return Result<CargoDto>.Failure("NAO_ENCONTRADO", "Cargo não encontrado.");
 
-        try
-        {
-            var cbo = new Cbo(cmd.Cbo);
-            cargo.Atualizar(cmd.Nome, cbo.Codigo, cmd.Descricao,
-                cmd.SalarioBaseMinimo, cmd.SalarioBaseMaximo);
-            await _repo.UpdateAsync(cargo, ct);
+        var cboBuilder = Cbo.Create(cmd.Cbo);
+        var cbo = cboBuilder.Build();
 
-            return Result<CargoDto>.Success(new CargoDto
-            {
-                Id = cargo.Id,
-                EmpresaId = cargo.EmpresaId,
-                Nome = cargo.Nome,
-                Cbo = cargo.Cbo,
-                Descricao = cargo.Descricao,
-                CreatedAt = cargo.CreatedAt,
-                UpdatedAt = cargo.UpdatedAt,
-            });
-        }
-        catch (ArgumentException ex)
+        if (cbo is null)
+            return Result<CargoDto>.FromNotification(cboBuilder.Notification);
+
+        cargo.Atualizar(cmd.Nome, cbo.Codigo, cmd.Descricao,
+            cmd.SalarioBaseMinimo, cmd.SalarioBaseMaximo);
+        await _repo.UpdateAsync(cargo, ct);
+
+        return Result<CargoDto>.Success(new CargoDto
         {
-            return Result<CargoDto>.Failure("VALIDACAO", ex.Message);
-        }
+            Id = cargo.Id,
+            EmpresaId = cargo.EmpresaId,
+            Nome = cargo.Nome,
+            Cbo = cargo.Cbo,
+            Descricao = cargo.Descricao,
+            CreatedAt = cargo.CreatedAt,
+            UpdatedAt = cargo.UpdatedAt,
+        });
     }
 }
 
