@@ -1,19 +1,14 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from '@/providers/AuthProvider'
-import { useSindicatos, useCreateSindicato, useUpdateSindicato, useDeleteSindicato } from '@folha360/api'
+import { useSindicatos, useCreateSindicato, useUpdateSindicato, useDeleteSindicato, useEmpresas } from '@folha360/api'
 import type { Sindicato } from '@folha360/api'
 import {
   DataTable,
-  FormContainer,
   SindicatoFormFields,
   Card,
   CardContent,
   Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  FormPanel,
   Badge,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
@@ -31,9 +26,7 @@ type FormData = {
   contribuicaoAssistencialPercentual: string
 }
 
-const EMPTY_FORM: FormData = {
-  id: '',
-  empresaId: '',
+const EMPTY_FORM: Omit<FormData, 'id' | 'empresaId'> = {
   codigo: '',
   nome: '',
   cnpj: '',
@@ -53,21 +46,26 @@ export default function SindicatosPage() {
   const { apiClient } = useAuth()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
-  const [formData, setFormData] = useState<FormData>(EMPTY_FORM)
+  const [editItem, setEditItem] = useState<Sindicato | null>(null)
+  const [formData, setFormData] = useState<FormData>({ id: '', empresaId: '', ...EMPTY_FORM })
 
   const { data, isLoading } = useSindicatos(apiClient)
+  const { data: empresasData } = useEmpresas(apiClient)
   const createMutation = useCreateSindicato(apiClient)
   const updateMutation = useUpdateSindicato(apiClient)
   const deleteMutation = useDeleteSindicato(apiClient)
+  const primeiraEmpresaId = empresasData?.items?.[0]?.id
 
   const openCreate = useCallback(() => {
     setEditId(null)
-    setFormData(EMPTY_FORM)
+    setEditItem(null)
+    setFormData({ id: '', empresaId: primeiraEmpresaId ?? '', ...EMPTY_FORM })
     setSheetOpen(true)
-  }, [])
+  }, [primeiraEmpresaId])
 
   const openEdit = useCallback((item: Sindicato) => {
     setEditId(item.id)
+    setEditItem(item)
     setFormData({
       id: item.id, empresaId: item.empresaId, codigo: item.codigo, nome: item.nome,
       cnpj: item.cnpj ?? '', tipo: item.tipo ?? '',
@@ -80,16 +78,22 @@ export default function SindicatosPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      if (!formData.empresaId) {
+        toast.error('Nenhuma empresa encontrada. Crie uma empresa primeiro.')
+        return
+      }
       const payload: Sindicato = {
         ...formData,
         contribuicaoSindicalPercentual: Number(formData.contribuicaoSindicalPercentual),
         contribuicaoAssistencialPercentual: Number(formData.contribuicaoAssistencialPercentual),
+        ...(editItem ? { createdAt: editItem.createdAt, updatedAt: editItem.updatedAt } : {}),
       }
       if (editId) {
         await updateMutation.mutateAsync({ id: editId, data: payload })
         toast.success('Sindicato atualizado!')
       } else {
-        await createMutation.mutateAsync(payload)
+        const { id: _, ...createPayload } = payload
+        await createMutation.mutateAsync(createPayload as Sindicato)
         toast.success('Sindicato criado!')
       }
       setSheetOpen(false)
@@ -126,24 +130,19 @@ export default function SindicatosPage() {
         </CardContent>
       </Card>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>{editId ? 'Editar Sindicato' : 'Novo Sindicato'}</SheetTitle>
-            <SheetDescription>Preencha os dados do sindicato.</SheetDescription>
-          </SheetHeader>
-          <div className="mt-6">
-            <FormContainer
-              mode={editId ? 'edit' : 'create'}
-              onSubmit={handleSubmit}
-              onCancel={() => setSheetOpen(false)}
-              isSubmitting={createMutation.isPending || updateMutation.isPending}
-            >
-              <SindicatoFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} />
-            </FormContainer>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <FormPanel
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={editId ? 'Editar Sindicato' : 'Novo Sindicato'}
+        subtitle="Preencha os dados do sindicato."
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        saveLabel={editId ? 'Salvar' : 'Criar Sindicato'}
+      >
+        <fieldset disabled={createMutation.isPending || updateMutation.isPending} className="flex flex-col gap-4">
+          <SindicatoFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} />
+        </fieldset>
+      </FormPanel>
     </div>
   )
 }

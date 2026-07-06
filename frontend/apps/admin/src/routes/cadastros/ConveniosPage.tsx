@@ -1,19 +1,14 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from '@/providers/AuthProvider'
-import { useConvenios, useCreateConvenio, useUpdateConvenio, useDeleteConvenio } from '@folha360/api'
+import { useConvenios, useCreateConvenio, useUpdateConvenio, useDeleteConvenio, useEmpresas } from '@folha360/api'
 import type { Convenio } from '@folha360/api'
 import {
   DataTable,
-  FormContainer,
   ConvenioFormFields,
   Card,
   CardContent,
   Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  FormPanel,
   Badge,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
@@ -32,8 +27,8 @@ type FormData = {
   percentualFuncionario: string
 }
 
-const EMPTY_FORM: FormData = {
-  id: '', empresaId: '', nome: '', tipo: '', operadora: '',
+const EMPTY_FORM: Omit<FormData, 'id' | 'empresaId'> = {
+  nome: '', tipo: '', operadora: '',
   valorMensal: '0', percentualEmpresa: '0', percentualFuncionario: '0',
 }
 
@@ -48,16 +43,25 @@ export default function ConveniosPage() {
   const { apiClient } = useAuth()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
-  const [formData, setFormData] = useState<FormData>(EMPTY_FORM)
+  const [editItem, setEditItem] = useState<Convenio | null>(null)
+  const [formData, setFormData] = useState<FormData>({ id: '', empresaId: '', ...EMPTY_FORM })
 
   const { data, isLoading } = useConvenios(apiClient)
+  const { data: empresasData } = useEmpresas(apiClient)
   const createMutation = useCreateConvenio(apiClient)
   const updateMutation = useUpdateConvenio(apiClient)
   const deleteMutation = useDeleteConvenio(apiClient)
+  const primeiraEmpresaId = empresasData?.items?.[0]?.id
 
-  const openCreate = useCallback(() => { setEditId(null); setFormData(EMPTY_FORM); setSheetOpen(true) }, [])
+  const openCreate = useCallback(() => {
+    setEditId(null)
+    setEditItem(null)
+    setFormData({ id: '', empresaId: primeiraEmpresaId ?? '', ...EMPTY_FORM })
+    setSheetOpen(true)
+  }, [primeiraEmpresaId])
   const openEdit = useCallback((item: Convenio) => {
     setEditId(item.id)
+    setEditItem(item)
     setFormData({
       id: item.id, empresaId: item.empresaId, nome: item.nome, tipo: item.tipo,
       operadora: item.operadora ?? '',
@@ -71,9 +75,10 @@ export default function ConveniosPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const payload: Convenio = { ...formData, valorMensal: Number(formData.valorMensal), percentualEmpresa: Number(formData.percentualEmpresa), percentualFuncionario: Number(formData.percentualFuncionario) }
+      if (!formData.empresaId) { toast.error('Nenhuma empresa encontrada. Crie uma empresa primeiro.'); return }
+      const payload: Convenio = { ...formData, valorMensal: Number(formData.valorMensal), percentualEmpresa: Number(formData.percentualEmpresa), percentualFuncionario: Number(formData.percentualFuncionario), ...(editItem ? { createdAt: editItem.createdAt, updatedAt: editItem.updatedAt } : {}) }
       if (editId) { await updateMutation.mutateAsync({ id: editId, data: payload }); toast.success('Convênio atualizado!') }
-      else { await createMutation.mutateAsync(payload); toast.success('Convênio criado!') }
+      else { const { id: _, ...createPayload } = payload; await createMutation.mutateAsync(createPayload as Convenio); toast.success('Convênio criado!') }
       setSheetOpen(false)
     } catch { toast.error('Erro ao salvar.') }
   }
@@ -93,12 +98,19 @@ export default function ConveniosPage() {
             </div>
           )} />
       </CardContent></Card>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader><SheetTitle>{editId ? 'Editar Convênio' : 'Novo Convênio'}</SheetTitle><SheetDescription>Preencha os dados do convênio.</SheetDescription></SheetHeader>
-          <div className="mt-6"><FormContainer mode={editId ? 'edit' : 'create'} onSubmit={handleSubmit} onCancel={() => setSheetOpen(false)} isSubmitting={createMutation.isPending || updateMutation.isPending}><ConvenioFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} /></FormContainer></div>
-        </SheetContent>
-      </Sheet>
+      <FormPanel
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={editId ? 'Editar Convênio' : 'Novo Convênio'}
+        subtitle="Preencha os dados do convênio."
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        saveLabel={editId ? 'Salvar' : 'Criar Convênio'}
+      >
+        <fieldset disabled={createMutation.isPending || updateMutation.isPending} className="flex flex-col gap-4">
+          <ConvenioFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} />
+        </fieldset>
+      </FormPanel>
     </div>
   )
 }

@@ -11,16 +11,11 @@ import {
 import type { FuncionarioDto, CriarFuncionarioCommand } from '@folha360/api'
 import {
   DataTable,
-  FormContainer,
   FuncionarioFormFields,
   Card,
   CardContent,
   Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  FormPanel,
   Badge,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
@@ -185,34 +180,26 @@ export default function FuncionariosPage() {
       </Card>
 
       {/* Create-only Sheet */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Novo Funcionário</SheetTitle>
-            <SheetDescription>
-              Preencha os dados básicos. Após criar, acesse o funcionário para adicionar documentos, contrato, dependentes e demais dados.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="mt-6">
-            <FormContainer
-              mode="create"
-              onSubmit={handleSubmit}
-              onCancel={() => setSheetOpen(false)}
-              isSubmitting={createMutation.isPending}
-              submitLabel="Criar Funcionário"
-            >
-              <FuncionarioFormFields
-                data={formComponentData}
-                onChange={(d) => setFormData({ ...formData, ...d, salarioBase: Number(d.salarioBase) || 0, jornadaHorasSemanais: d.jornadaHorasSemanais ? Number(d.jornadaHorasSemanais) : undefined })}
-                errors={formErrors}
-                mode="create"
-                cargos={cargoOptions}
-                lotacoes={lotacaoOptions}
-              />
-            </FormContainer>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <FormPanel
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title="Novo Funcionário"
+        subtitle="Preencha os dados básicos. Após criar, acesse o funcionário para adicionar documentos, contrato, dependentes e demais dados."
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending}
+        saveLabel="Criar Funcionário"
+      >
+        <fieldset disabled={createMutation.isPending} className="flex flex-col gap-4">
+          <FuncionarioFormFields
+            data={formComponentData}
+            onChange={(d) => setFormData({ ...formData, ...d, salarioBase: Number(d.salarioBase) || 0, jornadaHorasSemanais: d.jornadaHorasSemanais ? Number(d.jornadaHorasSemanais) : undefined })}
+            errors={formErrors}
+            mode="create"
+            cargos={cargoOptions}
+            lotacoes={lotacaoOptions}
+          />
+        </fieldset>
+      </FormPanel>
     </div>
   )
 }

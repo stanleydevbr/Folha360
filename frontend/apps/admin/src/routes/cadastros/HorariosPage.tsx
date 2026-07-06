@@ -1,19 +1,14 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from '@/providers/AuthProvider'
-import { useHorariosTrabalho, useCreateHorarioTrabalho, useUpdateHorarioTrabalho, useDeleteHorarioTrabalho } from '@folha360/api'
+import { useHorariosTrabalho, useCreateHorarioTrabalho, useUpdateHorarioTrabalho, useDeleteHorarioTrabalho, useEmpresas } from '@folha360/api'
 import type { HorarioTrabalho } from '@folha360/api'
 import {
   DataTable,
-  FormContainer,
   HorarioTrabalhoFormFields,
   Card,
   CardContent,
   Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  FormPanel,
   Badge,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
@@ -35,8 +30,8 @@ type FormData = {
   toleranciaAtrasoMinutos: string
 }
 
-const EMPTY_FORM: FormData = {
-  id: '', empresaId: '', codigo: '', descricao: '', tipo: '',
+const EMPTY_FORM: Omit<FormData, 'id' | 'empresaId'> = {
+  codigo: '', descricao: '', tipo: '',
   cargaHorariaDiaria: '480', cargaHorariaSemanal: '2400',
   inicioJornada: '08:00', fimJornada: '17:00', inicioIntervalo: '', fimIntervalo: '',
   toleranciaAtrasoMinutos: '10',
@@ -54,16 +49,25 @@ export default function HorariosPage() {
   const { apiClient } = useAuth()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
-  const [formData, setFormData] = useState<FormData>(EMPTY_FORM)
+  const [editItem, setEditItem] = useState<HorarioTrabalho | null>(null)
+  const [formData, setFormData] = useState<FormData>({ id: '', empresaId: '', ...EMPTY_FORM })
 
   const { data, isLoading } = useHorariosTrabalho(apiClient)
+  const { data: empresasData } = useEmpresas(apiClient)
   const createMutation = useCreateHorarioTrabalho(apiClient)
   const updateMutation = useUpdateHorarioTrabalho(apiClient)
   const deleteMutation = useDeleteHorarioTrabalho(apiClient)
+  const primeiraEmpresaId = empresasData?.items?.[0]?.id
 
-  const openCreate = useCallback(() => { setEditId(null); setFormData(EMPTY_FORM); setSheetOpen(true) }, [])
+  const openCreate = useCallback(() => {
+    setEditId(null)
+    setEditItem(null)
+    setFormData({ id: '', empresaId: primeiraEmpresaId ?? '', ...EMPTY_FORM })
+    setSheetOpen(true)
+  }, [primeiraEmpresaId])
   const openEdit = useCallback((item: HorarioTrabalho) => {
     setEditId(item.id)
+    setEditItem(item)
     setFormData({
       id: item.id, empresaId: item.empresaId, codigo: item.codigo, descricao: item.descricao, tipo: item.tipo,
       cargaHorariaDiaria: String(item.cargaHorariaDiaria),
@@ -80,9 +84,10 @@ export default function HorariosPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const payload: HorarioTrabalho = { ...formData, cargaHorariaDiaria: Number(formData.cargaHorariaDiaria), cargaHorariaSemanal: Number(formData.cargaHorariaSemanal), toleranciaAtrasoMinutos: Number(formData.toleranciaAtrasoMinutos) }
+      if (!formData.empresaId) { toast.error('Nenhuma empresa encontrada. Crie uma empresa primeiro.'); return }
+      const payload: HorarioTrabalho = { ...formData, cargaHorariaDiaria: Number(formData.cargaHorariaDiaria), cargaHorariaSemanal: Number(formData.cargaHorariaSemanal), toleranciaAtrasoMinutos: Number(formData.toleranciaAtrasoMinutos), ...(editItem ? { createdAt: editItem.createdAt, updatedAt: editItem.updatedAt } : {}) }
       if (editId) { await updateMutation.mutateAsync({ id: editId, data: payload }); toast.success('Horário atualizado!') }
-      else { await createMutation.mutateAsync(payload); toast.success('Horário criado!') }
+      else { const { id: _, ...createPayload } = payload; await createMutation.mutateAsync(createPayload as HorarioTrabalho); toast.success('Horário criado!') }
       setSheetOpen(false)
     } catch { toast.error('Erro ao salvar.') }
   }
@@ -102,12 +107,19 @@ export default function HorariosPage() {
             </div>
           )} />
       </CardContent></Card>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader><SheetTitle>{editId ? 'Editar Horário' : 'Novo Horário'}</SheetTitle><SheetDescription>Configure a jornada de trabalho.</SheetDescription></SheetHeader>
-          <div className="mt-6"><FormContainer mode={editId ? 'edit' : 'create'} onSubmit={handleSubmit} onCancel={() => setSheetOpen(false)} isSubmitting={createMutation.isPending || updateMutation.isPending}><HorarioTrabalhoFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} /></FormContainer></div>
-        </SheetContent>
-      </Sheet>
+      <FormPanel
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={editId ? 'Editar Horário' : 'Novo Horário'}
+        subtitle="Configure a jornada de trabalho."
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        saveLabel={editId ? 'Salvar' : 'Criar Horário'}
+      >
+        <fieldset disabled={createMutation.isPending || updateMutation.isPending} className="flex flex-col gap-4">
+          <HorarioTrabalhoFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} />
+        </fieldset>
+      </FormPanel>
     </div>
   )
 }

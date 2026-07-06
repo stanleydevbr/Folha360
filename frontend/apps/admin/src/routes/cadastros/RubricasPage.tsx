@@ -5,16 +5,11 @@ import { useRubricas, useCreateRubrica, useUpdateRubrica, useDeleteRubrica, useG
 import type { RubricaDto, CriarRubricaCommand } from '@folha360/api'
 import {
   DataTable,
-  FormContainer,
   RubricaFormFields,
   Card,
   CardContent,
   Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  FormPanel,
   Badge,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
@@ -147,12 +142,20 @@ export default function RubricasPage() {
             </div>
           )} />
       </CardContent></Card>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-3xl lg:max-w-4xl overflow-y-auto">
-          <SheetHeader><SheetTitle>{editId ? 'Editar Rubrica' : 'Nova Rubrica'}</SheetTitle><SheetDescription>Configure a rubrica para cálculo da folha.</SheetDescription></SheetHeader>
-          <div className="mt-6"><FormContainer mode={editId ? 'edit' : 'create'} onSubmit={handleSubmit} onCancel={() => setSheetOpen(false)} isSubmitting={createMutation.isPending || updateMutation.isPending}><RubricaFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} grupos={grupoOptions} rubricasBase={rubricaBaseOptions} /></FormContainer></div>
-        </SheetContent>
-      </Sheet>
+      <FormPanel
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={editId ? 'Editar Rubrica' : 'Nova Rubrica'}
+        subtitle="Configure a rubrica para cálculo da folha."
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        saveLabel={editId ? 'Salvar' : 'Criar Rubrica'}
+        panelWidth="max-w-3xl"
+      >
+        <fieldset disabled={createMutation.isPending || updateMutation.isPending} className="flex flex-col gap-4">
+          <RubricaFormFields data={formData as any} onChange={(d: any) => setFormData(d as FormData)} mode={editId ? 'edit' : 'create'} grupos={grupoOptions} rubricasBase={rubricaBaseOptions} />
+        </fieldset>
+      </FormPanel>
     </div>
   )
 }

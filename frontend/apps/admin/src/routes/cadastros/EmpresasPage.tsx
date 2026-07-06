@@ -5,16 +5,11 @@ import { useEmpresas, useCreateEmpresa, useDeleteEmpresa } from '@folha360/api'
 import type { EmpresaDto, CriarEmpresaCommand } from '@folha360/api'
 import {
   DataTable,
-  FormContainer,
   EmpresaFormFields,
   Card,
   CardContent,
   Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  FormPanel,
   Badge,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
@@ -156,32 +151,24 @@ export default function EmpresasPage() {
       </Card>
 
       {/* Create-only Sheet (quick create) */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Nova Empresa</SheetTitle>
-            <SheetDescription>
-              Preencha os dados para cadastrar uma nova empresa. Após criar, acesse a empresa para adicionar endereços, contatos e demais configurações.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="mt-6">
-            <FormContainer
-              mode="create"
-              onSubmit={handleSubmit}
-              onCancel={() => setSheetOpen(false)}
-              isSubmitting={createMutation.isPending}
-              submitLabel="Criar Empresa"
-            >
-              <EmpresaFormFields
-                data={formData as any}
-                onChange={(d) => setFormData(d as CriarEmpresaCommand)}
-                errors={formErrors}
-                mode="create"
-              />
-            </FormContainer>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <FormPanel
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title="Nova Empresa"
+        subtitle="Preencha os dados para cadastrar uma nova empresa. Após criar, acesse a empresa para adicionar endereços, contatos e demais configurações."
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending}
+        saveLabel="Criar Empresa"
+      >
+        <fieldset disabled={createMutation.isPending} className="flex flex-col gap-4">
+          <EmpresaFormFields
+            data={formData as any}
+            onChange={(d) => setFormData(d as CriarEmpresaCommand)}
+            errors={formErrors}
+            mode="create"
+          />
+        </fieldset>
+      </FormPanel>
     </div>
   )
 }

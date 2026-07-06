@@ -4,16 +4,11 @@ import { useLotacoes, useCreateLotacao, useUpdateLotacao, useDeleteLotacao } fro
 import type { LotacaoDto, CriarLotacaoCommand } from '@folha360/api'
 import {
   DataTable,
-  FormContainer,
   LotacaoFormFields,
   Card,
   CardContent,
   Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  FormPanel,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
@@ -70,12 +65,19 @@ export default function LotacoesPage() {
             </div>
           )} />
       </CardContent></Card>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader><SheetTitle>{editId ? 'Editar Lotação' : 'Nova Lotação'}</SheetTitle><SheetDescription>Preencha os dados da lotação.</SheetDescription></SheetHeader>
-          <div className="mt-6"><FormContainer mode={editId ? 'edit' : 'create'} onSubmit={handleSubmit} onCancel={() => setSheetOpen(false)} isSubmitting={createMutation.isPending || updateMutation.isPending}><LotacaoFormFields data={formData as any} onChange={(d: any) => setFormData(d as typeof formData)} mode={editId ? 'edit' : 'create'} /></FormContainer></div>
-        </SheetContent>
-      </Sheet>
+      <FormPanel
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={editId ? 'Editar Lotação' : 'Nova Lotação'}
+        subtitle="Preencha os dados da lotação."
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        saveLabel={editId ? 'Salvar' : 'Criar Lotação'}
+      >
+        <fieldset disabled={createMutation.isPending || updateMutation.isPending} className="flex flex-col gap-4">
+          <LotacaoFormFields data={formData as any} onChange={(d: any) => setFormData(d as typeof formData)} mode={editId ? 'edit' : 'create'} />
+        </fieldset>
+      </FormPanel>
     </div>
   )
 }

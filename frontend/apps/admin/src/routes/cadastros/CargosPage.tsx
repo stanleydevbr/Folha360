@@ -4,16 +4,11 @@ import { useCargos, useCreateCargo, useUpdateCargo, useDeleteCargo } from '@folh
 import type { CargoDto, CriarCargoCommand } from '@folha360/api'
 import {
   DataTable,
-  FormContainer,
   CargoFormFields,
   Card,
   CardContent,
   Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  FormPanel,
 } from '@folha360/ui'
 import type { Column } from '@folha360/ui'
 import { formatCurrency, formatDate } from '@folha360/utils'
@@ -162,24 +157,19 @@ export default function CargosPage() {
         </CardContent>
       </Card>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>{editId ? 'Editar Cargo' : 'Novo Cargo'}</SheetTitle>
-            <SheetDescription>Preencha os dados do cargo.</SheetDescription>
-          </SheetHeader>
-          <div className="mt-6">
-            <FormContainer
-              mode={editId ? 'edit' : 'create'}
-              onSubmit={handleSubmit}
-              onCancel={() => setSheetOpen(false)}
-              isSubmitting={createMutation.isPending || updateMutation.isPending}
-            >
-              <CargoFormFields data={formData as any} onChange={(d) => setFormData(d as FormData)} errors={formErrors as any} mode={editId ? 'edit' : 'create'} />
-            </FormContainer>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <FormPanel
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={editId ? 'Editar Cargo' : 'Novo Cargo'}
+        subtitle="Preencha os dados do cargo."
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        saveLabel={editId ? 'Salvar' : 'Criar Cargo'}
+      >
+        <fieldset disabled={createMutation.isPending || updateMutation.isPending} className="flex flex-col gap-4">
+          <CargoFormFields data={formData as any} onChange={(d) => setFormData(d as FormData)} errors={formErrors as any} mode={editId ? 'edit' : 'create'} />
+        </fieldset>
+      </FormPanel>
     </div>
   )
 }
